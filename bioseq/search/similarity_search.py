@@ -1,6 +1,6 @@
 from bioseq.alignment.smith_waterman import get_best_scores
 
-def wtvr(query):
+def rank_database_sequences(query):
     
     database = {
     "seq1": "GATTACA",
@@ -25,4 +25,4 @@ def wtvr(query):
     
     scoresDict = sorted(scoresDict.items(), key = lambda x: x[1], reverse=True)
 
-    print(scoresDict)
+    return(scoresDict)

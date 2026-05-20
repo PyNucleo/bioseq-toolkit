@@ -1,4 +1,4 @@
 validDNABases = ["A", "T", "G", "C"]
-def validate_dna(seq):
+def valid_dna(seq):
     seq = seq.upper()
     return (all(i in validDNABases for i in seq))

@@ -1,56 +1,26 @@
 import pandas as pd
 
-from .fasta_io import read_fasta
-from .validators import validate_dna
-from .sequence_utils import mrna_template, mrna_coding, total_length, gc_content, reverse_complement, base_number
+from .pipelines.translation_pipeline import process_fasta_sequences
+from .search.similarity_search import rank_database_sequences
 from .translation import translate_dna
 from .alignment.needleman_wunsch import global_alignment
-from .search.similarity_search import wtvr
+from .search.similarity_search import rank_database_sequences
 def main():
     
-    action = int(input("What would you like to perform: \n1 for similarity search,"))
+    action = int(input("What would you like to perform?\n"
+                       "1 for similarity search\n"
+                       "2 for FASTA translation pipeline\n"
+                       "> "
+    ))
     
     if action == 1:
-        wtvr("GATTACA")
-        
-        return
-        
-    FILE = input("Insert your file path: ")
-    file_record = read_fasta(FILE)
-    sequences = []
-    mrna_seqs = []
+        results = rank_database_sequences("GATTACA")
+        print(results)
     
-    s1 = "AGT"
-    s2 = "GTT"
-
-    final = {"Sequence": None,
-             "Length" : None,
-             "Base counts" : None,
-             "GC Content" : None,
-             "Transcribed Strand" : None,
-             "Amino acid chain" : None
-             }
-    for result in file_record:
-        if result["sequence"]:
-            seq = result["sequence"]
-            if validate_dna(seq):
-                sequences.append(seq)
-                mrna_seqs.append(mrna_template(seq))
-            else:
-                continue
-        else:
-            continue
-    final["Sequence"] = sequences
-    final["Length"] = [total_length(s) for s in sequences]
-    final["Base counts"] = [base_number(s) for s in sequences]
-    final["GC Content"] = [gc_content(s) for s in sequences]
-    final["Transcribed Strand"] = [mrna for mrna in mrna_seqs]
-    final["Amino acid chain"] = [translate_dna(s) for s in mrna_seqs]
-    #print(len(sequences))
-
-    #df = pd.DataFrame(final)
-    #df.to_csv( FILE + "test.csv", index = False)
-    print(global_alignment(s1, s2))
+    elif action == 2:
+        file_path = input("Insert your file path: ")
+        results = process_fasta_sequences(file_path)
+        print(results)
 
 if __name__ == "__main__":
     main()
