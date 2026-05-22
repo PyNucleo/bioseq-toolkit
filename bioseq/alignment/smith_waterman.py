@@ -48,7 +48,7 @@ def fill_local(s1, s2, grid,movement_grid, gap_penalty):
             if (score > tempMax):
                 tempMax = score
                 tempMax_At = [(i, j)]
-            if (score == tempMax and score > 0):
+            elif (score == tempMax and score > 0):
                 tempMax_At.append((i, j))
                 
             movement_grid[i][j] = dynamic_movement_filling(diagonal, horizontal, vertical)
@@ -122,7 +122,7 @@ def get_best_scores(s1, s2, gap_penalty):
             if (score > tempMax):
                 tempMax = score
                 tempMax_At = [(i, j)]
-            if (score == tempMax and score > 0):
+            elif (score == tempMax and score > 0):
                 tempMax_At.append((i, j))
             grid[i][j] = score
             
@@ -133,7 +133,7 @@ def local_alignment(s1, s2, return_all = False):
     
     movement_grid = initialize_movementGrid(s1, s2)
     
-    best_Score, startAt = set(fill_local(s1, s2, grid,movement_grid, -2))
+    best_Score, startAt = fill_local(s1, s2, grid,movement_grid, -2)
 
     all_alignments = []
     
