@@ -32,7 +32,7 @@ def gc_content(sequence):
     return gc_fraction * 100
 
 def reverse_complement(dna_sequence):
-    return "".join(DNA_COMPLEMENT[base] for base in dna_sequence)
+    return "".join(DNA_COMPLEMENT[base] for base in dna_sequence)[::-1]
 
 #Transcription:
 def mrna_template(dna_sequence):
