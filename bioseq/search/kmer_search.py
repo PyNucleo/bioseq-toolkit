@@ -1,10 +1,15 @@
-def kmer_search(queue, DB, k, threshold):
+def kmer_search(query, DB, k, threshold):
 
     max_shared_kmers = 0
-    sequences_and_shared_kmers = {x : 0 for x in DB}
 
-    for db_seq in DB:
-        temp_shared_kmers = get_shared_kmers(queue, db_seq, k)
+    DB_SEQUENCES = DB.get_sequences()
+    sequences_and_shared_kmers = {x : 0 for x in DB_SEQUENCES}
+
+    
+
+    for db_seq in DB_SEQUENCES:
+
+        temp_shared_kmers = get_shared_kmers(query, db_seq, k)
 
         if temp_shared_kmers < threshold:
             sequences_and_shared_kmers.pop(db_seq)
