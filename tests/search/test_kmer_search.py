@@ -23,8 +23,10 @@ def test_generate_kmers():
 
 def test_get_shared_kmers_identical():
 
+    temp_query = generate_kmers("GATTACA", 3)
+
     result = get_shared_kmers(
-        "GATTACA",
+        temp_query,
         "GATTACA",
         3
     )
