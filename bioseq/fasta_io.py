@@ -1,10 +1,10 @@
-def read_fasta(file):
+def read_fasta_records(file):
     FASTA = open(file, "r")
     records = []
     current_seq = ''
     record = {"header" : None,
               "sequence" : None}
-    i = 1
+
     for line in FASTA:
         line = line.rstrip()
         if line.startswith(">") and current_seq:
@@ -21,7 +21,7 @@ def read_fasta(file):
             record["header"] = line
         else: #Is a sequence, not a header
             current_seq += line
-        i += 1
+
     if len(current_seq) % 3 != 0:
         excess = len(current_seq) % 3
         current_seq = current_seq[0 : len(current_seq) - excess]
@@ -29,3 +29,11 @@ def read_fasta(file):
     records.append(record)
         
     return records
+
+def read_fasta_sequences_only(FILE):
+
+    records = read_fasta_records(FILE)
+
+    sequences = [records["sequence"] for record in records]
+
+    return sequences

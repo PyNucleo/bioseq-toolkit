@@ -4,7 +4,7 @@ from bioseq.search.kmer_search import (
     filter_candidates_ratio,
     kmer_search,
 )
-
+from database.sequence_database import SequenceDatabase
 
 def test_generate_kmers():
 
@@ -67,11 +67,11 @@ def test_filter_candidates_ratio():
 
 def test_kmer_search_basic():
 
-    database = [
+    database = SequenceDatabase([
         "GATTACA",
         "CCCCCCC",
         "GATTTTT",
-    ]
+    ])
 
     result = kmer_search(
         "GATTACA",
