@@ -1,13 +1,35 @@
 from bioseq.alignment.smith_waterman import get_best_scores
 
-def rank_database_sequences(query, db):
+def rank_by_shared_kmers(query, db):
     """
-    This typically follows processing a query against a Database using kmer_search within the pipeline, where it performs multiple local pairwise alignments between the query sequence and each Database sequence
+    Convert k-mer candidate hits into ranked hit dictionaries.
 
-    The alignment score obtained by the alignment of query vs database sequence is stored in a dictionary as items to their corresponding database sequence (Which naturally are the keys)
+    This function receives the dictionary returned by kmer_search(), where each
+    key is a database sequence and each value is the number of k-mers shared
+    with the query. It converts those entries into a list of hit dictionaries
+    and sorts them by shared k-mer count in descending order.
 
-    Finally, this dictionary is sorted in descending order of the local alignment score obtained from local alignment between the query sequence and the database sequence and returned.
+    Note
+    ----
+    Despite the function name, this does not currently rank by alignment score.
+    Smith-Waterman scoring is handled separately by refine_hits().
+
+    Parameters
+    ----------
+    query : str
+        Query sequence. Currently unused, but kept for pipeline compatibility.
+    db : dict[str, int]
+        Dictionary mapping database sequences to shared k-mer counts.
+
+    Returns
+    -------
+    list[dict]
+        Hit dictionaries containing:
+        - "seq_id": currently None
+        - "sequence": database sequence
+        - "shared_kmers": number of shared k-mers with the query
     """
+    
     ranked_hits = []
 
     for seq in db:

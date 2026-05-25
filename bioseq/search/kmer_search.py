@@ -1,12 +1,31 @@
 def kmer_search(query, DB, k, threshold):
 
     """
-     Initializes a dictionary of Database sequence and shared kmers pairs
-     Generates a list of words for the query sequence of size k each, iterates over each Database sequence, gets that number of words shared between the database sequence and the query sequence;
-     If the number of words shared is less than a threshold, that sequence iss eliminated, otherwise, the item of the key containing the DB sequence is updated
+    Find candidate database sequences using shared k-mers.
 
-    After potential candidates are found, they are filtered down further based on a set ratio, where anything having words less than the max shared kmers * ratio is also eliminated.
-    Result is returned as a dictionary.
+    The query sequence is split into unique words of length k. Each database
+    sequence is also split into k-mers, then compared against the query words.
+    Sequences with fewer shared k-mers than the threshold are discarded.
+
+    After threshold filtering, candidates are also filtered by a relative score
+    cutoff, keeping only sequences whose shared k-mer count is at least a fixed
+    fraction of the best candidate's count.
+
+    Parameters
+    ----------
+    query : str
+        Query sequence.
+    DB : SequenceDatabase
+        Database object containing biological sequences.
+    k : int
+        K-mer size.
+    threshold : int
+        Minimum number of shared k-mers required to keep a sequence.
+
+    Returns
+    -------
+    dict[str, int]
+        Dictionary mapping candidate sequences to their shared k-mer counts.
     """
     max_shared_kmers = 0
 
@@ -32,10 +51,41 @@ def kmer_search(query, DB, k, threshold):
 
 
 def generate_kmers(seq, k):
+    """
+    Generate unique k-mers from a sequence.
+
+    Parameters
+    ----------
+    seq : str
+        Input sequence.
+    k : int
+        K-mer size.
+
+    Returns
+    -------
+    set[str]
+        Set of unique k-mers from the sequence
+    """
     return set(seq[i : i + k] for i in range(len(seq) - k + 1))
 
 def get_shared_kmers(query_words, seq, k):
-    #Break down both sequences into words of size k
+    """
+    Count how many query k-mers are present in a database sequence.
+
+    Parameters
+    ----------
+    query_words : set[str]
+        Unique k-mers generated from the query sequence.
+    seq : str
+        Database sequence to compare against the query words.
+    k : int
+        K-mer size.
+
+    Returns
+    -------
+    int
+        Number of query k-mers found in the database sequence.
+    """
     
     db_seq_words = generate_kmers(seq, k)
 
@@ -48,7 +98,26 @@ def get_shared_kmers(query_words, seq, k):
     return shared_kmers
 
 def filter_by_relative_score(max_kmers, candidates_dict, ratio = 0.3):
+    """
+    Filter candidate sequences by relative shared k-mer count.
 
+    A sequence is kept if its shared k-mer count is at least:
+    max_kmers * ratio
+
+    Parameters
+    ----------
+    max_kmers : int
+        Highest shared k-mer count among all candidate sequences.
+    candidates_dict : dict[str, int]
+        Dictionary mapping sequences to shared k-mer counts.
+    ratio : float, optional
+        Relative cutoff compared to the best candidate. Default is 0.3.
+
+    Returns
+    -------
+    dict[str, int]
+        Filtered dictionary of candidate sequences and shared k-mer counts.
+    """
     filtered = {
     seq_id: count
     for seq_id, count in candidates_dict.items()
