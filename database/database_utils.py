@@ -29,7 +29,7 @@ def normalize_database(db):
     
     elif isinstance(db, list):
         return SequenceDatabase(db)
-    elif isinstance(db):
+    elif isinstance(db, str):
         return create_database(db)
     else:
         raise TypeError

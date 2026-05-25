@@ -26,7 +26,7 @@ def test_best_hit_ranked_first():
 
     results = search(query="ATGCG", database=db, k=3)
 
-    assert results[0][0] == "ATGCGT"
+    assert results[0]["sequence"] == "ATGCGT"
 
 
 def test_threshold_filtering():
@@ -44,7 +44,7 @@ def test_threshold_filtering():
     )
 
     for hit in results:
-        assert hit[1] >= 2
+        assert hit["shared_kmers"] >= 2
 
 
 def test_top_n_hits_filtering():

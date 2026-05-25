@@ -3,13 +3,13 @@ from database.sequence_database import SequenceDatabase
 
 from bioseq.search.kmer_search import kmer_search
 from bioseq.search.similarity_search import rank_database_sequences
-
+from bioseq.search.refinement import refine_hits
 
 def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=False):
     
     """
     Required Parameters: Query sequence and DataBase
-    Optional Parameters: Word size (k), minimum threshold for shared words between query and DB sequence to consider the Database sequence worthy of being analyzed, maximum number of desired homologs/hits, and a boolean refinement option to be implemented further.
+    Optional Parameters: Word size (k), minimum threshold for shared words between query and DB sequence to consider the Database sequence worthy of being analyzed, maximum number of desired homologs/hits, and a boolean refinement option which, if true, further filters potential false positives.
 
     Steps:
 
@@ -31,14 +31,13 @@ def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=Fal
 
     potential_hits = kmer_search(query, db, k, threshold) #Dictionary of sequence : shared_kmer pairs 
 
-    candidate_sequences = [key for key in potential_hits]
-    candidate_sequences = SequenceDatabase(candidate_sequences)
+    ranked_hits = rank_database_sequences(query, potential_hits) #Ranks based on SW scores; List of dictionaries, each containing info about one sequence 
 
-    ranked_hits = rank_database_sequences(query, candidate_sequences) #Ranks based on scores; list of tuples: [(sequence, score)]
+    ranked_hits = ranked_hits[:top_n_hits]
 
-
-
-    top_hits = ranked_hits[:top_n_hits]
-
-    return top_hits
+    if refinement:
+        return refine_hits(query, ranked_hits)
+    
+    if not refinement:
+        return ranked_hits
 
