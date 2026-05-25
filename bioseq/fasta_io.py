@@ -34,6 +34,6 @@ def read_fasta_sequences_only(FILE):
 
     records = read_fasta_records(FILE)
 
-    sequences = [records["sequence"] for record in records]
+    sequences = [record["sequence"] for record in records]
 
     return sequences

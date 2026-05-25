@@ -1,6 +1,6 @@
 from bioseq.alignment.smith_waterman import get_best_scores
 
-def rank_database_sequences(query, DB):
+def rank_database_sequences(query, db):
     """
     This typically follows processing a query against a Database using kmer_search within the pipeline, where it performs multiple local pairwise alignments between the query sequence and each Database sequence
 
@@ -8,17 +8,16 @@ def rank_database_sequences(query, DB):
 
     Finally, this dictionary is sorted in descending order of the local alignment score obtained from local alignment between the query sequence and the database sequence and returned.
     """
-    scores_dict = dict()
+    ranked_hits = []
 
-    DB_SEQUENCES = DB.get_sequences()
-
-    for seq in DB_SEQUENCES:
-
-        score, _ = get_best_scores(query, seq, 2)
+    for seq in db:
         
-        
-        scores_dict[seq] = score
+        ranked_hits.append({
+            "seq_id" : None,
+            "sequence":seq,
+            "shared_kmers": db[seq]
+        })
     
-    scores_dict = sorted(scores_dict.items(), key = lambda x: x[1], reverse=True)
+    ranked_hits = sorted(ranked_hits, key = lambda hit: hit["shared_kmers"], reverse=True)
 
-    return(scores_dict)
+    return(ranked_hits)

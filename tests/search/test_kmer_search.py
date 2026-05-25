@@ -1,7 +1,7 @@
 from bioseq.search.kmer_search import (
     generate_kmers,
     get_shared_kmers,
-    filter_candidates_ratio,
+    filter_by_relative_score,
     kmer_search,
 )
 from database.sequence_database import SequenceDatabase
@@ -45,7 +45,7 @@ def test_get_shared_kmers_none():
     assert result == 0
 
 
-def test_filter_candidates_ratio():
+def test_filter_by_relative_score():
 
     candidates = {
         "seq1": 10,
@@ -53,7 +53,7 @@ def test_filter_candidates_ratio():
         "seq3": 1,
     }
 
-    result = filter_candidates_ratio(
+    result = filter_by_relative_score(
         10,
         candidates,
         0.5
