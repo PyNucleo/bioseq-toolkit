@@ -1,0 +1,200 @@
+>d6iyia_ a.1.1.0 (A:) automated matches {Acipenser stellatus [TaxId: 7903]}
+sltsadkshvrsiwskaggsaeeigaealgrmlesfpntktyfdhyadlsvssaqvhthgkkiidalttavnhidditgalsslstlhaqtlrvdpanfkilshtilvvlalyfpadftpevhlacdkflanvshaladnyr
+>d2xyka_ a.1.1.0 (A:) automated matches {Agrobacterium tumefaciens [TaxId: 358]}
+mssetvtlyeaiggdatvraltrrfyelmdtlpeaarcraihpadlsgseakfydyltgylggppvyvekhghpmlrrrhfvapigpaerdewllcfrramdetienaklreiiwapverlafhmqnqe
+>d7diha_ a.1.1.0 (A:) automated matches {Aquifex aeolicus [TaxId: 224324]}
+mlseetirvikstvpllkehgteitarmfellfskypktkelfagaseeqpkklanaiiayatyidrleeldnaistiarshvrrnvkpehyplvkecllqaieevlnpgeevlkaweeaydflaktlitlekklysqp
+>d2ig3a_ a.1.1.0 (A:) automated matches {Campylobacter jejuni [TaxId: 197]}
+mkfetinqesiaklmeifyekvrkdkdlgpifnnaigtsdeewkehkakignfwagmllgegdyngqplkkhldlppfpqeffeiwlklfeeslnivyneemknvilqraqmiashfqnmlykyggh
+>d2wy4a_ a.1.1.0 (A:) automated matches {Campylobacter jejuni [TaxId: 197]}
+tkeqiqiikdcvpilqkngedltnefykimfndypevkpmfnmekqisgeqpkalamailmaaknienlenmrsfvdkvaithvnlgvkeehypivgacllkaiknllnpdeatlkawevaygkiakfyidiekklydk
+>d5d1va_ a.1.1.0 (A:) automated matches {Chloroflexus aurantiacus [TaxId: 324602]}
+eptiyeqiggeatfrrivdifyarveadprlrhlfpadlepgkehqrlflmqyfggprtyserrghprlrmrhapfpigprerdawlehmlaalneagvpeparsvmenyfrhaaqammnr
+>d2olpa_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi1a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi2a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi3a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi4a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pt7a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pt8a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d6otwa_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d6otxa_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d6otya_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d6q6pa_ a.1.1.0 (A:) automated matches {Dissostichus mawsoni [TaxId: 36200]}
+spltdkervmiqdswakvyensddtgvailvrlfvnfpssrqyfsqfkhieepeelersaqlrkhanrvmnglntlvesldnsekvasvlkllgkahalrhkvepvyfkilsgvilevlgeafsevvtpevaaawtkllatiysginavyeevgws
+>d2vywa_ a.1.1.0 (A:) automated matches {Fasciola hepatica [TaxId: 6192]}
+avltqtqidsiladlahhtdttehitemgvsiyktlfaahpeyisyfsklqgltkdnvgqsegiryygrtlgeelirllkaasnpsvleerivqgakdhkarpvtkdqftgaapifikffqgllkkqedkdaiekfllhvmqaiaakm
+>d2bk9a_ a.1.1.0 (A:) automated matches {Fruit fly (Drosophila melanogaster) [TaxId: 7227]}
+mnsdevqlikktweipvatptdsgaailtqffnrfpsnlekfpfrdvpleelsgnarfrahagriirvfdesiqvlgqdgdlekldeiwtkiavshiprtvskesynqlkgvildvltaassldesqaatwaklvdhvyaiifkaidddgnak
+>d2g3ha_ a.1.1.0 (A:) automated matches {Fruit fly (Drosophila melanogaster) [TaxId: 7227]}
+mnsdevqlikktweipvatptdsgaailtqffnrfpsnlekfpfrdvpleelsgnarfrahagriirvfdesiqvlgqdgdlekldeiwtkiavshiprtvskesynqlkgvildvltaassldesqaatwaklvdhvygiifkaidddgnak
+>d2c0ka_ a.1.1.0 (A:) automated matches {Gasterophilus intestinalis [TaxId: 84525]}
+mnseevndikrtwevvaakmteagvemlkryfkkyphnlnhfpwfkeipfddlpenarfkthgtrilrqvdegvkalsvdfgdkkfddvwkklaqthhekkverrsynelkdiiievvcscvklnekqvhayhkffdraydiafaemakm
+>d4xdia_ a.1.1.0 (A:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+tapadslysrmggeaavekavdvfyerivadpqlapffanvdmkkqrrkqvafmtyvfggsgayegrdlgashrrlireqgmnhhhfdlvaahldstlqelgvaqelkaeamaivasarplifgtge
+>d6bmea_ a.1.1.0 (A:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+stlhaklggaaavaatvdvfykklmndpdlepffrgvdmvtliakqnrflayafgatthyhgkdivmghahliinrglnlthfdkvaghfvdslkemgvgqelideaagvligvrplfdperykgkv
+>d6ciia_ a.1.1.0 (A:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+apadslysrmggeaavekavdvfyerivadpqlapffanvdmkkqrrkqvafmtyvfggsgayegrdlgashrrlireqgmnhhhfdlvaahldstlqelgvaqelkaeamaivasarplifgt
+>d6td7a_ a.1.1.0 (A:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+gpllqrvggldvvkkvvelfyrklyadpqlikylhdqdpmhlrakqsmfvswlfgppnvpytgksvriahlriikqrgfspedfdlgmkyfeeamtelgapevlrgevmrrmlpykdaiftpaagd
+>d3wcta_ a.1.1.0 (A:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+dcnilqrlkvkmqwakaygfgterakfgnslwtsifnyapdardlfksvksedmrspqfkahiarviggldrvismfdnedalnadlehlksqhdprgldalnfvvfgkalfatvggqfgvcfdlpawescykviamgitgndmfs
+>d3wcua_ a.1.1.0 (A:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+dcnilqrlkvkmqwakaygfgterakfgnslwtsifnyapdardlfksvksedmrspqfkahiarviggldrvismfdnedalnadlehlksqhdprgldalnfvvfgkalfatvggqfgvcfdlpawescykviamgitgndmfs
+>d3wcva_ a.1.1.0 (A:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+dcnilqrlkvkmqwakaygfgterakfgnslwtsifnyapdardlfksvksedmrspqfkahiarviggldrvismfdnedalnadlehlksqhdprgldalnfvvfgkalfatvggqfgvcfdlpawescykviamgitgndmfs
+>d3wcwa_ a.1.1.0 (A:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+dcnilqrlkvkmqwakaygfgterakfgnslwtsifnyapdardlfksvksedmrspqfkahiarviggldrvismfdnedalnadlehlksqhdprgldalnfvvfgkalfatvggqfgvcfdlpawescykviamgitgndmfs
+>d3s1ia_ a.1.1.0 (A:) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+idqkekelikeswkriepnkneigllfyanlfkeeptvsvlfqnpissqsrklmqvlgilvqgidnlegliptlqdlgrrhkqygvvdshyplvgdcllksiqeylgqgfteeakaawtkvygiaaqvmta
+>d3s1ja_ a.1.1.0 (A:) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+idqkekelikeswkriepnkneigllfyanlfkeeptvsvlfqnpissqsrklmqvlgilvqgidnlegliptlqdlgrrhkqygvvdshyplvgdcllksiqeylgqgfteeakaawtkvygiaaqvmta
+>d3ubca_ a.1.1.0 (A:) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+idqkekelikeswkriepnkneigllfyanlfkeeptvsvlfqnpissqsrklmqvlgilvqgidnlegliptlqdlgrrhkqygvvdshyplvgdcllksiqeylgqgfteeakaawtkvygiaaqvmta
+>d5ab8a_ a.1.1.0 (A:) automated matches {Mycobacterium tuberculosis [TaxId: 1773]}
+pisiydkiggheaievvvedfyvrvladdqlsaffsgtnmsrlkgkqveffaaalggpepytgapmkqvhqgrgitmhhfslvaghladaltaagvpsetiteilgviaplavdvts
+>d2wtga_ a.1.1.0 (A:) automated matches {Nematode (Caenorhabditis elegans) [TaxId: 6239]}
+smnrqeisdlcvkslegrmvgteaqniengnafyryfftnfpdlrvyfkgaekytaddvkkserfdkqgqrillachllanvytneevfkgyvretinrhriykmdpalwmafftvftgylesvgslndqqkaawmalgkefnaesqthlknsnlphv
+>d2wtha_ a.1.1.0 (A:) automated matches {Nematode (Caenorhabditis elegans) [TaxId: 6239]}
+smnrqeisdlcvkslegrmvgteaqniengnafyryfftnfpdlrvyfkgaekytaddvkkserfdkqgqrillachllanvytneevfkgyvretinrhriykmdpalwmafftvftgylesvgslndqqkaawmalgkefnaesqthlknsnlphv
+>d4xxia_ a.1.1.0 (A:) automated matches {Nostoc sp. [TaxId: 103690]}
+lavatitqaeqqdrflgrgeldelasyfasgakrleiaqlltenseiivsraanrifqkienmakslrdlswflryatyaivagdpniivvntrglreiienacsgeativalqeikaaslsyfrkdpeaaeivsqymdvlitefka
+>d2d2ma_ a.1.1.0 (A:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+vcnrleqilvktqwaqsygeaenraafsrdlfselfniqgssralfsgvgvddmnsaaftahclrvtgalnrlisqldqqatinadlahlagqhasrnldasnfaamgqavmsvvpthldcfnqhawgecyeriasgisg
+>d2zfoa_ a.1.1.0 (A:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+vcnrleqilvktqwaqsygeaenraafsrdlfselfniqgssralfsgvgvddmnsaaftahclrvtgalnrlisqldqqatinadlahlagqhasrnldasnfaamgqavmsvvpthldcfnqhawgecyeriasgisg
+>d2zs0a_ a.1.1.0 (A:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+vcnrleqilvktqwaqsygeaenraafsrdlfselfniqgssralfsgvgvddmnsaaftahclrvtgalnrlisqldqqatinadlahlagqhasrnldasnfaamgqavmsvvpthldcfnqhawgecyeriasgisg
+>d2zs1a_ a.1.1.0 (A:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+vcnrleqilvktqwaqsygeaenraafsrdlfselfniqgssralfsgvgvddmnsaaftahclrvtgalnrlisqldqqatinadlahlagqhasrnldasnfaamgqavmsvvpthldcfnqhawgecyeriasgisg
+>d6wk3a_ a.1.1.0 (A:) automated matches {Rhodothermus marinus [TaxId: 518766]}
+maptlseqtrqlvrasvpalqkhsvaisatmyrllferypetrslfelpervihklasallayarsidnpsalqaairrmvlsharagvqavhyplvweclrdaikevlgpdatetllqawkeaydflahllstkeaqvyavlae
+>d1yhua_ a.1.1.0 (A:) automated matches {Riftia pachyptila [TaxId: 6426]}
+acamlerakvkdewakaygigaarskfgdalwrnvfnyapnardifesvnskdmaspefkahiarvlggldrvismldnqatldadlahlksqhdprtidpvnfvvfrkaliatvagtfgvcfdvpawqgcyniiakgitgsdaa
+>d3aq5a_ a.1.1.0 (A:) automated matches {Tetrahymena pyriformis [TaxId: 5908]}
+qtiyeklggenamkaavplfykkvladervkhffkntdmdhqtkqqtdfltmllggpnhykgknmteahkgmnlqnlhfdaiienlaatlkelgvtdavineaakviehtrkdmlgk
+>d3aq6a_ a.1.1.0 (A:) automated matches {Tetrahymena pyriformis [TaxId: 5908]}
+qtiyeklggenamkaavplfykkvladervkhffkntdmdhqtkqqtdfltmllggpnhykgknmteahkgmnlqnlhfdaiienlaatlkelgvtdavineaakviehtrkdmlgk
+>d3aq7a_ a.1.1.0 (A:) automated matches {Tetrahymena pyriformis [TaxId: 5908]}
+qtiyeklggenamkaavplffkkvladervkhffkntdmdhqtkqqtdfltmllggpnhykgknmteahkgmnlqnlhfdaiienlaatlkelgvtdavineaakviehtrkdmlgk
+>d3aq8a_ a.1.1.0 (A:) automated matches {Tetrahymena pyriformis [TaxId: 5908]}
+qtiyeklggenamkaavplfykkvladervkhffkntdmdhetkqqtdfltmllggpnhykgknmteahkgmnlqnlhfdaiienlaatlkelgvtdavineaakviehtrkdmlgk
+>d3aq9a_ a.1.1.0 (A:) automated matches {Tetrahymena pyriformis [TaxId: 5908]}
+qtiyeklggenamkaavplfykkvladervkhffkntdmdhqtkqetdfltmllggpnhykgknmteahkgmnlqnlhfdaiienlaatlkelgvtdavineaakviehtrkdmlgk
+>d1x3ka_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d1x46a_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+dptwvdmeagdialvksswaqihdkevdilynffksypasqakfsafagkdleslkdtapfalhatrivsvineaialmgvaenrpalknvlkqqginhkgrgvtaahfeefetaleafleshasgynagtkkawdsafnnmysvvfpel
+>d2zwja_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3a5aa_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3a5ba_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3a5ga_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3a9ma_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3arja_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3arka_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3arla_ a.1.1.0 (A:) automated matches {Tokunagayusurika akamusi [TaxId: 28383]}
+afvglsdseeklvrdawapihgdlqgtantvfynylkkypsnqdkfetlkghpldevkdtanfkliagriftifdncvknvgndkgfqkviadmsgphvarpithgsyndlrgviydsmhldsthgaawnkmmdnffyvfyecldgrcsqfs
+>d3wfwa1 a.1.1.0 (A:1-133) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+mtreeikmiqkswlrvidkmdeagllfyrrlfdvepkvrplfkidiekqgrklmdvlnwivlnlqdidaaldaarelarrhvkygvkaehypvvghtliwtlrkmigsewtkqleqlwtqayealaqvmieeh
+>d3wfxa1 a.1.1.0 (A:1-133) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+mtreeikmiqkswlrvidkmdeagllfyrrlfdvepkvrplfkidiekqgrklmdvlnwivlnlqdidaaldaarelarrhvkygvkaehypvvghtliwtlrkmigsewtkqleqlwtqayealaqvmieeh
+>d3ozua1 a.1.1.0 (A:1-150) automated matches {Ralstonia eutropha [TaxId: 381666]}
+mltqktkdivkatapvlaehgydiikcfyqrmfeahpelknvfnmahqeqgqqqqalaravyayaeniedpnslmavlkniankhaslgvkpeqypivgehllaaikevlgnaatddiisawaqaygnladvlmgmeselyersaeqpgg
+>d3ozva1 a.1.1.0 (A:1-150) automated matches {Ralstonia eutropha [TaxId: 381666]}
+mltqktkdivkatapvlaehgydiikcfyqrmfeahpelknvfnmahqeqgqqqqalaravyayaeniedpnslmavlkniankhaslgvkpeqypivgehllaaikevlgnaatddiisawaqaygnladvlmgmeselyersaeqpgg
+>d3ozwa1 a.1.1.0 (A:1-150) automated matches {Ralstonia eutropha [TaxId: 381666]}
+mltqktkdivkatapvlaehgydiikcfyqrmfeahpelknvfnmahqeqgqqqqalaravyayaeniedpnslmavlkniankhaslgvkpeqypivgehllaaikevlgnaatddiisawaqaygnladvlmgmeselyersaeqpgg
+>d4po5a1 a.1.1.0 (A:2-161) automated matches {Synechocystis sp. [TaxId: 1111708]}
+svvsqvilqaddqlryptsgelkgiqaflttgaqririaetlaenekkivdqaqkqlfkkhpeyrapggnaygqrqynqclrdygwylrlvtygvlagnkepiettgligvkemynslnvpvpgmvdavtvlkdaalgllsaedanetapyfdyiiqfms
+>d4xxka1 a.1.1.0 (A:20-240) automated matches {Nostoc sp. [TaxId: 103690]}
+lavatitqaeqqdrflgrgeldelasyfasgakrleiaqlltenseiivsraanrifqkienmakslrdlswflryatyaivagdpniivvntrglreiienacsgeativalqeikaaslsyfrkdpeaaeivsqymdvlitefkap
+>d5ziqa1 a.1.1.0 (A:37-190) automated matches {Ramazzottius varieornatus [TaxId: 947166]}
+dprfpltardkfslvkswktfsrnlesagkemllklfiehpdmkdlfpkfkaktpdqlrndesfeeaalahitpydqavqdsdnvdilltnlkrvgrqhktvpgfqesyfermekclvfalqttladaytenmeriykiwiswttekiregfre
+>d6iyhb_ a.1.1.0 (B:) automated matches {Acipenser persicus [TaxId: 61968]}
+ewtdserfaittlwakvnvesvgaqalvrllvvypwtqryfgafgnisdaaaiagnaqvhahgktvldsvgnaiahmddvadaftalstfhsetlhvdpdnfqhfgdclsivlaatfgtaytpdvqaawqkmiaviisalskeyh
+>d6iyib_ a.1.1.0 (B:) automated matches {Acipenser stellatus [TaxId: 7903]}
+vkwtdserfaittlwakvdvervgaqalvrllvvypwtqryfgafgnisdaaaiagnakvhahgktvlssvgiaiahmddlagaftalsafhsetlhvdpdnfehfgdclsivlaatfgtaytpdvhaawqkmiaviisalskeyh
+>d2xykb_ a.1.1.0 (B:) automated matches {Agrobacterium tumefaciens [TaxId: 358]}
+mssetvtlyeaiggdatvraltrrfyelmdtlpeaarcraihpadlsgseakfydyltgylggppvyvekhghpmlrrrhfvapigpaerdewllcfrramdetienaklreiiwapverlafhmqnqea
+>d7dihb_ a.1.1.0 (B:) automated matches {Aquifex aeolicus [TaxId: 224324]}
+mlseetirvikstvpllkehgteitarmfellfskypktkelfagaseeqpkklanaiiayatyidrleeldnaistiarshvrrnvkpehyplvkecllqaieevlnpgeevlkaweeaydflaktlitlekklys
+>d2ig3b_ a.1.1.0 (B:) automated matches {Campylobacter jejuni [TaxId: 197]}
+mkfetinqesiaklmeifyekvrkdkdlgpifnnaigtsdeewkehkakignfwagmllgegdyngqplkkhldlppfpqeffeiwlklfeeslnivyneemknvilqraqmiashfqnmlyky
+>d5d1vb_ a.1.1.0 (B:) automated matches {Chloroflexus aurantiacus [TaxId: 324602]}
+eptiyeqiggeatfrrivdifyarveadprlrhlfpadlepgkehqrlflmqyfggprtyserrghprlrmrhapfpigprerdawlehmlaalneagvpeparsvmenyfrhaaqammnr
+>d2olpb_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi1b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi2b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi3b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi4b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pt7b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ssgltgpqkaalksswsrfmnnavtngtnfymdlfkaypdtltpfkslfqnvsfnqmtnhptmkaqslvfcngmssfvdnlddhevlvvllqkmaklhfnrgirikelrdgygvllryledhchvegstknawedfiayicrvqgdfmkerl
+>d3pt8b_ a.1.1.0 (B:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ssgltgpqkaalksswsrfmnnavtngtnfymdlfkaypdtltpfkslfqnvsfnqmtnhptmkaqslvfcngmssfvdnlddhevlvvllqkmaklhfnrgirikelrdgygtllryledhchvegstknawedfiayicrvqgdfmkerl
+>d6q6pb_ a.1.1.0 (B:) automated matches {Dissostichus mawsoni [TaxId: 36200]}
+spltdkervmiqdswakvyensddtgvailvrlfvnfpssrqyfsqfkhieepeelersaqlrkhanrvmnglntlvesldnsekvasvlkllgkahalrhkvepvyfkilsgvilevlgeafsevvtpevaaawtkllatiysginavyeevgwsk
+>d2c0kb_ a.1.1.0 (B:) automated matches {Gasterophilus intestinalis [TaxId: 84525]}
+mnseevndikrtwevvaakmteagvemlkryfkkyphnlnhfpwfkeipfddlpenarfkthgtrilrqvdegvkalsvdfgdkkfddvwkklaqthhekkverrsynelkdiiievvcscvklnekqvhayhkffdraydiafaemak
+>d4xdib_ a.1.1.0 (B:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+apadslysrmggeaavekavdvfyerivadpqlapffanvdmkkqrrkqvafmtyvfggsgayegrdlgashrrlireqgmnhhhfdlvaahldstlqelgvaqelkaeamaivasarplifg
+>d6bmeb_ a.1.1.0 (B:) automated matches {Green alga (Chlamydomonas reinhardtii) [TaxId: 3055]}
+tlhaklggaaavaatvdvfykklmndpdlepffrgvdmvtliakqnrflayafgatthyhgkdivmghahliinrglnlthfdkvaghfvdslkemgvgqelideaagvligvrplfdperykgk
+>d3wctb_ a.1.1.0 (B:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+secgplqrlkvkrqwaeaygsgngreefghfiwanvfkvapsardmfkrvrgdniytpafrahatrvlggldmcvallddesvlntqlahlasqhssrgvsaeqynvvehavmmgveheigqnvfdkdawqacldvitsgiqgn
+>d3wcub_ a.1.1.0 (B:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+secgplqrlkvkrqwaeaygsgngreefghfiwanvfkvapsardmfkrvrgdniytpafrahatrvlggldmcvallddesvlntqlahlasqhssrgvsaeqynvvehavmmgveheigqnvfdkdawqacldvitsgiqgn
+>d3wcvb_ a.1.1.0 (B:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+secgplqrlkvkrqwaeaygsgngreefghfiwanvfkvapsardmfkrvrgdniytpafrahatrvlggldmcvallddesvlntqlahlasqhssrgvsaeqynvvehavmmgveheigqnvfdkdawqacldvitsgiqgn
+>d3wcwb_ a.1.1.0 (B:) automated matches {Lamellibrachia satsuma [TaxId: 104711]}
+secgplqrlkvkrqwaeaygsgngreefghfiwanvfkvapsardmfkrvrgdniytpafrahatrvlggldmcvallddesvlntqlahlasqhssrgvsaeqynvvehavmmgveheigqnvfdkdawqacldvitsgiqgn
+>d3s1ib_ a.1.1.0 (B:) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+idqkekelikeswkriepnkneigllfyanlfkeeptvsvlfqnpissqsrklmqvlgilvqgidnlegliptlqdlgrrhkqygvvdshyplvgdcllksiqeylgqgfteeakaawtkvygiaaqvmta
+>d3s1jb_ a.1.1.0 (B:) automated matches {Methylacidiphilum infernorum [TaxId: 481448]}
+idqkekelikeswkriepnkneigllfyanlfkeeptvsvlfqnpissqsrklmqvlgilvqgidnlegliptlqdlgrrhkqygvvdshyplvgdcllksiqeylgqgfteeakaawtkvygiaaqvmta
+>d2wthb_ a.1.1.0 (B:) automated matches {Nematode (Caenorhabditis elegans) [TaxId: 6239]}
+smnrqeisdlcvkslegrmvgteaqniengnafyryfftnfpdlrvyfkgaekytaddvkkserfdkqgqrillachllanvytneevfkgyvretinrhriykmdpalwmafftvftgylesvgslndqqkaawmalgkefnaesqthlknsnlphv
+>d4xxib_ a.1.1.0 (B:) automated matches {Nostoc sp. [TaxId: 103690]}
+lavatitqaeqqdrflgrgeldelasyfasgakrleiaqlltenseiivsraanrifqkienmakslrdlswflryatyaivagdpniivvntrglreiienacsgeativalqeikaaslsyfrkdpeaaeivsqymdvlitefk
+>d4xxkb_ a.1.1.0 (B:) automated matches {Nostoc sp. [TaxId: 103690]}
+lavatitqaeqqdrflgrgeldelasyfasgakrleiaqlltenseiivsraanrifqkienmakslrdlswflryatyaivagdpniivvntrglreiienacsgeativalqeikaaslsyfrkdpeaaeivsqymdvlitefka
+>d2d2mb_ a.1.1.0 (B:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+dctslnrllvkrqwaeaygegtnrellgnriwedlfanmpdarglfsrvngndidssefqahslrvlggldmcvaslddvpvlnallarlnsqhdsrgipaagypafvasaisavratvgarsfdndawnscmnqivsgisg
+>d2zfob_ a.1.1.0 (B:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+dctslnrllvkrqwaeaygegtnrellgnriwedlfanmpdarglfsrvngndidssefqahslrvlggldmcvaslddvpvlnallarlnsqhdsrgipaagypafvasaisavratvgarsfdndawnscmnqivsgisg
+>d2zs0b_ a.1.1.0 (B:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+dctslnrllvkrqwaeaygegtnrellgnriwedlfanmpdarglfsrvngndidssefqahslrvlggldmcvaslddvpvlnallarlnsqhdsrgipaagypafvasaisavratvgarsfdndawnscmnqivsgisg
+>d2zs1b_ a.1.1.0 (B:) automated matches {Oligobrachia mashikoi [TaxId: 55676]}
+dctslnrllvkrqwaeaygegtnrellgnriwedlfanmpdarglfsrvngndidssefqahslrvlggldmcvaslddvpvlnallarlnsqhdsrgipaagypafvasaisavratvgarsfdndawnscmnqivsgisg
+>d6otwb_ a.1.1.0 (B:) automated matches {Phacoides pectinatus [TaxId: 244486]}
+ssgltgpqkaalksswsrfmdnavtngtnfymdlfkaypdtltpfkslfedvsfnqmtdhptmkaqalvfcdgmssfvdnlddhevlvvllqkmaklhfnrgirikelrdgygvllryledhchvegstknawedfiayicrvqgdfmkerl
+>d6otxb_ a.1.1.0 (B:) automated matches {Phacoides pectinatus [TaxId: 244486]}
+ssgltgpqkaalksswsrfmdnavtngtnfymdlfkaypdtltpfkslfedvsfnqmtdhptmkaqalvfcdgmssfvdnlddhevlvvllqkmaklhfnrgirikelrdgygvllryledhchvegstknawedfiayicrvqgdfmkerl
+>d6otyb_ a.1.1.0 (B:) automated matches {Phacoides pectinatus [TaxId: 244486]}
+ssgltgpqkaalksswsrfmdnavtngtnfymdlfkaypdtltpfkslfedvsfnqmtdhptmkaqalvfcdgmssfvdnlddhevlvvllqkmaklhfnrgirikelrdgygvllryledhchvegstknawedfiayicrvqgdfmkerl
+>d6wk3b_ a.1.1.0 (B:) automated matches {Rhodothermus marinus [TaxId: 518766]}
+tlseqtrqlvrasvpalqkhsvaisatmyrllferypetrslfelpervihklasallayarsidnpsalqaairrmvlsharagvqavhyplvweclrdaikevlgpdatetllqawkeaydflahllstkeaqvyavlae
+>d1yhub_ a.1.1.0 (B:) automated matches {Riftia pachyptila [TaxId: 6426]}
+dyvcgplqrlkvkrqwaeaygsgnsreefghfiwshvfqhspaardmfkrvrgdnihtpafrahatrvlggldmciallddepvlntqlahlakqhetrgveaahydtvnhavmmgvenvigsevfdqdawkpclnvitngiqg

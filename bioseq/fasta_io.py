@@ -8,9 +8,7 @@ def read_fasta_records(file):
     for line in FASTA:
         line = line.rstrip()
         if line.startswith(">") and current_seq:
-            if len(current_seq) % 3 != 0:
-                excess = len(current_seq) % 3
-                current_seq = current_seq[0 : len(current_seq) - excess]
+            
             record["sequence"] = current_seq
             records.append(record)
             record = {"header" : line,
@@ -21,10 +19,6 @@ def read_fasta_records(file):
             record["header"] = line
         else: #Is a sequence, not a header
             current_seq += line
-
-    if len(current_seq) % 3 != 0:
-        excess = len(current_seq) % 3
-        current_seq = current_seq[0 : len(current_seq) - excess]
     record["sequence"] = current_seq
     records.append(record)
         
