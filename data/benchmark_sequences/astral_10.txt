@@ -1,0 +1,20 @@
+>d6iyia_ a.1.1.0 (A:) automated matches {Acipenser stellatus [TaxId: 7903]}
+sltsadkshvrsiwskaggsaeeigaealgrmlesfpntktyfdhyadlsvssaqvhthgkkiidalttavnhidditgalsslstlhaqtlrvdpanfkilshtilvvlalyfpadftpevhlacdkflanvshaladnyr
+>d2xyka_ a.1.1.0 (A:) automated matches {Agrobacterium tumefaciens [TaxId: 358]}
+mssetvtlyeaiggdatvraltrrfyelmdtlpeaarcraihpadlsgseakfydyltgylggppvyvekhghpmlrrrhfvapigpaerdewllcfrramdetienaklreiiwapverlafhmqnqe
+>d7diha_ a.1.1.0 (A:) automated matches {Aquifex aeolicus [TaxId: 224324]}
+mlseetirvikstvpllkehgteitarmfellfskypktkelfagaseeqpkklanaiiayatyidrleeldnaistiarshvrrnvkpehyplvkecllqaieevlnpgeevlkaweeaydflaktlitlekklysqp
+>d2ig3a_ a.1.1.0 (A:) automated matches {Campylobacter jejuni [TaxId: 197]}
+mkfetinqesiaklmeifyekvrkdkdlgpifnnaigtsdeewkehkakignfwagmllgegdyngqplkkhldlppfpqeffeiwlklfeeslnivyneemknvilqraqmiashfqnmlykyggh
+>d2wy4a_ a.1.1.0 (A:) automated matches {Campylobacter jejuni [TaxId: 197]}
+tkeqiqiikdcvpilqkngedltnefykimfndypevkpmfnmekqisgeqpkalamailmaaknienlenmrsfvdkvaithvnlgvkeehypivgacllkaiknllnpdeatlkawevaygkiakfyidiekklydk
+>d5d1va_ a.1.1.0 (A:) automated matches {Chloroflexus aurantiacus [TaxId: 324602]}
+eptiyeqiggeatfrrivdifyarveadprlrhlfpadlepgkehqrlflmqyfggprtyserrghprlrmrhapfpigprerdawlehmlaalneagvpeparsvmenyfrhaaqammnr
+>d2olpa_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi1a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi2a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
+>d3pi3a_ a.1.1.0 (A:) automated matches {Clam (Lucina pectinata) [TaxId: 244486]}
+ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
