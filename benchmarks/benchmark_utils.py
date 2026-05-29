@@ -1,18 +1,33 @@
 
 
 def get_average_runtime(benchmark_method, iterations, dataset):
-    
-    temp = "somemethod"
+    """
+    Run a benchmark function multiple times and return
+    the average runtime.
+
+    Parameters
+    ----------
+    benchmark_method : callable
+        Benchmark function to execute.
+    iterations : int
+        Number of repeated runs.
+    dataset : str
+        Dataset path passed into benchmark_method.
+
+    Returns
+    -------
+    None
+        Writes benchmark subset FASTA files to the
+        benchmark output directory.
+    """
+
+    total_runtime = 0
 
     for _ in range(iterations):
+        runtime = benchmark_method(dataset)
+        total_runtime += runtime
 
-        #TEMP IS TEMPORARY! FIX LOGIC FOR PASSING METHOD AS ARGUMENT LATER!!!!!!!!!
-
-        interval = temp("data/benchmark_sequences/astral_10000.txt") 
-        sum += interval
-
-
-    return sum / iterations
+    return total_runtime / iterations
 
 def get_total_dataset_residues(dataset_sequences):
 

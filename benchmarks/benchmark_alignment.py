@@ -51,14 +51,10 @@ def benchmark_smith_waterman_scores_run_results(FILE):
 
     db = db.get_sequences()
 
-    tot_res = 0
-
     for seq in db:
-         
-        tot_res += len(seq)
-        score, _ = get_best_scores(query, seq, 3)
+        score, _ = get_best_scores(query, seq["sequence"], 3)
         all_scores.append({
-             "sequence": seq,
+             "sequence": seq["sequence"],
              "sw_score": score
         })
 
@@ -66,7 +62,7 @@ def benchmark_smith_waterman_scores_run_results(FILE):
 
     interval = end - start
 
-    return interval, tot_res
+    return interval
 
 def benchmark_smith_waterman_scores_run_time(FILE):
     start = time.perf_counter()
@@ -77,7 +73,7 @@ def benchmark_smith_waterman_scores_run_time(FILE):
     db = db.get_sequences()
 
     for seq in db:
-        get_best_scores(query, seq, 3)
+        get_best_scores(query, seq["sequence"], 3)
 
     end = time.perf_counter()
 

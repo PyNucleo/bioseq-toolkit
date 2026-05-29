@@ -15,7 +15,8 @@ def read_fasta_records(file):
                 records.append(record)
 
             record = {
-                "header": line,
+                "id": f"seq{len(records)+1}",
+                "header":line,
                 "sequence": ""
             }
 

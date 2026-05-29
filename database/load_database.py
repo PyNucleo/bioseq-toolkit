@@ -1,11 +1,9 @@
-from bioseq.fasta_io import read_fasta_sequences_only
+from bioseq.fasta_io import read_fasta_records
 from database.sequence_database import SequenceDatabase
 
 def create_database(db):
 
-    sequences = read_fasta_sequences_only(db)
+    records = read_fasta_records(db)
 
-    db = SequenceDatabase()
-
-    return SequenceDatabase(sequences)
+    return SequenceDatabase(records)
     
