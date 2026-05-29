@@ -1,4 +1,5 @@
 from bioseq.alignment.smith_waterman import get_best_scores
+from database.database_utils import normalize_database
 
 def rank_by_shared_kmers(query, db):
     """
@@ -35,11 +36,11 @@ def rank_by_shared_kmers(query, db):
     for seq in db:
         
         ranked_hits.append({
-            "seq_id" : None,
-            "sequence":seq,
-            "shared_kmers": db[seq]
+            "id" : seq["id"],
+            "sequence": seq["sequence"],
+            "shared_kmers": seq["shared_kmers"]
         })
     
     ranked_hits = sorted(ranked_hits, key = lambda hit: hit["shared_kmers"], reverse=True)
 
-    return(ranked_hits)
+    return ranked_hits

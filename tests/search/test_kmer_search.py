@@ -1,95 +1,59 @@
-from bioseq.search.kmer_search import (
-    generate_kmers,
-    get_shared_kmers,
-    filter_by_relative_score,
-    kmer_search,
-)
 from database.sequence_database import SequenceDatabase
-
-def test_generate_kmers():
-
-    result = generate_kmers("GATTACA", 3)
-
-    expected = {
-        "GAT",
-        "ATT",
-        "TTA",
-        "TAC",
-        "ACA",
-    }
-
-    assert result == expected
-
-
-def test_get_shared_kmers_identical():
-
-    temp_query = generate_kmers("GATTACA", 3)
-
-    result = get_shared_kmers(
-        temp_query,
-        "GATTACA",
-        3
-    )
-
-    assert result == 5
-
-
-def test_get_shared_kmers_none():
-
-    result = get_shared_kmers(
-        "AAAAAAA",
-        "CCCCCCC",
-        3
-    )
-
-    assert result == 0
+from bioseq.search.kmer_search import filter_by_relative_score, kmer_search
 
 
 def test_filter_by_relative_score():
+    candidates = [
+        {"id": "seq1", "sequence": "ATGCGT", "shared_kmers": 10},
+        {"id": "seq2", "sequence": "ATGAAA", "shared_kmers": 3},
+        {"id": "seq3", "sequence": "GGGGGG", "shared_kmers": 2},
+        {"id": "seq4", "sequence": "CCCCCC", "shared_kmers": 0},
+    ]
 
-    candidates = {
-        "seq1": 10,
-        "seq2": 8,
-        "seq3": 1,
-    }
-
-    result = filter_by_relative_score(
-        10,
-        candidates,
-        0.5
+    filtered = filter_by_relative_score(
+        max_kmers=10,
+        candidates_dict=candidates,
+        ratio=0.3
     )
 
-    expected = {
-        "seq1": 10,
-        "seq2": 8,
-    }
+    assert isinstance(filtered, list)
+    assert [hit["id"] for hit in filtered] == ["seq1", "seq2"]
+    assert filtered[0]["sequence"] == "ATGCGT"
+    assert filtered[0]["shared_kmers"] == 10
 
-    assert result == expected
+    assert filter_by_relative_score(
+        max_kmers=0,
+        candidates_dict=[],
+        ratio=0.3
+    ) == []
 
 
 def test_kmer_search_basic():
-
-    database = SequenceDatabase([
-        "GATTACA",
-        "CCCCCCC",
-        "GATTTTT",
+    db = SequenceDatabase([
+        {"id": "seq1", "sequence": "ATGCGT"},
+        {"id": "seq2", "sequence": "ATGCGT"},
+        {"id": "seq3", "sequence": "ATGAAA"},
+        {"id": "seq4", "sequence": "GGGGGG"},
     ])
 
-    result = kmer_search(
-        "GATTACA",
-        database,
-        3,
-        1
+    results = kmer_search(
+        query="ATGCG",
+        db=db,
+        k=3,
+        threshold=1
     )
 
-    assert "GATTACA" in result
-    assert "GATTTTT" in result
+    assert isinstance(results, list)
+    assert all(isinstance(hit, dict) for hit in results)
+    assert {"id", "sequence", "shared_kmers"}.issubset(results[0].keys())
 
+    by_id = {hit["id"]: hit for hit in results}
 
-def test_generate_kmers_large_k():
+    assert by_id["seq1"]["shared_kmers"] == 3
+    assert by_id["seq2"]["shared_kmers"] == 3
+    assert by_id["seq3"]["shared_kmers"] == 1
 
-    result = generate_kmers("ATG", 5)
+    assert "seq4" not in by_id
 
-    expected = set()
-
-    assert result == expected
+    assert by_id["seq1"]["sequence"] == by_id["seq2"]["sequence"]
+    assert by_id["seq1"]["id"] != by_id["seq2"]["id"]

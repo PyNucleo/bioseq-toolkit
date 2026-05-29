@@ -1,6 +1,7 @@
 # tests/search/test_refinement.py
 
 from database.sequence_database import SequenceDatabase
+from database.database_utils import normalize_database
 
 from bioseq.search.refinement import refine_hits
 from bioseq.pipelines.search_pipeline import search
@@ -50,7 +51,7 @@ def test_refinement_handles_empty_hits():
 
 
 def test_search_pipeline_with_refinement_adds_sw_scores():
-    db = SequenceDatabase([
+    db = normalize_database([
         "ATGAAA",
         "ATGCGT",
         "GGGGGG"

@@ -1,27 +1,35 @@
 def read_fasta_records(file):
     FASTA = open(file, "r")
     records = []
-    current_seq = ''
-    record = {"header" : None,
-              "sequence" : None}
+    record = None
+    current_seq = ""
 
     for line in FASTA:
+
         line = line.rstrip()
-        if line.startswith(">") and current_seq:
-            
-            record["sequence"] = current_seq
-            records.append(record)
-            record = {"header" : line,
-                      "sequence" : None}
-            current_seq = ''
-                
-        elif line.startswith(">") and not current_seq:
-            record["header"] = line
-        else: #Is a sequence, not a header
+
+        if line.startswith(">"):
+
+            if record is not None:
+                record["sequence"] = current_seq
+                records.append(record)
+
+            record = {
+                "header": line,
+                "sequence": ""
+            }
+
+            current_seq = ""
+
+        else:
+
             current_seq += line
-    record["sequence"] = current_seq
-    records.append(record)
-        
+
+    if record is not None:
+
+        record["sequence"] = current_seq
+        records.append(record)
+
     return records
 
 def read_fasta_sequences_only(FILE):

@@ -1,10 +1,9 @@
-import pandas as pd
-
 from .pipelines.translation_pipeline import process_fasta_sequences
-from .search.similarity_search import rank_database_sequences
-from .translation import translate_dna
+from .search.similarity_search import rank_by_shared_kmers
+from .translation import translate_sequence
 from .alignment.needleman_wunsch import global_alignment
-from .search.similarity_search import rank_database_sequences
+
+
 def main():
     
     action = int(input("What would you like to perform?\n"
@@ -14,7 +13,8 @@ def main():
     ))
     
     if action == 1:
-        results = rank_database_sequences("GATTACA")
+        query = "ATACAGAT"
+        results = rank_by_shared_kmers(query, "GATTACA")
         print(results)
     
     elif action == 2:

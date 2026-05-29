@@ -27,8 +27,21 @@ def normalize_database(db):
     if isinstance(db, SequenceDatabase):
         return db
     
-    elif isinstance(db, list):
+    elif isinstance(db, dict):
         return SequenceDatabase(db)
+    
+    elif isinstance(db, list):
+        db_dict = []
+        
+        id = "id"
+        for num, seq in enumerate(db, start = 1):
+            db_dict.append({
+                "id": id + str(num),
+                "sequence": seq
+            })
+
+        return SequenceDatabase(db_dict)
+    
     elif isinstance(db, str):
         return create_database(db)
     else:
