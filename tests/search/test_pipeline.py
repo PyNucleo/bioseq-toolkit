@@ -1,11 +1,12 @@
 # tests/pipelines/test_search_pipeline.py
 
 from database.sequence_database import SequenceDatabase
+from database.database_utils import normalize_database
 from bioseq.pipelines.search_pipeline import search
 
 
 def test_pipeline_returns_hits():
-    db = SequenceDatabase([
+    db = normalize_database([
         "ATGCGT",
         "ATGAAA",
         "GGGGGG",
@@ -18,7 +19,7 @@ def test_pipeline_returns_hits():
 
 
 def test_best_hit_ranked_first():
-    db = SequenceDatabase([
+    db = normalize_database([
         "ATGAAA",
         "ATGCGT",
         "GGGGGG"
@@ -30,7 +31,7 @@ def test_best_hit_ranked_first():
 
 
 def test_threshold_filtering():
-    db = SequenceDatabase([
+    db = normalize_database([
         "ATGCGT",
         "ATGAAA",
         "GGGGGG"
@@ -48,7 +49,7 @@ def test_threshold_filtering():
 
 
 def test_top_n_hits_filtering():
-    db = SequenceDatabase([
+    db = normalize_database([
         "ATGCGT",
         "ATGCGA",
         "ATGAAA",
@@ -65,7 +66,7 @@ def test_top_n_hits_filtering():
 
 
 def test_empty_results():
-    db = SequenceDatabase([
+    db = normalize_database([
         "AAAAAA",
         "CCCCCC",
         "GGGGGG"

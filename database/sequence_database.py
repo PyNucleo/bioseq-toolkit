@@ -8,9 +8,6 @@ class SequenceDatabase:
             self.sequences = []
         else:
             self.sequences = sequences
-
-    def add_sequence(self, sequence):
-        self.sequences.append(sequence)
     
     def get_sequences(self):
         return self.sequences

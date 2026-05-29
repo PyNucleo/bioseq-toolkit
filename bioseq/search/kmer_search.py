@@ -1,4 +1,4 @@
-def kmer_search(query, DB, k, threshold):
+def kmer_search(query, db, k, threshold):
 
     """
     Find candidate database sequences using shared k-mers.
@@ -29,25 +29,26 @@ def kmer_search(query, DB, k, threshold):
     """
     max_shared_kmers = 0
 
-    DB_SEQUENCES = DB.get_sequences()
-    sequences_and_shared_kmers = {x : 0 for x in DB_SEQUENCES}
+    db_records = db.get_sequences() #List of Dicts
+
+    results = []
 
     query_words = generate_kmers(query, k)
 
-    for db_seq in DB_SEQUENCES:
+    for db_seq in db_records:
 
-        temp_shared_kmers = get_shared_kmers(query_words, db_seq, k)
+        temp_shared_kmers = get_shared_kmers(query_words, db_seq["sequence"], k)
 
-        if temp_shared_kmers < threshold:
-            sequences_and_shared_kmers.pop(db_seq)
+        if temp_shared_kmers >= threshold:
+            results.append({"id": db_seq["id"],
+                            "sequence": db_seq["sequence"],
+                            "shared_kmers": temp_shared_kmers})
         
-        else:
-            if temp_shared_kmers > max_shared_kmers:
-                max_shared_kmers = temp_shared_kmers
+        if temp_shared_kmers > max_shared_kmers:
+            max_shared_kmers = temp_shared_kmers
 
-            sequences_and_shared_kmers[db_seq] = temp_shared_kmers
 
-    return filter_by_relative_score(max_shared_kmers, sequences_and_shared_kmers)
+    return filter_by_relative_score(max_shared_kmers, results)
 
 
 def generate_kmers(seq, k):
@@ -118,11 +119,10 @@ def filter_by_relative_score(max_kmers, candidates_dict, ratio = 0.3):
     dict[str, int]
         Filtered dictionary of candidate sequences and shared k-mer counts.
     """
-    filtered = {
-    seq_id: count
-    for seq_id, count in candidates_dict.items()
-    if count >= max_kmers * ratio
-}
+    filtered = [
+    d for d in candidates_dict
+    if d["shared_kmers"] >= max_kmers * ratio
+]
     return filtered
 
 
