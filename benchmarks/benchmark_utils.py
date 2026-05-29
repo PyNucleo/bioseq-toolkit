@@ -16,9 +16,8 @@ def get_average_runtime(benchmark_method, iterations, dataset):
 
     Returns
     -------
-    None
-        Writes benchmark subset FASTA files to the
-        benchmark output directory.
+    float
+        Mean runtime across all benchmark iterations.
     """
 
     total_runtime = 0

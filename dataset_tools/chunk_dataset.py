@@ -25,6 +25,11 @@ def dataset_to_chunks(dataset, *chunk_lengths):
         One or more chunk sizes specifying how many
         sequences should be written into each output dataset.
 
+    Returns
+    -------
+    None
+        Writes benchmark subset FASTA files to the
+        benchmark output directory.
     
     """
     dataset_sequences = read_fasta_records(dataset)
