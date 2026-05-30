@@ -1,4 +1,4 @@
-
+from bioseq.fasta_io import read_fasta_records
 
 def get_average_runtime(benchmark_method, iterations, dataset):
     """
@@ -28,11 +28,12 @@ def get_average_runtime(benchmark_method, iterations, dataset):
 
     return total_runtime / iterations
 
-def get_total_dataset_residues(dataset_sequences):
+def get_total_dataset_residues(dataset):
+    dataset_records = read_fasta_records(dataset)
 
     temp_s = 0
 
-    for seq in dataset_sequences:
-        temp_s += len(seq)
+    for seq in dataset_records:
+        temp_s += len(seq["sequence"])
     
     return temp_s

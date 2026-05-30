@@ -16,7 +16,7 @@ def benchmark_smith_waterman_alignment_run_search(FILE):
     for seq2 in db_sequences:
             sw_alignments.append({
             "sequence":seq2,
-            "alignments":local_alignment(query, seq2, True)
+            "alignments":local_alignment(query, seq2["sequence"], True)
         })
 
     return sw_alignments
@@ -32,7 +32,7 @@ def benchmark_smith_waterman_alignment_run_time(FILE):
     db_sequences = db.get_sequences()
 
     for seq2 in db_sequences:
-        local_alignment(query, seq2, True)
+        local_alignment(query, seq2["sequence"], True)
         
 
     end = time.perf_counter()

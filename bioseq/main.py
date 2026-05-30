@@ -1,4 +1,5 @@
 from .pipelines.translation_pipeline import process_fasta_sequences
+from .pipelines.search_pipeline import search
 from .search.similarity_search import rank_by_shared_kmers
 from .translation import translate_sequence
 from .alignment.needleman_wunsch import global_alignment
@@ -14,7 +15,7 @@ def main():
     
     if action == 1:
         query = "ATACAGAT"
-        results = rank_by_shared_kmers(query, "GATTACA")
+        results = search(query, "GATTACA")
         print(results)
     
     elif action == 2:
