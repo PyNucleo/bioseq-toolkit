@@ -66,4 +66,5 @@ def run():
 
         print(f"k=3, threshold=3, top_n_hits=10: {runtime:.6f}s")
 
-run()
+if __name__ == "__main__":
+    run()
