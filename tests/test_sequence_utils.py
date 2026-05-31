@@ -29,3 +29,9 @@ def test_mrna_template():
     result = mrna_template("ATGC")
 
     assert result == "UACG"
+
+def test_sequence_utils_accept_lowercase_dna():
+    assert reverse_complement("atgc") == "GCAT"
+    assert gc_content("ggccaa") == 66.67
+    assert mrna_coding("atgc") == "AUGC"
+    assert mrna_template("atgc") == "UACG"
