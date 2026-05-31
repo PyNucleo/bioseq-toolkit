@@ -11,7 +11,6 @@ def assert_basic_structured_result(result, s1, s2, score, best_positions):
     assert result["score"] == score
     assert result["best_positions"] == best_positions
 
-    assert result["scoring"]["matrix"] is None
     assert result["scoring"]["gap_model"] == "linear"
 
     assert isinstance(result["num_alignments"], int)
@@ -41,7 +40,7 @@ def test_local_alignment_identical_sequences_structured():
     assert result["scoring"] == {
         "match": 2,
         "mismatch": -1,
-        "gap": -2,
+        "gap_penalty": -2,
         "matrix": None,
         "gap_model": "linear",
     }
@@ -192,7 +191,7 @@ def test_local_alignment_normalizes_positive_gap_penalty():
     )
 
     assert result["score"] == 8
-    assert result["scoring"]["gap"] == -2
+    assert result["scoring"]["gap_penalty"] == -2
     assert result["scoring"]["gap_model"] == "linear"
 
 
@@ -210,7 +209,7 @@ def test_local_alignment_uses_custom_match_score():
     assert result["score"] == 12
     assert result["scoring"]["match"] == 3
     assert result["scoring"]["mismatch"] == -1
-    assert result["scoring"]["gap"] == -2
+    assert result["scoring"]["gap_penalty"] == -2
 
     alignment = result["alignments"][0]
 
@@ -218,6 +217,48 @@ def test_local_alignment_uses_custom_match_score():
     assert alignment["aligned_sequence_2"] == "AAAA"
     assert alignment["matches"] == 4
     assert alignment["identity"] == 1.0
+
+
+def test_local_alignment_with_blosum62_matrix():
+    result = local_alignment(
+        "HEART",
+        "HPEART",
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+        return_all=False,
+        structured=True,
+    )
+
+    assert_basic_structured_result(
+        result,
+        s1="HEART",
+        s2="HPEART",
+        score=23.0,
+        best_positions=[(5, 6)],
+    )
+
+    assert result["scoring"] == {
+        "gap_penalty": -4,
+        "matrix": "BLOSUM62",
+        "gap_model": "linear",
+    }
+
+    assert result["num_alignments"] == 1
+
+    alignment = result["alignments"][0]
+
+    assert alignment == {
+        "aligned_sequence_1": "H-EART",
+        "aligned_sequence_2": "HPEART",
+        "alignment_length": 6,
+        "matches": 5,
+        "mismatches": 0,
+        "gaps": 1,
+        "gap_columns": 1,
+        "identity": 0.833,
+        "identity_excluding_gaps": 1.0,
+        "similarity": None,
+    }
 
 
 def test_local_alignment_old_return_format_still_works():
@@ -232,6 +273,7 @@ def test_local_alignment_old_return_format_still_works():
     )
 
     assert result == [("ATGC", "ATGC")]
+
 
 def test_local_alignment_return_all_explores_multiple_traceback_branches():
     result = local_alignment(
@@ -254,7 +296,8 @@ def test_local_alignment_return_all_explores_multiple_traceback_branches():
         ("TA", "TA"),
         ("AT-A", "ATTA"),
     }
-    
+
+
 def test_local_alignment_rejects_empty_sequence_input():
     with pytest.raises(ValueError):
         local_alignment("", "ATGC")

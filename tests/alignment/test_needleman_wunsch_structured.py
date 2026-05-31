@@ -12,16 +12,16 @@ def test_global_alignment_structured_result_with_default_gap_penalty():
         structured=True,
     )
 
+
     assert result["algorithm"] == "Needleman-Wunsch"
     assert result["mode"] == "global"
     assert result["sequence_1"] == "ATGCG"
     assert result["sequence_2"] == "ATCGA"
     assert result["score"] == 0
-
     assert result["scoring"] == {
         "match": 1,
         "mismatch": -1,
-        "gap": -2,
+        "gap_penalty": -2,
         "matrix": None,
         "gap_model": "linear",
     }
@@ -30,6 +30,8 @@ def test_global_alignment_structured_result_with_default_gap_penalty():
     assert isinstance(result["alignments"], list)
 
     alignment = result["alignments"][0]
+
+    
 
     assert alignment == {
         "aligned_sequence_1": "ATGCG-",
@@ -57,7 +59,7 @@ def test_global_alignment_structured_result_with_lower_gap_penalty():
     )
 
     assert result["score"] == 2
-    assert result["scoring"]["gap"] == -1
+    assert result["scoring"]["gap_penalty"] == -1
 
     alignment = result["alignments"][0]
 
@@ -84,7 +86,7 @@ def test_global_alignment_structured_result_with_higher_match_score():
     assert result["score"] == 6
     assert result["scoring"]["match"] == 2
     assert result["scoring"]["mismatch"] == -1
-    assert result["scoring"]["gap"] == -1
+    assert result["scoring"]["gap_penalty"] == -1
 
     alignment = result["alignments"][0]
 
@@ -133,3 +135,43 @@ def test_global_alignment_old_return_format_still_works():
     )
 
     assert result == [("GATTACA", "GATTACA")]
+
+def test_global_alignment_with_blosum62_matrix():
+
+    result = global_alignment(
+        "HEAG",
+        "HAG",
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+        return_all=False,
+        structured=True,
+    )
+
+    assert result["algorithm"] == "Needleman-Wunsch"
+    assert result["mode"] == "global"
+    assert result["sequence_1"] == "HEAG"
+    assert result["sequence_2"] == "HAG"
+    assert result["score"] == 14.0
+
+    assert result["scoring"] == {
+        "gap_penalty": -4,
+        "matrix": "BLOSUM62",
+        "gap_model": "linear",
+    }
+
+    assert result["num_alignments"] == 1
+
+    alignment = result["alignments"][0]
+
+    assert alignment == {
+        "aligned_sequence_1": "HEAG",
+        "aligned_sequence_2": "H-AG",
+        "alignment_length": 4,
+        "matches": 3,
+        "mismatches": 0,
+        "gaps": 1,
+        "gap_columns": 1,
+        "identity": 0.75,
+        "identity_excluding_gaps": 1.0,
+        "similarity": None,
+    }
