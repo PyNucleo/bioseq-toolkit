@@ -1,42 +1,88 @@
 # bioseq-toolkit
 
-Educational bioinformatics toolkit implementing sequence alignment, FASTA handling, k-mer search, Smith-Waterman refinement, and BLAST-like search ideas from scratch.
+Educational bioinformatics toolkit implementing core sequence-analysis algorithms from scratch, including FASTA handling, DNA sequence utilities, pairwise alignment, k-mer search, Smith-Waterman refinement, and benchmarked BLAST-like search ideas.
 
-This project is built as a learning-focused bioinformatics software project. It is not intended to replace production tools such as BLAST, EMBOSS, Biopython, or professional sequence-analysis pipelines. Instead, the goal is to implement core sequence-analysis algorithms directly, test them, benchmark them, and gradually build toward a biologically realistic sequence-search toolkit.
+This project is built as a learning-focused bioinformatics software project. It is **not** intended to replace production tools such as BLAST, EMBOSS, HMMER, MAFFT, MUSCLE, Clustal Omega, Biopython, or professional sequence-analysis pipelines.
+
+The goal is to implement the internal logic behind common bioinformatics tasks directly, test the implementations, benchmark them, and gradually improve biological realism, reproducibility, and scalability.
+
+---
 
 ## Current Project Status
 
-`bioseq-toolkit` currently supports:
+`bioseq-toolkit` is currently best described as an **educational sequence-search prototype**.
+
+It currently supports:
 
 - Basic DNA sequence utilities
 - FASTA parsing
 - DNA transcription helpers
 - Translation using Biopython
-- Needleman-Wunsch global alignment with structured output
-- Smith-Waterman local alignment with structured output
-- Alignment statistics, including matches, mismatches, gaps, gap columns, and identity
+- Needleman-Wunsch global alignment
+- Smith-Waterman local alignment
+- Structured output for both global and local alignment
+- Alignment statistics, including:
+  - alignment length
+  - matches
+  - mismatches
+  - gaps
+  - gap columns
+  - identity
+  - identity excluding gaps
+- Simple match/mismatch scoring
+- Linear gap penalties
+- Initial substitution-matrix support through Biopython, including BLOSUM62 usage in alignment tests
 - k-mer based sequence search
 - Optional Smith-Waterman refinement of k-mer search hits
 - Basic sequence database normalization
 - Smith-Waterman runtime benchmarking on protein FASTA datasets
-- k-mer-only search benchmarking across multiple k/threshold settings
+- k-mer-only search benchmarking across multiple `k` and threshold settings
 - k-mer + Smith-Waterman refinement benchmarking
-- Unit tests for core utilities, search, refinement, database normalization, alignment, and benchmark smoke tests
+- Benchmark driver scripts for alignment and search benchmarks
+- Unit tests for core utilities, alignment, search, refinement, database normalization, FASTA loading, and benchmark smoke checks
 
-The project is currently best described as an **educational sequence-search prototype**. It has real structure, tests, structured alignment outputs, and benchmark results, but it is still early-stage and biologically incomplete.
+The project has real structure, tests, benchmark reports, and a coherent search-pipeline direction. However, it is still early-stage and biologically incomplete.
+
+Current important limitations include:
+
+- No affine gap penalties yet
+- No E-values or bit scores yet
+- No indexed k-mer search yet
+- No seed-extension step yet
+- No stable command-line interface yet
+- No completed biological case study yet
+- Not intended for clinical, diagnostic, or production biological analysis
+
+---
 
 ## Why This Project Exists
 
-Sequence alignment and database similarity search are central ideas in bioinformatics. Tools such as BLAST are fast because they avoid running full dynamic programming against every possible sequence unless needed. This project is an attempt to build those ideas step by step:
+Sequence alignment and database similarity search are central ideas in bioinformatics.
 
-1. Start with basic sequence manipulation.
+Tools such as BLAST are fast because they do not simply run full dynamic programming against every database sequence in the most expensive way possible. Instead, they use heuristic ideas such as word matching, candidate filtering, and refinement.
+
+This project builds toward those ideas step by step:
+
+1. Start with basic biological sequence manipulation.
 2. Implement exact pairwise alignment algorithms.
 3. Build a simple k-mer search filter.
-4. Refine promising hits using Smith-Waterman alignment.
+4. Refine promising hits using Smith-Waterman local alignment.
 5. Benchmark exact search, k-mer search, and k-mer + refinement.
-6. Gradually improve biological realism and scalability.
+6. Gradually improve scoring, biological realism, scalability, and reproducibility.
 
 The long-term goal is to turn this into a small but coherent educational toolkit for understanding how sequence search works internally.
+
+A good description of the project is:
+
+> An educational BLAST-like sequence-search prototype demonstrating exact dynamic programming alignment, k-mer candidate filtering, Smith-Waterman refinement, and runtime tradeoffs.
+
+A bad description would be:
+
+> A replacement for BLAST.
+
+This project is not that.
+
+---
 
 ## Installation
 
@@ -56,12 +102,34 @@ pip install -r requirements.txt
 Run the test suite:
 
 ```bash
-pytest
+python -m pytest
 ```
+
+Using `python -m pytest` is recommended because it runs tests through the active Python environment and is less likely to run into import-path issues than calling `pytest` directly in some setups.
+
+---
+
+## Dependencies
+
+Current dependencies are listed in:
+
+```text
+requirements.txt
+```
+
+Main dependencies:
+
+- Biopython
+- pytest
+- pandas
+
+Biopython is currently used for translation support and substitution-matrix loading.
+
+---
 
 ## Quick Start
 
-Example: run a simple k-mer search.
+### Example 1 — Simple k-mer search
 
 ```python
 from bioseq.pipelines.search_pipeline import search
@@ -89,7 +157,11 @@ Expected style of output:
 ]
 ```
 
-Example with Smith-Waterman refinement:
+The exact ordering depends on the candidate scores and filtering behavior.
+
+---
+
+### Example 2 — k-mer search with Smith-Waterman refinement
 
 ```python
 from bioseq.pipelines.search_pipeline import search
@@ -103,13 +175,104 @@ results = search(
     ],
     k=3,
     threshold=1,
+    top_n_hits=3,
     refinement=True
 )
 
 print(results)
 ```
 
-When refinement is enabled, candidate hits are first found using shared k-mers, then re-ranked using Smith-Waterman local alignment scores.
+When refinement is enabled:
+
+1. Candidate hits are first found using shared k-mers.
+2. The top candidates are scored using Smith-Waterman local alignment.
+3. Hits are re-ranked by Smith-Waterman score.
+
+Expected style of refined output:
+
+```python
+[
+    {
+        "id": "id2",
+        "sequence": "ATGCGT",
+        "shared_kmers": 3,
+        "sw_score": 10,
+        "best_positions": [(5, 5)]
+    }
+]
+```
+
+---
+
+### Example 3 — Smith-Waterman local alignment
+
+```python
+from bioseq.alignment.smith_waterman import local_alignment
+
+result = local_alignment(
+    "GATTACA",
+    "TTAC",
+    match=2,
+    mismatch=-1,
+    gap_penalty=-2,
+    structured=True
+)
+
+print(result)
+```
+
+Structured output includes:
+
+- algorithm name
+- alignment mode
+- input sequences
+- score
+- scoring metadata
+- best matrix positions
+- number of alignments
+- aligned sequences
+- alignment statistics
+
+---
+
+### Example 4 — Needleman-Wunsch global alignment
+
+```python
+from bioseq.alignment.needleman_wunsch import global_alignment
+
+result = global_alignment(
+    "ATGCG",
+    "ATCGA",
+    match=1,
+    mismatch=-1,
+    gap_penalty=-2,
+    structured=True
+)
+
+print(result)
+```
+
+---
+
+### Example 5 — Alignment with BLOSUM62
+
+```python
+from bioseq.alignment.smith_waterman import local_alignment
+
+result = local_alignment(
+    "HEART",
+    "HPEART",
+    gap_penalty=-4,
+    matrix="BLOSUM62",
+    structured=True
+)
+
+print(result)
+```
+
+Substitution-matrix support currently uses Biopython matrix loading. This is an initial implementation and should not yet be treated as a fully optimized scoring backend.
+
+---
 
 ## Repository Structure
 
@@ -117,32 +280,40 @@ When refinement is enabled, candidate hits are first found using shared k-mers, 
 bioseq-toolkit/
 ├── bioseq/
 │   ├── alignment/
-│   │   ├── needleman_wunsch.py
-│   │   ├── smith_waterman.py
 │   │   ├── alignment_stats.py
-│   │   └── scoring.py
+│   │   ├── needleman_wunsch.py
+│   │   ├── scoring.py
+│   │   ├── smith_waterman.py
+│   │   └── substitution_matrices.py
+│   │
 │   ├── pipelines/
 │   │   ├── search_pipeline.py
 │   │   └── translation_pipeline.py
+│   │
 │   ├── search/
 │   │   ├── kmer_search.py
 │   │   ├── refinement.py
 │   │   └── similarity_search.py
+│   │
 │   ├── fasta_io.py
+│   ├── main.py
 │   ├── sequence_utils.py
 │   ├── translation.py
 │   └── validators.py
 │
 ├── database/
-│   ├── sequence_database.py
 │   ├── database_utils.py
-│   └── load_database.py
+│   ├── load_database.py
+│   └── sequence_database.py
 │
 ├── benchmarks/
+│   ├── BENCHMARKS.md
 │   ├── benchmark_alignment.py
 │   ├── benchmark_search.py
 │   ├── benchmark_utils.py
-│   └── BENCHMARKS.md
+│   ├── main.py
+│   ├── run_alignment_benchmarks.py
+│   └── run_search_benchmarks.py
 │
 ├── data/
 │   └── benchmark_sequences/
@@ -168,6 +339,8 @@ bioseq-toolkit/
 └── README.md
 ```
 
+---
+
 ## Main Components
 
 ### Sequence Utilities
@@ -181,7 +354,13 @@ The project includes basic DNA sequence utility functions such as:
 - transcription from DNA template strand
 - transcription from DNA coding strand
 
-These utilities are intentionally simple and are tested as foundational building blocks.
+These are intentionally simple foundational functions.
+
+Current limitation:
+
+- Direct utility calls are still mainly designed around uppercase DNA strings.
+
+---
 
 ### FASTA Parsing
 
@@ -191,7 +370,48 @@ The FASTA reader loads sequence records from FASTA files and returns structured 
 - original FASTA header
 - sequence string
 
-This allows later search and benchmark code to work with a consistent record format.
+Current record style:
+
+```python
+{
+    "id": "seq1",
+    "header": ">example_header",
+    "sequence": "ATGCGT"
+}
+```
+
+Current limitation:
+
+- IDs are currently generated rather than parsed from the FASTA header.
+- This is acceptable for simple internal use, but future biological case studies should preserve meaningful database identifiers such as UniProt or ASTRAL accessions.
+
+---
+
+### Database Normalization
+
+The search pipeline accepts:
+
+- an existing `SequenceDatabase`
+- a list of sequence strings
+- a FASTA file path
+
+The input is normalized into a consistent sequence-record format before search.
+
+Example:
+
+```python
+[
+    {"id": "id1", "sequence": "ATGCGT"},
+    {"id": "id2", "sequence": "ATGCGA"}
+]
+```
+
+Current limitation:
+
+- This is a lightweight wrapper, not a real database engine.
+- It is intended to support consistent input handling for the current educational pipeline.
+
+---
 
 ### Pairwise Alignment
 
@@ -200,7 +420,82 @@ The project currently includes two classic dynamic programming alignment algorit
 - **Needleman-Wunsch** for global alignment
 - **Smith-Waterman** for local alignment
 
-Both alignment tools now support structured output containing alignment metadata and alignment statistics. These implementations are educational and currently use a simple scoring system rather than full biological substitution matrices.
+Both support structured output.
+
+Example structured fields:
+
+```python
+{
+    "algorithm": "Smith-Waterman",
+    "mode": "local",
+    "sequence_1": "...",
+    "sequence_2": "...",
+    "score": 8,
+    "scoring": {
+        "match": 2,
+        "mismatch": -1,
+        "gap_penalty": -2,
+        "matrix": None,
+        "gap_model": "linear"
+    },
+    "best_positions": [(6, 4)],
+    "num_alignments": 1,
+    "alignments": [
+        {
+            "aligned_sequence_1": "TTAC",
+            "aligned_sequence_2": "TTAC",
+            "alignment_length": 4,
+            "matches": 4,
+            "mismatches": 0,
+            "gaps": 0,
+            "gap_columns": 0,
+            "identity": 1.0,
+            "identity_excluding_gaps": 1.0,
+            "similarity": None
+        }
+    ]
+}
+```
+
+Current limitations:
+
+- Gap model is currently linear.
+- Affine gap penalties are not implemented yet.
+- Similarity is currently a placeholder field.
+- Matrix scoring exists initially, but scoring performance and broader validation still need improvement.
+
+---
+
+### Scoring
+
+The project currently supports:
+
+- simple match/mismatch scoring
+- linear gap penalties
+- initial substitution-matrix lookup through Biopython
+
+Simple scoring example:
+
+```python
+match = 2
+mismatch = -1
+gap_penalty = -2
+```
+
+Matrix scoring example:
+
+```python
+matrix = "BLOSUM62"
+gap_penalty = -4
+```
+
+Current limitation:
+
+- Matrix loading should be optimized further so matrices are loaded once and reused during dynamic programming.
+- PAM matrices and custom user-provided matrices are not yet documented as stable features.
+- Affine gap penalties are not yet implemented.
+
+---
 
 ### Alignment Statistics
 
@@ -213,15 +508,35 @@ Alignment results can include:
 - gap columns
 - identity
 - identity excluding gaps
-- placeholder similarity field for future protein scoring support
+- similarity placeholder
 
-This makes the output easier to test, inspect, and eventually compare across scoring systems.
+This makes outputs easier to test, inspect, and compare.
+
+---
 
 ### k-mer Search
 
-The k-mer search step splits the query sequence and database sequences into words of length `k`. It then counts shared k-mers and returns candidate hits that pass a threshold.
+The k-mer search step splits the query sequence and database sequences into words of length `k`.
+
+It then:
+
+1. generates unique query k-mers,
+2. generates k-mers for each database sequence,
+3. counts shared k-mers,
+4. filters candidates by threshold,
+5. applies a relative score filter,
+6. returns candidate hits.
 
 This is the first step toward BLAST-like search behavior: use a fast word-based filter before doing more expensive alignment work.
+
+Current limitation:
+
+- The current implementation scans the database directly.
+- It does not yet build an inverted k-mer index.
+- It does not yet track seed positions.
+- It does not yet perform seed extension.
+
+---
 
 ### Smith-Waterman Refinement
 
@@ -235,7 +550,14 @@ Pipeline:
 4. Keep the top candidate hits.
 5. Optionally re-rank them using Smith-Waterman score.
 
-This makes the project more than just a pairwise alignment implementation; it becomes a basic search pipeline.
+This makes the project more than just a pairwise alignment implementation. It becomes a basic search pipeline demonstrating a seed-filter-refine idea.
+
+Current limitation:
+
+- Refinement currently scores top candidates, but does not yet return full local alignment objects inside each search hit.
+- Search accuracy/sensitivity has not yet been fully evaluated against exhaustive Smith-Waterman rankings.
+
+---
 
 ## Benchmarks
 
@@ -250,9 +572,9 @@ Current benchmarks evaluate runtime scaling on ASTRAL/SCOPe protein sequence dat
 The benchmark report currently compares:
 
 - score-only Smith-Waterman computation
-- exhaustive Smith-Waterman alignment reconstruction
-- k-mer-only search using multiple k/threshold settings
-- k-mer + Smith-Waterman refinement using `k=3`, `threshold=3`, and `top_n_hits=10`
+- Smith-Waterman alignment reconstruction
+- k-mer-only search using multiple `k` and threshold settings
+- k-mer + Smith-Waterman refinement
 - runtime scaling across increasing dataset sizes
 - total residue count as an explanation for runtime growth
 
@@ -263,60 +585,92 @@ The benchmarked datasets include chunks of:
 - 1000 sequences
 - 10000 sequences
 
-Benchmark FASTA chunks are stored in `data/benchmark_sequences/` and include `astral_10.fasta`, `astral_100.fasta`, `astral_1000.fasta`, and `astral_10000.fasta`.
+Benchmark FASTA chunks are stored in:
+
+```text
+data/benchmark_sequences/
+```
 
 Current benchmark highlights:
 
 - Exact Smith-Waterman score-only search on the 10000-sequence dataset took about 137.18 seconds.
-- K-mer-only search on the same dataset took about 0.50–0.52 seconds depending on k and threshold.
+- K-mer-only search on the same dataset took about 0.50–0.52 seconds depending on `k` and threshold.
 - K-mer + Smith-Waterman refinement took about 0.67 seconds with `k=3`, `threshold=3`, and `top_n_hits=10`.
 - K-mer + refinement showed a runtime speedup of about 203.73× over exact Smith-Waterman score-only search on the 10000-sequence dataset.
 
-These benchmarks demonstrate runtime improvement for the current query, datasets, and parameters. They do **not** prove equal biological sensitivity or accuracy compared with exhaustive Smith-Waterman search.
+These benchmarks demonstrate runtime improvement for the current query, datasets, implementation, and parameters.
 
-Current benchmark limitations:
+They do **not** prove equal biological sensitivity or accuracy compared with exhaustive Smith-Waterman search.
 
-- Linear gap model only
-- Simple scoring system
-- No affine gap penalties yet
-- No BLOSUM/PAM substitution matrices yet
-- Protein lengths vary across datasets
-- Hardware/background processes were not strictly controlled
-- Sensitivity and false-negative behavior have not yet been fully evaluated
-- Current k-mer search scans database sequences directly rather than using an index
+---
 
-## Running Benchmarks
+## Benchmark Drivers
 
-Benchmark helper functions and benchmark runners are located in the `benchmarks/` directory.
+Benchmark driver scripts are provided in the `benchmarks/` directory.
 
-From the repository root, run benchmark scripts with module-style execution when available, for example:
+Run the Smith-Waterman alignment benchmarks:
 
 ```bash
 python -m benchmarks.run_alignment_benchmarks
 ```
 
-or run benchmark files directly only if their paths are written relative to the project root.
+Run the k-mer and k-mer + Smith-Waterman refinement benchmarks:
 
-The benchmark report in `benchmarks/BENCHMARKS.md` should be treated as the main written summary of current results.
+```bash
+python -m benchmarks.run_search_benchmarks
+```
+
+These benchmark drivers should be run from the repository root so dataset paths resolve correctly.
+
+Full benchmark runs may take a long time, especially on larger datasets and repeated iterations.
+
+---
+
+## Benchmark Limitations
+
+Current benchmark limitations:
+
+- Linear gap model only
+- No affine gap penalties yet
+- Simple scoring is still the main benchmark mode
+- Initial substitution-matrix support exists, but matrix-based benchmark behavior is not yet fully evaluated
+- Protein lengths vary across datasets
+- Hardware and background processes were not strictly controlled
+- Current k-mer search scans database sequences directly rather than using an index
+- Sensitivity and false-negative behavior have not yet been fully evaluated
+- Current benchmarks emphasize speed more than biological accuracy
+
+Future benchmarks should evaluate both:
+
+1. runtime, and
+2. candidate recovery compared with exhaustive Smith-Waterman search.
+
+---
 
 ## Running Tests
 
 Run all tests:
 
 ```bash
-pytest
+python -m pytest
+```
+
+Run only alignment tests:
+
+```bash
+python -m pytest tests/alignment/
 ```
 
 Run only search pipeline tests:
 
 ```bash
-pytest tests/pipelines/
+python -m pytest tests/pipelines/
 ```
 
 Run only benchmark tests:
 
 ```bash
-pytest tests/benchmarks/
+python -m pytest tests/benchmarks/
 ```
 
 The tests currently cover:
@@ -326,13 +680,17 @@ The tests currently cover:
 - database normalization
 - FASTA database loading
 - Needleman-Wunsch alignment
+- Needleman-Wunsch structured output
 - Smith-Waterman alignment
 - Smith-Waterman structured output
+- BLOSUM62 usage in alignment tests
 - k-mer search
 - search refinement
 - full search pipeline behavior
 - benchmark smoke tests
 - benchmark residue-count checks
+
+---
 
 ## Examples
 
@@ -342,32 +700,39 @@ A simple search example is provided in:
 examples/search_demo.py
 ```
 
-Run it with:
+Run it from the repository root:
 
 ```bash
-python examples/search_demo.py
+python -m examples.search_demo
 ```
+
+---
 
 ## Current Strengths
 
 The strongest parts of the project are:
 
-- Clear movement from isolated algorithms toward a search pipeline
+- Clear movement from isolated functions toward a search pipeline
 - Basic package organization
 - Structured output for both global and local alignment
-- Tests for search, refinement, database normalization, alignment, and benchmark behavior
-- Benchmark documentation instead of only toy examples
+- Tests for alignment, search, refinement, database normalization, and benchmark behavior
 - Runtime comparison between exact dynamic programming and heuristic search
+- Benchmark driver scripts for repeatable benchmark runs
+- Benchmark documentation instead of only toy examples
+- Initial substitution-matrix support
 - Honest educational scope
 - Beginning of reproducibility through dataset chunks and benchmark reports
 
 The project is especially useful for learning how sequence database search can be built from smaller algorithmic pieces.
 
+---
+
 ## Current Limitations
 
-This project is still early-stage. Important limitations include:
+This project is still early-stage.
 
-- No BLOSUM or PAM substitution matrix support yet
+Important limitations include:
+
 - No affine gap penalties yet
 - No statistical significance estimates such as E-values or bit scores
 - No indexed k-mer search yet
@@ -375,9 +740,13 @@ This project is still early-stage. Important limitations include:
 - No seed-extension step yet
 - No stable command-line interface yet
 - No biological case study has been completed yet
+- FASTA identifiers are not yet parsed into biologically meaningful IDs
+- Matrix scoring exists initially, but needs cleaner optimization and broader validation
 - Not intended for production biological analysis
 
 These limitations are intentional development targets, not hidden assumptions.
+
+---
 
 ## Roadmap
 
@@ -386,24 +755,60 @@ Planned development stages:
 ### 1. Improve Benchmark Reproducibility
 
 - Keep benchmark results synchronized with benchmark scripts
-- Add clearer instructions for running all benchmark modes
+- Continue using explicit keyword arguments in benchmark function calls
+- Add clearer instructions for running benchmark modes
 - Save benchmark outputs in a consistent machine-readable format where useful
+- Separate speed benchmarks from sensitivity/recovery benchmarks
 
-### 2. Add Biologically Realistic Scoring
+---
 
-- Add BLOSUM62 support for protein alignment
-- Add support for additional scoring matrices later
-- Add affine gap penalties with separate gap opening and gap extension costs
+### 2. Clean Up Substitution Matrix Support
 
-### 3. Improve Search Heuristics
+- Keep BLOSUM62 support
+- Load substitution matrices once instead of repeatedly during scoring
+- Add direct tests for known BLOSUM62 pair scores
+- Benchmark simple scoring vs BLOSUM62 scoring
+- Clearly document which matrices are stable and tested
 
+---
+
+### 3. Improve FASTA and Database Handling
+
+- Parse meaningful IDs from FASTA headers
+- Preserve full FASTA headers
+- Keep sequence records traceable to original database entries
+- Add more FASTA edge-case tests
+- Improve lowercase sequence handling where appropriate
+
+---
+
+### 4. Add Sensitivity / Recovery Evaluation
+
+Future benchmarks should evaluate not only speed, but also whether heuristic search recovers the same important candidates as exhaustive Smith-Waterman.
+
+Possible measurements:
+
+- top-1 recovery
+- top-5 recovery
+- top-10 recovery
+- overlap with exact Smith-Waterman rankings
+- effect of `k` and threshold on missed candidates
+- speed/sensitivity tradeoff
+
+---
+
+### 5. Improve Search Heuristics
+
+- Add seed-position tracking
 - Add seed-extension behavior around k-mer hits
 - Compare seed-extension search against current k-mer-only search
 - Continue measuring runtime and candidate recovery
 
-### 4. Add Indexed Search
+---
 
-Build an inverted k-mer index so that database k-mers do not need to be regenerated for every query.
+### 6. Add Indexed Search
+
+Build an inverted k-mer index so database k-mers do not need to be regenerated for every query.
 
 Example idea:
 
@@ -416,51 +821,130 @@ Example idea:
 
 This would make repeated searches more scalable.
 
-### 5. Add Sensitivity / Recovery Evaluation
+---
 
-Future benchmarks should evaluate not only speed, but also whether the heuristic search recovers the same important candidates as exhaustive Smith-Waterman.
+### 7. Add Affine Gap Penalties
 
-Possible measurements:
+Current alignments use a linear gap model.
 
-- top-1 recovery
-- top-5 recovery
-- top-10 recovery
-- overlap with exact Smith-Waterman rankings
-- effect of k and threshold on missed candidates
+Future affine gap support should separate:
 
-### 6. Add a Biological Case Study
+- gap opening penalty
+- gap extension penalty
+
+Example future scoring metadata:
+
+```python
+{
+    "gap_model": "affine",
+    "gap_open": -10,
+    "gap_extend": -1
+}
+```
+
+This would make alignments more biologically realistic.
+
+---
+
+### 8. Add a Biological Case Study
 
 Use the toolkit on a real protein-family dataset.
 
 Possible case study direction:
 
-- collect related protein sequences
-- search against a local FASTA database
+- collect related protein sequences from a reliable source
+- build a local FASTA database
+- search against the database
 - refine hits with Smith-Waterman
-- compare conserved regions
-- discuss biological interpretation and limitations
+- compare exact search vs k-mer search vs k-mer + refinement
+- align top hits using BLOSUM62
+- discuss conserved regions
+- explain biological interpretation and limitations
+
+Possible target:
+
+- beta-lactamase / antibiotic resistance protein family
+
+A biological case study is important because it would turn the project from a software-only exercise into a bioinformatics analysis project.
+
+---
+
+### 9. Add a Stable CLI
+
+A command-line interface should be added after the core APIs and benchmark behavior are more stable.
+
+Minimum useful CLI scope:
+
+```bash
+bioseq search
+bioseq align-global
+bioseq align-local
+bioseq translate
+bioseq benchmark-search
+```
+
+The CLI should not be added too early because it would freeze unstable behavior.
+
+---
 
 ## Educational Scope
 
 This repository is meant to show the internal logic behind common bioinformatics sequence-analysis tasks.
 
-It is not currently designed for clinical, diagnostic, or production research use.
+It is useful for:
 
-For serious biological analysis, established tools such as BLAST, HMMER, EMBOSS, MAFFT, MUSCLE, Clustal Omega, and Biopython should be used. This project is mainly for learning, experimentation, and building algorithmic understanding.
+- learning pairwise alignment
+- understanding dynamic programming
+- understanding local vs global alignment
+- experimenting with k-mer based filtering
+- seeing why heuristic search can be faster than exhaustive search
+- practicing testing and benchmarking of bioinformatics code
 
-## Dependencies
+It is not currently designed for:
 
-Current dependencies are listed in:
+- clinical analysis
+- diagnostic use
+- production research pipelines
+- replacing mature bioinformatics tools
+
+For serious biological analysis, established tools such as BLAST, HMMER, EMBOSS, MAFFT, MUSCLE, Clustal Omega, and Biopython should be used.
+
+---
+
+## Project Philosophy
+
+This project prioritizes:
+
+- correctness over speed of development
+- tested behavior over hidden assumptions
+- honest limitations over exaggerated claims
+- incremental biological realism
+- reproducible benchmarking
+- learning by implementing core ideas directly
+
+The project should not pretend to be more mature than it is.
+
+The intended direction is:
 
 ```text
-requirements.txt
+basic sequence utilities
+        ↓
+pairwise alignment
+        ↓
+k-mer candidate search
+        ↓
+Smith-Waterman refinement
+        ↓
+benchmarking
+        ↓
+biologically realistic scoring
+        ↓
+indexed search
+        ↓
+real protein-family case study
 ```
 
-Main dependencies:
-
-- Biopython
-- pytest
-- pandas
+---
 
 ## License
 

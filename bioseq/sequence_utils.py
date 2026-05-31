@@ -23,6 +23,7 @@ def base_number(sequence):
     return Counter(sequence)
 
 def gc_content(sequence):
+    
     if not sequence:
         return 0.0
     

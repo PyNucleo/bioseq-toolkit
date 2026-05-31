@@ -16,7 +16,15 @@ def benchmark_smith_waterman_alignment_run_search(FILE):
     for seq2 in db_sequences:
             sw_alignments.append({
             "sequence":seq2,
-            "alignments":local_alignment(query, seq2["sequence"], True)
+            "alignments":local_alignment(
+                            query,
+                            seq2["sequence"],
+                            match=2,
+                            mismatch=-1,
+                            gap_penalty=-2,
+                            return_all=False,
+                            structured=True,
+                        )
         })
 
     return sw_alignments
@@ -32,7 +40,15 @@ def benchmark_smith_waterman_alignment_run_time(FILE):
     db_sequences = db.get_sequences()
 
     for seq2 in db_sequences:
-        local_alignment(query, seq2["sequence"], True)
+        local_alignment(
+            query,
+            seq2["sequence"],
+            match=2,
+            mismatch=-1,
+            gap_penalty=-2,
+            return_all=False,
+            structured=True,
+        )
         
 
     end = time.perf_counter()
@@ -52,7 +68,13 @@ def benchmark_smith_waterman_scores_run_results(FILE):
     db = db.get_sequences()
 
     for seq in db:
-        score, _ = get_best_scores(query, seq["sequence"], 3)
+        score, _ = get_best_scores(
+                       query,
+                       seq["sequence"],
+                       gap_penalty=-2,
+                       match=2,
+                       mismatch=-1,
+                    )
         all_scores.append({
              "sequence": seq["sequence"],
              "sw_score": score
@@ -73,7 +95,13 @@ def benchmark_smith_waterman_scores_run_time(FILE):
     db = db.get_sequences()
 
     for seq in db:
-        get_best_scores(query, seq["sequence"], 3)
+        get_best_scores(
+            query,
+            seq["sequence"],
+            gap_penalty=-2,
+            match=2,
+            mismatch=-1,
+        )
 
     end = time.perf_counter()
 
