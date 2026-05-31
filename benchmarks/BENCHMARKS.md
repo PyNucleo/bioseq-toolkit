@@ -129,10 +129,59 @@ The visualization suggests runtime scales approximately proportionally with resi
 
 ## Future Benchmarks
 
-* Single traceback Smith-Waterman
-* k-mer filtering
-* k-mer + refinement pipeline
-* Indexed search
+* Indexed k-mer search
 * Affine gap penalties
 * Runtime per residue analysis
 * Sensitivity/speed tradeoff experiments
+* Seed-extension search variants
+
+## Runtime Results - K-mer Search Only Using Varying k Sizes and Thresholds 
+
+| Dataset      |  k | Threshold | Runtime (s) |
+| ------------ | -: | --------: | ----------: |
+| astral_10    |  3 |         1 |    0.000608 |
+| astral_10    |  3 |         3 |    0.000538 |
+| astral_10    |  3 |         5 |    0.000546 |
+| astral_10    |  4 |         2 |    0.000511 |
+| astral_10    |  4 |         3 |    0.000511 |
+| astral_100   |  3 |         1 |    0.003706 |
+| astral_100   |  3 |         3 |    0.003846 |
+| astral_100   |  3 |         5 |    0.003831 |
+| astral_100   |  4 |         2 |    0.003782 |
+| astral_100   |  4 |         3 |    0.004647 |
+| astral_1000  |  3 |         1 |    0.033992 |
+| astral_1000  |  3 |         3 |    0.034162 |
+| astral_1000  |  3 |         5 |    0.033632 |
+| astral_1000  |  4 |         2 |    0.031665 |
+| astral_1000  |  4 |         3 |    0.031457 |
+| astral_10000 |  3 |         1 |    0.520231 |
+| astral_10000 |  3 |         3 |    0.520493 |
+| astral_10000 |  3 |         5 |    0.522213 |
+| astral_10000 |  4 |         2 |    0.495486 |
+| astral_10000 |  4 |         3 |    0.495018 |
+
+## Observations
+
+K-mer-only search was substantially faster than exact Smith-Waterman score-only search. On astral_10000, exact SW score-only took about 137.18 s, while k-mer-only search took about 0.50–0.52 s depending on k and threshold. 
+
+Changing the threshold had little effect on runtime because the current implementation still scans all database sequences before filtering. Increasing k from 3 to 4 slightly reduced runtime on the largest dataset, likely because fewer k-mers are generated per sequence, which further supports the impact of kmer-filtering on larger datasets when it comes to cutting down runtime.
+
+## Runtime Results — K-mer + Smith-Waterman Refinement
+
+Parameters:
+- k = 3
+- threshold = 3
+- top_n_hits = 10
+
+| Dataset | Exact SW Score-Only (s) | K-mer + SW Refinement (s) |  Speedup  |
+|---------|-------------------------|---------------------------|-----------|
+|    10   |          0.078          |           0.036           |   2.18×   |
+|    100  |          0.930          |           0.092           |   10.13×  |
+|    1000 |          10.765         |           0.126           |   85.21×  |
+|    10000|          137.183        |           0.673           |   203.73× |
+
+## Interpretation
+
+K-mer + Smith-Waterman refinement was much faster than exhaustive Smith-Waterman scoring because Smith-Waterman was only applied to the top candidate hits rather than every database sequence.
+
+This does not prove equal sensitivity or biological accuracy. It only demonstrates runtime improvement for the current query, datasets, and parameters.
