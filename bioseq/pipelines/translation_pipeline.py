@@ -11,7 +11,7 @@ from ..sequence_utils import(
 
 def process_fasta_sequences(file_path):
     file_records = read_fasta_records(file_path)
-    print(file_records)
+
     sequences = []
     mrna_seqs = []
 

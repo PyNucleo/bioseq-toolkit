@@ -1,4 +1,5 @@
 from .scoring import check_match, normalize_gap
+from .alignment_stats import get_alignment_stats, get_matches_mismatches_gaps
 
 def initialize_grid(s1, s2):
     grid = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
@@ -6,7 +7,7 @@ def initialize_grid(s1, s2):
 def initialize_movementGrid(s1, s2):
     tempMoveGrid = [[[None]] * (len(s2) + 1) for _ in range(len(s1) + 1)]
     return tempMoveGrid
-def dynamic_movement_filling(d, l, v, ):
+def dynamic_movement_filling(d, l, v):
     
     tempArray = []
     temp = max(d, l, v, 0)
@@ -25,7 +26,7 @@ def dynamic_movement_filling(d, l, v, ):
     
     return tempArray
 
-def fill_local(s1, s2, grid,movement_grid, gap_penalty):
+def fill_local(s1, s2, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1):
    
     gap_penalty = normalize_gap(gap_penalty)
 
@@ -36,7 +37,7 @@ def fill_local(s1, s2, grid,movement_grid, gap_penalty):
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = check_match(s1[i - 1], s2[j - 1])
+            match_score = check_match(s1[i - 1], s2[j - 1], match_score=match_s, mismatch_score=mismatch_s)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -98,8 +99,8 @@ def local_trace(movementMatrix, s1, s2, row, col, algn1, algn2, return_all, scor
     
     return result
 
-def get_best_scores(s1, s2, gap_penalty):
-    
+def get_best_scores(s1, s2, gap_penalty, match=2, mismatch=-1):
+
     gap_penalty = normalize_gap(gap_penalty)
     
     grid = initialize_grid(s1, s2)
@@ -110,7 +111,7 @@ def get_best_scores(s1, s2, gap_penalty):
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = check_match(s1[i - 1], s2[j - 1])
+            match_score = check_match(s1[i - 1], s2[j - 1], match_score=match, mismatch_score=mismatch)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -127,18 +128,64 @@ def get_best_scores(s1, s2, gap_penalty):
             grid[i][j] = score
             
     return tempMax, tempMax_At
-def local_alignment(s1, s2, return_all = False):
+def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, return_all=False, structured=True):
+    if (s1 == "" or s2 == ""):
+        raise ValueError("Sequence(s) cannot be empty.")
     
+    gap_penalty = normalize_gap(gap_penalty)
+
     grid = initialize_grid(s1, s2)
     
     movement_grid = initialize_movementGrid(s1, s2)
     
-    best_Score, startAt = fill_local(s1, s2, grid,movement_grid, -2)
+    best_score, start_at = fill_local(s1, s2, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
 
     all_alignments = []
     
-    for pos in startAt:
-        all_alignments.append(local_trace(movement_grid, s1, s2, pos[0], pos[1], "", "", return_all, grid))
+    if not return_all:
+        start_at = start_at[:1]
+
+    for pos in start_at:
+        all_alignments.extend(local_trace(movement_grid, s1, s2, pos[0], pos[1], "", "", return_all, grid))
+
+    
+    if structured:
+        temp_structure = {
+            "algorithm": "Smith-Waterman",
+            "mode": "local",
+            "sequence_1": s1,
+            "sequence_2": s2,
+            "score": best_score,
+            "scoring":{
+                "match": match,
+                "mismatch": mismatch,
+                "gap": gap_penalty,
+                "matrix": None,
+                "gap_model": "linear"  
+            },
+            "best_positions": start_at,
+            "num_alignments": len(all_alignments),
+            "alignments":[]
+        }
+        
+        for i in range(len(all_alignments)):
+            algn_1 = all_alignments[i][0]
+            algn_2 = all_alignments[i][1]
+
+            matches, mismatches, gaps, gap_columns = get_matches_mismatches_gaps(algn_1, algn_2)
+
+            alignment_stats = get_alignment_stats(algn_1, algn_2)
+
+            temp_structure["alignments"].append({
+                "aligned_sequence_1": algn_1,
+                "aligned_sequence_2": algn_2,
+                **alignment_stats
+            })
+        
+        return temp_structure
+    
+    
+    
     
     return all_alignments
     

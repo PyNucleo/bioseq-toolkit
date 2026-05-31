@@ -16,7 +16,7 @@ def test_reverse_complement():
 def test_gc_content():
     result = gc_content("GGCCAA")
 
-    assert result == 66.66666666666666
+    assert result == 66.67
 
 
 def test_mrna_coding():

@@ -29,7 +29,7 @@ def gc_content(sequence):
     counts = base_number(sequence)
 
     gc_fraction = (counts["G"] + counts["C"]) / total_length(sequence)
-    return gc_fraction * 100
+    return round(gc_fraction * 100, 2)
 
 def reverse_complement(dna_sequence):
     return "".join(DNA_COMPLEMENT[base] for base in dna_sequence)[::-1]
