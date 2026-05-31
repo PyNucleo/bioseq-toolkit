@@ -27,6 +27,11 @@ def kmer_search(query, db, k, threshold):
     dict[str, int]
         Dictionary mapping candidate sequences to their shared k-mer counts.
     """
+    is_valid_query_length = validate_kmer_params(query, k, threshold)
+
+    if not is_valid_query_length:
+        return []
+    
     max_shared_kmers = 0
 
     db_records = db.get_sequences() #List of Dicts
@@ -50,6 +55,24 @@ def kmer_search(query, db, k, threshold):
 
     return filter_by_relative_score(max_shared_kmers, results)
 
+def validate_kmer_params(seq, k, threshold=None):
+    if not isinstance(k, int):
+        raise TypeError("k must be an integer.")
+
+    if k <= 0:
+        raise ValueError("k must be a positive integer.")
+
+    if k > len(seq):
+        return False
+
+    if threshold is not None:
+        if not isinstance(threshold, int):
+            raise TypeError("threshold must be an integer.")
+
+        if threshold < 0:
+            raise ValueError("threshold must be greater than or equal to 0.")
+
+    return True
 
 def generate_kmers(seq, k):
     """
@@ -67,6 +90,11 @@ def generate_kmers(seq, k):
     set[str]
         Set of unique k-mers from the sequence
     """
+    is_valid_length = validate_kmer_params(seq, k)
+
+    if not is_valid_length:
+        return set()
+
     return set(seq[i : i + k] for i in range(len(seq) - k + 1))
 
 def get_shared_kmers(query_words, seq, k):
