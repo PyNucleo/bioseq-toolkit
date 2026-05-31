@@ -11,13 +11,12 @@ from ..sequence_utils import(
 
 def process_fasta_sequences(file_path):
     file_records = read_fasta_records(file_path)
-
-
+    print(file_records)
     sequences = []
     mrna_seqs = []
 
     for record in file_records:
-        seq = record["sequence"]
+        seq = record["sequence"].upper()
 
         if not seq:
             continue
@@ -29,11 +28,11 @@ def process_fasta_sequences(file_path):
         mrna_seqs.append(mrna_template(seq))
     
     final = {
-        "Sequence": sequences,
-        "Length": [total_length(seq) for seq in sequences],
-        "Base Counts": [gc_content(seq) for seq in sequences],
-        "Transcribed Strand": mrna_seqs,
-        "Amino acid chain": [translate_sequence(mrna) for mrna in mrna_seqs],
+        "sequence": sequences,
+        "length": [total_length(seq) for seq in sequences],
+        "base_counts": [gc_content(seq) for seq in sequences],
+        "transcribed_strand": mrna_seqs,
+        "amino_acid_chain": [translate_sequence(mrna) for mrna in mrna_seqs],
     }
 
     return final

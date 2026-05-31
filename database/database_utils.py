@@ -27,9 +27,6 @@ def normalize_database(db):
     if isinstance(db, SequenceDatabase):
         return db
     
-    elif isinstance(db, dict):
-        return SequenceDatabase(db)
-    
     elif isinstance(db, list):
         db_dict = []
         
