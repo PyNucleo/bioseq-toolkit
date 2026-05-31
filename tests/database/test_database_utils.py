@@ -33,3 +33,5 @@ def test_normalize_database():
 
     with pytest.raises(TypeError):
         normalize_database(123)
+    with pytest.raises(TypeError):
+        normalize_database({"seq1": "ATGC"})

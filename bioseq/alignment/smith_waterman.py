@@ -1,5 +1,5 @@
 from .scoring import check_match, normalize_gap
-from .alignment_stats import get_alignment_stats, get_matches_mismatches_gaps
+from .alignment_stats import get_alignment_stats
 
 def initialize_grid(s1, s2):
     grid = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
@@ -70,15 +70,15 @@ def local_trace(movementMatrix, s1, s2, row, col, algn1, algn2, return_all, scor
             if (move == "diagonal"):
                 new_branch1 = algn1 + s1[row - 1]
                 new_branch2 = algn2 + s2[col - 1]
-                branch_align = local_trace(movementMatrix, s1, s2, row - 1, col - 1, new_branch1, new_branch2, return_all, scoring_matrix)
+                result.extend(local_trace(movementMatrix, s1, s2, row - 1, col - 1, new_branch1, new_branch2, return_all, scoring_matrix))
             elif (move == "left"):
                 new_branch1 = algn1 + "-"
                 new_branch2 = algn2 + s2[col - 1]
-                branch_align = local_trace(movementMatrix, s1, s2, row, col - 1, new_branch1, new_branch2, return_all, scoring_matrix)
+                result.extend(local_trace(movementMatrix, s1, s2, row, col - 1, new_branch1, new_branch2, return_all, scoring_matrix))
             elif (move == "vertical"):
                 new_branch1 = algn1 + s1[row - 1]
                 new_branch2 = algn2 + "-"
-                branch_align = local_trace(movementMatrix, s1, s2, row - 1, col, new_branch1, new_branch2, return_all, scoring_matrix)
+                result.extend(local_trace(movementMatrix, s1, s2, row - 1, col, new_branch1, new_branch2, return_all, scoring_matrix))
     else:
             move = movementMatrix[row][col][0]
             
@@ -94,8 +94,7 @@ def local_trace(movementMatrix, s1, s2, row, col, algn1, algn2, return_all, scor
                 new_branch1 = algn1 + s1[row - 1]
                 new_branch2 = algn2 + "-"
                 branch_align = local_trace(movementMatrix, s1, s2, row - 1, col, new_branch1, new_branch2, return_all, scoring_matrix)
-            
-    result.extend(branch_align)
+            result.extend(branch_align)
     
     return result
 
@@ -171,8 +170,6 @@ def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, return_all=Fal
         for i in range(len(all_alignments)):
             algn_1 = all_alignments[i][0]
             algn_2 = all_alignments[i][1]
-
-            matches, mismatches, gaps, gap_columns = get_matches_mismatches_gaps(algn_1, algn_2)
 
             alignment_stats = get_alignment_stats(algn_1, algn_2)
 

@@ -233,7 +233,28 @@ def test_local_alignment_old_return_format_still_works():
 
     assert result == [("ATGC", "ATGC")]
 
+def test_local_alignment_return_all_explores_multiple_traceback_branches():
+    result = local_alignment(
+        "ATA",
+        "ATTA",
+        match=2,
+        mismatch=-1,
+        gap_penalty=-2,
+        return_all=True,
+        structured=True,
+    )
 
+    alignments = {
+        (aln["aligned_sequence_1"], aln["aligned_sequence_2"])
+        for aln in result["alignments"]
+    }
+
+    assert alignments == {
+        ("AT", "AT"),
+        ("TA", "TA"),
+        ("AT-A", "ATTA"),
+    }
+    
 def test_local_alignment_rejects_empty_sequence_input():
     with pytest.raises(ValueError):
         local_alignment("", "ATGC")
