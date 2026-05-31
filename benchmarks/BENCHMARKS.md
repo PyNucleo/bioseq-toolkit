@@ -100,7 +100,7 @@ The primary explanation was total residue count rather than sequence count.
 | ------- | -------------: |
 | 10      |          1,401 |
 | 100     |         14,274 |
-| 1000    |        142,343 |
+| 1000    |        142,363 |
 | 10000   |      2,471,135 |
 
 Residue count increased by approximately 17.4× between the 1000 and 10000 datasets rather than the expected ~10× increase from sequence count alone.
