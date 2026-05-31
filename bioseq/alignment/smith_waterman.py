@@ -1,4 +1,4 @@
-from .scoring import check_match, normalize_gap
+from .scoring import score_pair, normalize_gap, build_scoring_metadata
 from .alignment_stats import get_alignment_stats
 
 def initialize_grid(s1, s2):
@@ -26,7 +26,7 @@ def dynamic_movement_filling(d, l, v):
     
     return tempArray
 
-def fill_local(s1, s2, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1):
+def fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1):
    
     gap_penalty = normalize_gap(gap_penalty)
 
@@ -37,7 +37,7 @@ def fill_local(s1, s2, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = check_match(s1[i - 1], s2[j - 1], match_score=match_s, mismatch_score=mismatch_s)
+            match_score = score_pair(s1[i - 1], s2[j - 1], matrix, match_score=match_s, mismatch_score=mismatch_s)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -98,7 +98,7 @@ def local_trace(movementMatrix, s1, s2, row, col, algn1, algn2, return_all, scor
     
     return result
 
-def get_best_scores(s1, s2, gap_penalty, match=2, mismatch=-1):
+def get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1):
 
     gap_penalty = normalize_gap(gap_penalty)
     
@@ -110,7 +110,7 @@ def get_best_scores(s1, s2, gap_penalty, match=2, mismatch=-1):
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = check_match(s1[i - 1], s2[j - 1], match_score=match, mismatch_score=mismatch)
+            match_score = score_pair(s1[i - 1], s2[j - 1], matrix, match_score=match, mismatch_score=mismatch)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -127,7 +127,7 @@ def get_best_scores(s1, s2, gap_penalty, match=2, mismatch=-1):
             grid[i][j] = score
             
     return tempMax, tempMax_At
-def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, return_all=False, structured=True):
+def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, matrix=None, return_all=False, structured=True):
     if (s1 == "" or s2 == ""):
         raise ValueError("Sequence(s) cannot be empty.")
     
@@ -137,7 +137,7 @@ def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, return_all=Fal
     
     movement_grid = initialize_movementGrid(s1, s2)
     
-    best_score, start_at = fill_local(s1, s2, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
+    best_score, start_at = fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
 
     all_alignments = []
     
@@ -156,11 +156,7 @@ def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, return_all=Fal
             "sequence_2": s2,
             "score": best_score,
             "scoring":{
-                "match": match,
-                "mismatch": mismatch,
-                "gap": gap_penalty,
-                "matrix": None,
-                "gap_model": "linear"  
+                **build_scoring_metadata(match, mismatch, gap_penalty, matrix) 
             },
             "best_positions": start_at,
             "num_alignments": len(all_alignments),

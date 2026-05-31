@@ -1,5 +1,5 @@
-from .scoring import check_match, normalize_gap
-from .alignment_stats import get_identity, get_matches_mismatches_gaps, get_alignment_stats
+from .scoring import score_pair, normalize_gap, build_scoring_metadata
+from .alignment_stats import get_alignment_stats
 
 def initialize_grid(s1, s2, gap_penalty):
     grid = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
@@ -23,11 +23,11 @@ def initialGlobalMovementMatrix(s1, s2):
     for row in range(1, len(s1) + 1):
         movements[row][0] = ["up"]
     return movements
-def fill_matrix(grid, s1, s2, match_score, mismatch_score, gap_penalty):
+def fill_matrix(grid, matrix, s1, s2, match_score, mismatch_score, gap_penalty):
     for row in range(1, len(grid)):
         for column in range(1, len(s2) + 1):
             a, b = s1[row - 1], s2[column - 1]
-            match_case = check_match(a, b, match_score, mismatch_score)
+            match_case = score_pair(a, b, matrix, match_score, mismatch_score)
             grid[row][column] = max((grid[row - 1][column - 1] + match_case), grid[row][column - 1] + gap_penalty, grid[row - 1][column] + gap_penalty)
     return grid
         
@@ -50,13 +50,17 @@ def dynamicMovementMatrix(grid, row, column, check_match, gap):
         movement_case.append("up")
     
     return movement_case
-def compute_movement_matrix(s1, s2, grid, match_score, mismatch_score, gap):
+def compute_movement_matrix(s1, s2, matrix, grid, match_score, mismatch_score, gap):
     movements = initialGlobalMovementMatrix(s1, s2)
+
     for row in range(1, len(s1) + 1):
+
         for column in range(1, len(s2) + 1):
+
             a, b = s1[row - 1], s2[column - 1]
-            match_case = check_match(a, b, match_score, mismatch_score)
+            match_case = score_pair(a, b, matrix, match_score, mismatch_score)
             movements[row][column] = dynamicMovementMatrix(grid, row, column, match_case, gap)
+
     return movements
 
 def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
@@ -102,17 +106,17 @@ def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
     
     return result
 
-def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, return_all = False, structured=True):
+def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, matrix = None, return_all = False, structured=True):
     gap_penalty = normalize_gap(gap_penalty)
         
     # 1. Initialize grid
     grid = initialize_grid(s1, s2, gap_penalty)
 
     # 2. Fill scoring matrix
-    grid = fill_matrix(grid, s1, s2, match, mismatch, gap_penalty)
+    grid = fill_matrix(grid, matrix, s1, s2, match, mismatch, gap_penalty)
 
     # 3. Compute movement matrix
-    movements = compute_movement_matrix(s1, s2, grid, match, mismatch, gap_penalty)
+    movements = compute_movement_matrix(s1, s2, matrix, grid, match, mismatch, gap_penalty)
         
     # 4. Traceback (ALL alignments)
     alignments = trace(movements, s1, s2, len(s1), len(s2), "", "", return_all)
@@ -125,11 +129,7 @@ def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, return_all = 
             "sequence_2": s2,
             "score": grid[len(s1)][len(s2)],
             "scoring":{
-                "match": match,
-                "mismatch": mismatch,
-                "gap": gap_penalty,
-                "matrix": None,
-                "gap_model": "linear"  
+                **build_scoring_metadata(match, mismatch, gap_penalty, matrix) 
             },
             "num_alignments": len(alignments),
             "alignments":[]
@@ -138,8 +138,6 @@ def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, return_all = 
         for i in range(len(alignments)):
             algn_1 = alignments[i][0]
             algn_2 = alignments[i][1]
-
-            matches, mismatches, gaps, gap_columns = get_matches_mismatches_gaps(algn_1, algn_2)
 
             alignment_stats = get_alignment_stats(algn_1, algn_2)
 
