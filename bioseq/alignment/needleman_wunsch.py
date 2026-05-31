@@ -1,4 +1,5 @@
 from .scoring import check_match, normalize_gap
+from .alignment_stats import get_identity, get_matches_mismatches_gaps, get_alignment_stats
 
 def initialize_grid(s1, s2, gap_penalty):
     grid = [[0] * (len(s2) + 1) for _ in range(len(s1) + 1)]
@@ -101,19 +102,55 @@ def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
     
     return result
 
-def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, return_all = False):
-   gap_penalty = normalize_gap(gap_penalty)
-   # 1. Initialize grid
-   grid = initialize_grid(s1, s2, gap_penalty)
+def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, return_all = False, structured=True):
+    gap_penalty = normalize_gap(gap_penalty)
+        
+    # 1. Initialize grid
+    grid = initialize_grid(s1, s2, gap_penalty)
 
-   # 2. Fill scoring matrix
-   grid = fill_matrix(grid, s1, s2, match, mismatch, gap_penalty)
+    # 2. Fill scoring matrix
+    grid = fill_matrix(grid, s1, s2, match, mismatch, gap_penalty)
 
-   # 3. Compute movement matrix
-   movements = compute_movement_matrix(s1, s2, grid, match, mismatch, gap_penalty)
+    # 3. Compute movement matrix
+    movements = compute_movement_matrix(s1, s2, grid, match, mismatch, gap_penalty)
+        
+    # 4. Traceback (ALL alignments)
+    alignments = trace(movements, s1, s2, len(s1), len(s2), "", "", return_all)
+
+    if structured:
+        temp_structure = {
+            "algorithm": "Needleman-Wunsch",
+            "mode": "global",
+            "sequence_1": s1,
+            "sequence_2": s2,
+            "score": grid[len(s1)][len(s2)],
+            "scoring":{
+                "match": match,
+                "mismatch": mismatch,
+                "gap": gap_penalty,
+                "matrix": None,
+                "gap_model": "linear"  
+            },
+            "num_alignments": len(alignments),
+            "alignments":[]
+        }
+        
+        for i in range(len(alignments)):
+            algn_1 = alignments[i][0]
+            algn_2 = alignments[i][1]
+
+            matches, mismatches, gaps, gap_columns = get_matches_mismatches_gaps(algn_1, algn_2)
+
+            alignment_stats = get_alignment_stats(algn_1, algn_2)
+
+            temp_structure["alignments"].append({
+                "aligned_sequence_1": algn_1,
+                "aligned_sequence_2": algn_2,
+                **alignment_stats
+            })
+
+
+        return temp_structure
     
-   # 4. Traceback (ALL alignments)
-   alignments = trace(movements, s1, s2, len(s1), len(s2), "", "", return_all)
-
-    
-   return alignments
+    else:
+        return alignments

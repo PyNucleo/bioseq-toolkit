@@ -7,21 +7,22 @@ from .alignment.needleman_wunsch import global_alignment
 
 def main():
     
-    action = int(input("What would you like to perform?\n"
-                       "1 for similarity search\n"
-                       "2 for FASTA translation pipeline\n"
-                       "> "
-    ))
+    print("Run a small demo search example.")
     
-    if action == 1:
-        query = "ATACAGAT"
-        results = search(query, "GATTACA")
-        print(results)
-    
-    elif action == 2:
-        file_path = input("Insert your file path: ")
-        results = process_fasta_sequences(file_path)
-        print(results)
+    results = search(
+        query="ATGCG",
+        database=[
+            "ATGCGA",
+            "ATGCGA",
+            "GGGGGG",
+        ],
+        k=3,
+        threshold=1,
+        refinement=True,
+    )
+
+    for hit in results:
+        print(hit)
 
 if __name__ == "__main__":
     main()
