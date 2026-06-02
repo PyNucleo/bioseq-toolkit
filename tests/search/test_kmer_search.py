@@ -1,6 +1,7 @@
 import pytest
 
 from database.sequence_database import SequenceDatabase
+from database.database_utils import normalize_database
 from bioseq.search.kmer_search import (
     filter_by_relative_score,
     generate_kmers,
@@ -117,6 +118,9 @@ def test_generate_kmers_rejects_invalid_k_values():
 def test_generate_kmers_returns_empty_set_when_k_larger_than_sequence():
     assert generate_kmers("ATGC", 10) == set()
 
+def test_generate_kmers_normalizes_sequence():
+    assert generate_kmers("atgc", 2) == {"AT", "TG", "GC"}
+    assert generate_kmers("ATGC", 2) == {"AT", "TG", "GC"}
 
 def test_kmer_search_rejects_invalid_k_values():
     db = SequenceDatabase([
@@ -151,3 +155,13 @@ def test_kmer_search_returns_empty_when_k_larger_than_query():
     ])
 
     assert kmer_search("ATGC", db, k=10, threshold=1) == []
+
+def test_kmer_search_is_case_insensitive():
+    db = SequenceDatabase([
+        {"id": "seq1", "sequence": "atgcgt"},
+    ])
+
+    results = kmer_search("ATGC", db, k=2, threshold=1)
+
+    assert len(results) == 1
+    assert results[0]["id"] == "seq1"

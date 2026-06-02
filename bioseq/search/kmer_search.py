@@ -90,10 +90,13 @@ def generate_kmers(seq, k):
     set[str]
         Set of unique k-mers from the sequence
     """
+
     is_valid_length = validate_kmer_params(seq, k)
 
     if not is_valid_length:
         return set()
+
+    seq = seq.upper()
 
     return set(seq[i : i + k] for i in range(len(seq) - k + 1))
 
