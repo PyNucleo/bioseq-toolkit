@@ -295,6 +295,7 @@ bioseq-toolkit/
 │   │   ├── refinement.py
 │   │   └── similarity_search.py
 │   │
+│   ├── cli.py
 │   ├── fasta_io.py
 │   ├── main.py
 │   ├── sequence_utils.py
@@ -333,8 +334,13 @@ bioseq-toolkit/
 │   ├── benchmarks/
 │   ├── database/
 │   ├── pipelines/
-│   └── search/
+│   ├── search/
+│   ├── test_cli.py
+│   ├── test_fasta_io.py
+│   ├── test_main.py
+│   └── test_sequence_utils.py
 │
+├── pytest.ini
 ├── requirements.txt
 └── README.md
 ```
@@ -559,6 +565,16 @@ Current limitation:
 
 ---
 
+### 3. Improve FASTA and Database Handling
+
+- Parse meaningful IDs from FASTA headers
+- Preserve full FASTA headers
+- Keep sequence records traceable to original database entries
+- Add more FASTA edge-case tests
+- Improve lowercase sequence handling where appropriate
+
+---
+
 ## Benchmarks
 
 Benchmarking results are documented in:
@@ -715,13 +731,15 @@ The strongest parts of the project are:
 - Clear movement from isolated functions toward a search pipeline
 - Basic package organization
 - Structured output for both global and local alignment
-- Tests for alignment, search, refinement, database normalization, and benchmark behavior
+- Structured FASTA parsing for UniProt-style and generic headers
+- Tests for alignment, search, refinement, database normalization, FASTA parsing, CLI behavior, and benchmark behavior
 - Runtime comparison between exact dynamic programming and heuristic search
 - Benchmark driver scripts for repeatable benchmark runs
+- Minimal command-line interface for search, local alignment, and global alignment
 - Benchmark documentation instead of only toy examples
 - Initial substitution-matrix support
 - Honest educational scope
-- Beginning of reproducibility through dataset chunks and benchmark reports
+- Beginning of reproducibility through dataset chunks, benchmark reports, CLI tests, and pytest configuration
 
 The project is especially useful for learning how sequence database search can be built from smaller algorithmic pieces.
 
@@ -738,9 +756,9 @@ Important limitations include:
 - No indexed k-mer search yet
 - Current k-mer search scans database sequences directly
 - No seed-extension step yet
-- No stable command-line interface yet
+- Command-line interface is still minimal and early-stage
 - No biological case study has been completed yet
-- FASTA identifiers are not yet parsed into biologically meaningful IDs
+- FASTA parsing currently supports structured UniProt-style and generic header metadata, but broader FASTA format support is limited
 - Matrix scoring exists initially, but needs cleaner optimization and broader validation
 - Not intended for production biological analysis
 
@@ -774,11 +792,8 @@ Planned development stages:
 
 ### 3. Improve FASTA and Database Handling
 
-- Parse meaningful IDs from FASTA headers
-- Preserve full FASTA headers
-- Keep sequence records traceable to original database entries
-- Add more FASTA edge-case tests
-- Improve lowercase sequence handling where appropriate
+Completed for current scope.
+Future work: add more specialized parsers only when needed, such as RefSeq, PDB, or ASTRAL-specific formats.
 
 ---
 
@@ -869,21 +884,15 @@ A biological case study is important because it would turn the project from a so
 
 ---
 
-### 9. Add a Stable CLI
+### 9. Improve CLI and Packaging
 
-A command-line interface should be added after the core APIs and benchmark behavior are more stable.
-
-Minimum useful CLI scope:
+A minimal command-line interface now exists for:
 
 ```bash
-bioseq search
-bioseq align-global
-bioseq align-local
-bioseq translate
-bioseq benchmark-search
+python -m bioseq.cli search
+python -m bioseq.cli align-local
+python -m bioseq.cli align-global
 ```
-
-The CLI should not be added too early because it would freeze unstable behavior.
 
 ---
 
