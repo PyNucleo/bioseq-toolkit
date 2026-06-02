@@ -1,5 +1,14 @@
 from .substitution_matrices import load_matrix
 
+def get_scoring_matrix(matrix=None):
+    if matrix is None:
+        return None
+
+    if isinstance(matrix, str):
+        return load_matrix(matrix)
+
+    return matrix
+
 def score_pair(a, b, loaded_matrix = None, match_score = 2, mismatch_score = -1):
     a = a.upper()
     b = b.upper()
@@ -7,7 +16,7 @@ def score_pair(a, b, loaded_matrix = None, match_score = 2, mismatch_score = -1)
     if loaded_matrix is None:
         return match_score if a == b else mismatch_score
 
-    loaded_matrix = load_matrix(loaded_matrix)
+    loaded_matrix = get_scoring_matrix(loaded_matrix)
     return loaded_matrix[a, b]
 
 

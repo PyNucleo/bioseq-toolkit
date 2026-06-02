@@ -270,7 +270,7 @@ result = local_alignment(
 print(result)
 ```
 
-Substitution-matrix support currently uses Biopython matrix loading. This is an initial implementation and should not yet be treated as a fully optimized scoring backend.
+Substitution-matrix support currently uses Biopython matrix loading with cached matrix reuse. This is an initial implementation and should not yet be treated as a fully complete scoring backend.
 
 ---
 
@@ -526,7 +526,7 @@ gap_penalty = -4
 
 Current limitation:
 
-- Matrix loading should be optimized further so matrices are loaded once and reused during dynamic programming.
+- Matrix loading is cached, but matrix-based benchmark behavior is not yet fully evaluated.
 - PAM matrices and custom user-provided matrices are not yet documented as stable features.
 - Affine gap penalties are not yet implemented.
 
@@ -769,21 +769,22 @@ bioseq --help
 Available commands:
 
 ```bash
-bioseq search
-bioseq align-local
-bioseq align-global
+bioseq search --help
+bioseq align-local --help
+bioseq align-global --help
 ```
 
-Run k-mer search:
+Run k-mer search with a tiny FASTA file:
 
 ```bash
-bioseq search -q ATGCG -d data/benchmark_sequences/astral_10.fasta -k 3 -t 1
+printf ">seq1 best hit\nATGCGT\n>seq2 also good\nATGCGA\n>seq3 no hit\nGGGGGG\n" > tiny_search.fasta
+bioseq search -q ATGCG -d tiny_search.fasta -k 3 -t 2
 ```
 
 Run k-mer search with Smith-Waterman refinement:
 
 ```bash
-bioseq search -q ATGCG -d data/benchmark_sequences/astral_10.fasta -k 3 -t 1 -r
+bioseq search -q ATGCG -d tiny_search.fasta -k 3 -t 1 -r
 ```
 
 Run Smith-Waterman local alignment:
@@ -804,7 +805,7 @@ The module-style form also remains supported:
 
 ```bash
 python -m bioseq.cli --help
-python -m bioseq.cli search -q ATGCG -d data/benchmark_sequences/astral_10.fasta
+python -m bioseq.cli search -q ATGCG -d tiny_search.fasta -k 3 -t 2
 ```
 
 ---
@@ -872,7 +873,7 @@ Planned development stages:
 ### 2. Clean Up Substitution Matrix Support
 
 - Keep BLOSUM62 support
-- Load substitution matrices once instead of repeatedly during scoring
+- Keep substitution matrix loading cached and covered by tests
 - Add direct tests for known BLOSUM62 pair scores
 - Benchmark simple scoring vs BLOSUM62 scoring
 - Clearly document which matrices are stable and tested
@@ -990,17 +991,17 @@ A biological case study is important because it would turn the project from a so
 A minimal command-line interface now exists for:
 
 ```bash
-bioseq search
-bioseq align-local
-bioseq align-global
+bioseq search --help
+bioseq align-local --help
+bioseq align-global --help
 ```
 
 The module-style form also remains supported:
 
 ```bash
-python -m bioseq.cli search
-python -m bioseq.cli align-local
-python -m bioseq.cli align-global
+python -m bioseq.cli search --help
+python -m bioseq.cli align-local --help
+python -m bioseq.cli align-global --help
 ```
 
 Current CLI output is structured JSON.

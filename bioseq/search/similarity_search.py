@@ -5,10 +5,8 @@ def rank_by_shared_kmers(query, db):
     """
     Convert k-mer candidate hits into ranked hit dictionaries.
 
-    This function receives the dictionary returned by kmer_search(), where each
-    key is a database sequence and each value is the number of k-mers shared
-    with the query. It converts those entries into a list of hit dictionaries
-    and sorts them by shared k-mer count in descending order.
+    This function receives the list of hit dictionaries returned by
+    kmer_search() and sorts them by shared k-mer count in descending order.
 
     Note
     ----
@@ -19,14 +17,15 @@ def rank_by_shared_kmers(query, db):
     ----------
     query : str
         Query sequence. Currently unused, but kept for pipeline compatibility.
-    db : dict[str, int]
-        Dictionary mapping database sequences to shared k-mer counts.
+    db : list[dict]
+        Candidate hit dictionaries from kmer_search(). Each hit should contain
+        "id", "sequence", and "shared_kmers".
 
     Returns
     -------
     list[dict]
         Hit dictionaries containing:
-        - "seq_id": currently None
+        - "id": sequence identifier from the normalized database
         - "sequence": database sequence
         - "shared_kmers": number of shared k-mers with the query
     """

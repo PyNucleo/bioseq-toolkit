@@ -15,7 +15,7 @@ def kmer_search(query, db, k, threshold):
     ----------
     query : str
         Query sequence.
-    DB : SequenceDatabase
+    db : SequenceDatabase
         Database object containing biological sequences.
     k : int
         K-mer size.
@@ -24,8 +24,12 @@ def kmer_search(query, db, k, threshold):
 
     Returns
     -------
-    dict[str, int]
-        Dictionary mapping candidate sequences to their shared k-mer counts.
+    list[dict]
+        Candidate hit dictionaries after threshold and relative-score filtering.
+        Each hit contains:
+        - "id": sequence identifier from the normalized database
+        - "sequence": database sequence
+        - "shared_kmers": number of shared k-mers with the query
     """
     is_valid_query_length = validate_kmer_params(query, k, threshold)
 
@@ -140,15 +144,15 @@ def filter_by_relative_score(max_kmers, candidates_dict, ratio = 0.3):
     ----------
     max_kmers : int
         Highest shared k-mer count among all candidate sequences.
-    candidates_dict : dict[str, int]
-        Dictionary mapping sequences to shared k-mer counts.
+    candidates_dict : list[dict]
+        Candidate hit dictionaries containing "shared_kmers" counts.
     ratio : float, optional
         Relative cutoff compared to the best candidate. Default is 0.3.
 
     Returns
     -------
-    dict[str, int]
-        Filtered dictionary of candidate sequences and shared k-mer counts.
+    list[dict]
+        Filtered candidate hit dictionaries.
     """
     filtered = [
     d for d in candidates_dict

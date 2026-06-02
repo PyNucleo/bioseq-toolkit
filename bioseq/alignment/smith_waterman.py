@@ -1,4 +1,4 @@
-from .scoring import score_pair, normalize_gap, build_scoring_metadata
+from .scoring import score_pair, normalize_gap, build_scoring_metadata, get_scoring_matrix
 from .alignment_stats import get_alignment_stats
 
 def initialize_grid(s1, s2):
@@ -101,6 +101,7 @@ def local_trace(movementMatrix, s1, s2, row, col, algn1, algn2, return_all, scor
 def get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1):
 
     gap_penalty = normalize_gap(gap_penalty)
+    scoring_matrix = get_scoring_matrix(matrix)
     
     grid = initialize_grid(s1, s2)
     
@@ -110,7 +111,7 @@ def get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1):
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = score_pair(s1[i - 1], s2[j - 1], matrix, match_score=match, mismatch_score=mismatch)
+            match_score = score_pair(s1[i - 1], s2[j - 1], scoring_matrix, match_score=match, mismatch_score=mismatch)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -132,12 +133,13 @@ def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, matrix=None, r
         raise ValueError("Sequence(s) cannot be empty.")
     
     gap_penalty = normalize_gap(gap_penalty)
+    scoring_matrix = get_scoring_matrix(matrix)
 
     grid = initialize_grid(s1, s2)
     
     movement_grid = initialize_movementGrid(s1, s2)
     
-    best_score, start_at = fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
+    best_score, start_at = fill_local(s1, s2, scoring_matrix, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
 
     all_alignments = []
     
