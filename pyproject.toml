@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bioseq-toolkit"
+version = "0.1.0"
+description = "Educational bioinformatics toolkit for sequence alignment, FASTA parsing, k-mer search, and Smith-Waterman refinement."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "biopython",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+bioseq = "bioseq.cli:main"
+
+[tool.setuptools]
+packages = [
+    "bioseq",
+    "bioseq.alignment",
+    "bioseq.pipelines",
+    "bioseq.search",
+    "database",
+    "benchmarks",
+    "dataset_tools",
+]
