@@ -38,8 +38,12 @@ It currently supports:
 - Smith-Waterman runtime benchmarking on protein FASTA datasets
 - k-mer-only search benchmarking across multiple `k` and threshold settings
 - k-mer + Smith-Waterman refinement benchmarking
+- Case-insensitive k-mer generation
 - Benchmark driver scripts for alignment and search benchmarks
 - Unit tests for core utilities, alignment, search, refinement, database normalization, FASTA loading, and benchmark smoke checks
+- Minimal command-line interface for search, local alignment, and global alignment
+- Editable installation support through `pyproject.toml`
+
 
 The project has real structure, tests, benchmark reports, and a coherent search-pipeline direction. However, it is still early-stage and biologically incomplete.
 
@@ -49,7 +53,7 @@ Current important limitations include:
 - No E-values or bit scores yet
 - No indexed k-mer search yet
 - No seed-extension step yet
-- No stable command-line interface yet
+- Command-line interface is still minimal and early-stage
 - No completed biological case study yet
 - Not intended for clinical, diagnostic, or production biological analysis
 
@@ -96,13 +100,13 @@ cd bioseq-toolkit
 Install dependencies:
 
 ```bash
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
 Run the test suite:
 
 ```bash
-python -m pytest
+pytest
 ```
 
 Using `python -m pytest` is recommended because it runs tests through the active Python environment and is less likely to run into import-path issues than calling `pytest` directly in some setups.
@@ -111,19 +115,15 @@ Using `python -m pytest` is recommended because it runs tests through the active
 
 ## Dependencies
 
-Current dependencies are listed in:
-
-```text
-requirements.txt
-```
-
-Main dependencies:
+Runtime dependency:
 
 - Biopython
-- pytest
-- pandas
 
-Biopython is currently used for translation support and substitution-matrix loading.
+Development dependency:
+
+- pytest
+
+Dependencies are defined in `pyproject.toml`. The `requirements.txt` file is kept as a lightweight compatibility/development helper.
 
 ---
 
@@ -340,6 +340,7 @@ bioseq-toolkit/
 │   ├── test_main.py
 │   └── test_sequence_utils.py
 │
+├── pyproject.toml
 ├── pytest.ini
 ├── requirements.txt
 └── README.md
@@ -370,26 +371,52 @@ Current limitation:
 
 ### FASTA Parsing
 
-The FASTA reader loads sequence records from FASTA files and returns structured records containing:
+The FASTA reader loads sequence records from FASTA files and returns structured records.
 
-- generated sequence ID
-- original FASTA header
-- sequence string
+For UniProt-style headers such as:
 
-Current record style:
+```text
+>sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=Homo sapiens
+```
+
+the parser extracts:
+
+```python
+{
+    "id": "P69905",
+    "db": "sp",
+    "accession": "P69905",
+    "entry_name": "HBA_HUMAN",
+    "description": "Hemoglobin subunit alpha",
+    "header": ">sp|P69905|HBA_HUMAN Hemoglobin subunit alpha OS=Homo sapiens",
+    "sequence": "..."
+}
+```
+
+For generic FASTA headers such as:
+
+```text
+>seq1 some description
+```
+
+the parser returns:
 
 ```python
 {
     "id": "seq1",
-    "header": ">example_header",
-    "sequence": "ATGCGT"
+    "db": None,
+    "accession": None,
+    "entry_name": None,
+    "description": "some description",
+    "header": ">seq1 some description",
+    "sequence": "..."
 }
 ```
 
 Current limitation:
 
-- IDs are currently generated rather than parsed from the FASTA header.
-- This is acceptable for simple internal use, but future biological case studies should preserve meaningful database identifiers such as UniProt or ASTRAL accessions.
+- UniProt-style and generic FASTA headers are supported.
+- Other specialized formats such as RefSeq, PDB, and ASTRAL-specific headers may be added later when needed.
 
 ---
 
@@ -403,7 +430,7 @@ The search pipeline accepts:
 
 The input is normalized into a consistent sequence-record format before search.
 
-Example:
+Example list-input normalization:
 
 ```python
 [
@@ -411,6 +438,8 @@ Example:
     {"id": "id2", "sequence": "ATGCGA"}
 ]
 ```
+
+For FASTA input, parsed FASTA metadata is preserved where available.
 
 Current limitation:
 
@@ -533,6 +562,8 @@ It then:
 5. applies a relative score filter,
 6. returns candidate hits.
 
+K-mer generation normalizes sequences to uppercase, so matching is case-insensitive for lowercase or mixed-case FASTA inputs.
+
 This is the first step toward BLAST-like search behavior: use a fast word-based filter before doing more expensive alignment work.
 
 Current limitation:
@@ -541,6 +572,7 @@ Current limitation:
 - It does not yet build an inverted k-mer index.
 - It does not yet track seed positions.
 - It does not yet perform seed extension.
+- It does not currently validate whether the query and database are the same biological sequence type, such as DNA-vs-protein.
 
 ---
 
@@ -562,16 +594,6 @@ Current limitation:
 
 - Refinement currently scores top candidates, but does not yet return full local alignment objects inside each search hit.
 - Search accuracy/sensitivity has not yet been fully evaluated against exhaustive Smith-Waterman rankings.
-
----
-
-### 3. Improve FASTA and Database Handling
-
-- Parse meaningful IDs from FASTA headers
-- Preserve full FASTA headers
-- Keep sequence records traceable to original database entries
-- Add more FASTA edge-case tests
-- Improve lowercase sequence handling where appropriate
 
 ---
 
@@ -668,7 +690,7 @@ Future benchmarks should evaluate both:
 Run all tests:
 
 ```bash
-python -m pytest
+pytest
 ```
 
 Run only alignment tests:
@@ -692,17 +714,21 @@ python -m pytest tests/benchmarks/
 The tests currently cover:
 
 - DNA utility functions
+- lowercase DNA utility behavior
 - translation pipeline behavior
 - database normalization
 - FASTA database loading
+- FASTA header parsing
 - Needleman-Wunsch alignment
 - Needleman-Wunsch structured output
 - Smith-Waterman alignment
 - Smith-Waterman structured output
 - BLOSUM62 usage in alignment tests
 - k-mer search
+- case-insensitive k-mer behavior
 - search refinement
 - full search pipeline behavior
+- CLI subprocess behavior
 - benchmark smoke tests
 - benchmark residue-count checks
 
@@ -724,6 +750,65 @@ python -m examples.search_demo
 
 ---
 
+## Command-Line Interface
+
+The project includes a minimal command-line interface.
+
+After editable installation:
+
+```bash
+pip install -e ".[dev]"
+```
+
+Run:
+
+```bash
+bioseq --help
+```
+
+Available commands:
+
+```bash
+bioseq search
+bioseq align-local
+bioseq align-global
+```
+
+Run k-mer search:
+
+```bash
+bioseq search -q ATGCG -d data/benchmark_sequences/astral_10.fasta -k 3 -t 1
+```
+
+Run k-mer search with Smith-Waterman refinement:
+
+```bash
+bioseq search -q ATGCG -d data/benchmark_sequences/astral_10.fasta -k 3 -t 1 -r
+```
+
+Run Smith-Waterman local alignment:
+
+```bash
+bioseq align-local -s1 HEART -s2 HPEART --matrix BLOSUM62 -g -4
+```
+
+Run Needleman-Wunsch global alignment:
+
+```bash
+bioseq align-global -s1 ATGCG -s2 ATCGA -m 1 --mismatch -1 -g -2
+```
+
+The CLI prints structured JSON output.
+
+The module-style form also remains supported:
+
+```bash
+python -m bioseq.cli --help
+python -m bioseq.cli search -q ATGCG -d data/benchmark_sequences/astral_10.fasta
+```
+
+---
+
 ## Current Strengths
 
 The strongest parts of the project are:
@@ -732,14 +817,17 @@ The strongest parts of the project are:
 - Basic package organization
 - Structured output for both global and local alignment
 - Structured FASTA parsing for UniProt-style and generic headers
+- Case-insensitive k-mer generation for lowercase or mixed-case FASTA inputs
 - Tests for alignment, search, refinement, database normalization, FASTA parsing, CLI behavior, and benchmark behavior
 - Runtime comparison between exact dynamic programming and heuristic search
 - Benchmark driver scripts for repeatable benchmark runs
 - Minimal command-line interface for search, local alignment, and global alignment
+- Editable installation support through `pyproject.toml`
+- `bioseq` console command entry point
 - Benchmark documentation instead of only toy examples
 - Initial substitution-matrix support
 - Honest educational scope
-- Beginning of reproducibility through dataset chunks, benchmark reports, CLI tests, and pytest configuration
+- Beginning of reproducibility through dataset chunks, benchmark reports, CLI tests, pytest configuration, and package metadata
 
 The project is especially useful for learning how sequence database search can be built from smaller algorithmic pieces.
 
@@ -759,6 +847,7 @@ Important limitations include:
 - Command-line interface is still minimal and early-stage
 - No biological case study has been completed yet
 - FASTA parsing currently supports structured UniProt-style and generic header metadata, but broader FASTA format support is limited
+- K-mer search is case-insensitive, but it does not yet validate whether the query and database are the same biological sequence type, such as DNA-vs-protein
 - Matrix scoring exists initially, but needs cleaner optimization and broader validation
 - Not intended for production biological analysis
 
@@ -793,7 +882,19 @@ Planned development stages:
 ### 3. Improve FASTA and Database Handling
 
 Completed for current scope.
-Future work: add more specialized parsers only when needed, such as RefSeq, PDB, or ASTRAL-specific formats.
+
+Current FASTA parsing supports:
+
+- UniProt-style reviewed headers such as `sp|...`
+- UniProt-style unreviewed headers such as `tr|...`
+- Generic FASTA headers as a safe fallback
+- Preserved original FASTA headers
+- Structured metadata fields for IDs, accessions, entry names, descriptions, and sequences
+
+Future work:
+
+- Add more specialized parsers only when needed, such as RefSeq, PDB, or ASTRAL-specific formats
+- Add more FASTA edge-case tests if new datasets require them
 
 ---
 
@@ -889,10 +990,36 @@ A biological case study is important because it would turn the project from a so
 A minimal command-line interface now exists for:
 
 ```bash
+bioseq search
+bioseq align-local
+bioseq align-global
+```
+
+The module-style form also remains supported:
+
+```bash
 python -m bioseq.cli search
 python -m bioseq.cli align-local
 python -m bioseq.cli align-global
 ```
+
+Current CLI output is structured JSON.
+
+Current packaging support includes:
+
+- `pyproject.toml`
+- editable installation with `pip install -e ".[dev]"`
+- `bioseq` console command entry point
+- runtime dependency declaration
+- development test dependency declaration
+
+Future CLI/package improvements:
+
+- Add optional output-file support
+- Add translation command later
+- Add benchmark command wrappers later
+- Improve CLI examples and documentation
+- Keep the CLI thin: parse user arguments, call existing tested functions, and print structured output
 
 ---
 
@@ -908,6 +1035,7 @@ It is useful for:
 - experimenting with k-mer based filtering
 - seeing why heuristic search can be faster than exhaustive search
 - practicing testing and benchmarking of bioinformatics code
+- practicing how bioinformatics code can be exposed through a command-line interface
 
 It is not currently designed for:
 
