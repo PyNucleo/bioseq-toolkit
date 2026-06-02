@@ -2,7 +2,7 @@
 
 ## Objective
 
-Evaluate how Smith-Waterman search scales with increasing database size and compare the computational cost of exhaustive alignment reconstruction versus score-only computation.
+Evaluate how Smith-Waterman search scales with increasing database size and compare the computational cost of exhaustive alignment reconstruction, score-only computation, k-mer search, and k-mer search with Smith-Waterman refinement.
 
 ## Experimental Setup
 
@@ -48,6 +48,10 @@ Benchmark Modes:
 
 * Exhaustive Smith-Waterman alignment reconstruction
 * Score-only Smith-Waterman computation
+* K-mer-only search
+* K-mer search with Smith-Waterman refinement
+
+The numbers below are existing recorded benchmark results from the scripts and environment described above. They were not regenerated as part of this documentation update.
 
 ## Dataset Statistics
 
@@ -124,8 +128,8 @@ The visualization suggests runtime scales approximately proportionally with resi
 * Linear gap model only
 * Protein lengths vary substantially between datasets
 * No affine gap penalties
-* Current benchmark measures exact search only
-* Hardware specifications not controlled/reported
+* Current benchmarks emphasize runtime, not biological sensitivity
+* Hardware specifications are reported, but hardware and background processes were not strictly controlled
 
 ## Future Benchmarks
 

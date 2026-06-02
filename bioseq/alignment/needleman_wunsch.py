@@ -1,4 +1,4 @@
-from .scoring import score_pair, normalize_gap, build_scoring_metadata
+from .scoring import score_pair, normalize_gap, build_scoring_metadata, get_scoring_matrix
 from .alignment_stats import get_alignment_stats
 
 def initialize_grid(s1, s2, gap_penalty):
@@ -108,15 +108,16 @@ def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
 
 def global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, matrix = None, return_all = False, structured=True):
     gap_penalty = normalize_gap(gap_penalty)
+    scoring_matrix = get_scoring_matrix(matrix)
         
     # 1. Initialize grid
     grid = initialize_grid(s1, s2, gap_penalty)
 
     # 2. Fill scoring matrix
-    grid = fill_matrix(grid, matrix, s1, s2, match, mismatch, gap_penalty)
+    grid = fill_matrix(grid, scoring_matrix, s1, s2, match, mismatch, gap_penalty)
 
     # 3. Compute movement matrix
-    movements = compute_movement_matrix(s1, s2, matrix, grid, match, mismatch, gap_penalty)
+    movements = compute_movement_matrix(s1, s2, scoring_matrix, grid, match, mismatch, gap_penalty)
         
     # 4. Traceback (ALL alignments)
     alignments = trace(movements, s1, s2, len(s1), len(s2), "", "", return_all)
