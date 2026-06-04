@@ -189,3 +189,11 @@ Parameters:
 K-mer + Smith-Waterman refinement was much faster than exhaustive Smith-Waterman scoring because Smith-Waterman was only applied to the top candidate hits rather than every database sequence.
 
 This does not prove equal sensitivity or biological accuracy. It only demonstrates runtime improvement for the current query, datasets, and parameters.
+
+## Search Sensitivity Benchmark
+
+A separate sensitivity benchmark was added in [`SEARCH_SENSITIVITY.md`](SEARCH_SENSITIVITY.md).
+
+That report compares exhaustive Smith-Waterman, k-mer-only search, and k-mer search with Smith-Waterman refinement by measuring top-hit recovery, high-confidence hit recovery, candidate-set reduction, background returned, and runtime.
+
+The sensitivity benchmark is kept separate from this file because this document primarily records runtime-scaling results, while `SEARCH_SENSITIVITY.md` focuses on recovery and speed-sensitivity tradeoffs.
