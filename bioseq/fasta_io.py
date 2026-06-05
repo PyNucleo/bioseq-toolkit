@@ -1,3 +1,5 @@
+import requests
+
 def read_fasta_records(file):
     FASTA = open(file, "r")
     records = []
@@ -152,4 +154,64 @@ def parse_generic_fasta(header):
         "header": header
     }
 
+def parse_header_sequence_from_string(text):
 
+    text = text.strip()
+
+    split_text = text.splitlines()
+
+    header_seq_dict = {
+        "header": split_text[0],
+        "sequence": "".join(split_text[1:])
+    }
+
+    return header_seq_dict
+
+def fetch_uniprot_sequences(accession_file, strict=False):
+
+    parsed_sequences = []
+    failed_accessions = []
+
+    with open(accession_file, "r") as f:
+
+        for accession in f:
+
+            accession = accession.strip()
+
+            if not accession:
+                continue
+
+            temp_url = f"https://www.uniprot.org/uniprotkb/{accession}.fasta"
+
+            response = requests.get(temp_url)
+
+            if response.status_code == 200:
+                fasta_data = response.text
+                header_and_sequence = parse_header_sequence_from_string(fasta_data)
+
+                header = header_and_sequence["header"]
+                sequence = header_and_sequence["sequence"]
+
+                entry_data = {
+                    **parse_fasta_header(header),
+                    "sequence": sequence
+                }
+
+                parsed_sequences.append(entry_data)
+
+            else:
+                if strict:
+                    raise ValueError(
+                        f"Failed to fetch sequence for accession {accession}. "
+                        f"Status code: {response.status_code}"
+                    )
+                
+                failed_accessions.append({
+                    "accession": accession,
+                    "status_code": response.status_code
+                })
+
+    return {
+        "records": parsed_sequences, 
+        "failed": failed_accessions
+    }

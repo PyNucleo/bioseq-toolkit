@@ -15,6 +15,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "requests>=2.31"
+]
+
+fetch = [
+    "requests>=2.31"
 ]
 
 [project.scripts]
