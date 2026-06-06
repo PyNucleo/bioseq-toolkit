@@ -1,9 +1,10 @@
 from database.database_utils import normalize_database
-from database.sequence_database import SequenceDatabase
-
 from bioseq.search.kmer_search import kmer_search
+from bioseq.search.kmer_index import multi_query_indexed_search
 from bioseq.search.similarity_search import rank_by_shared_kmers
 from bioseq.search.refinement import refine_hits
+from bioseq.fasta_io import read_fasta_records
+from database.database_utils import normalize_database
 
 def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=False):
     
@@ -54,4 +55,41 @@ def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=Fal
    
    if not refinement:
         return ranked_hits
+
+def search_many(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False):
+   
+    query_records = read_fasta_records(query_fasta)
+    
+    if indexed:
+        db = normalize_database(database)
+
+        hits = multi_query_indexed_search(query_records, db, k, threshold)
+
+        #Sort the hits per each query
+        for query_result in hits:
+            query_result["indexed_hits"].sort(
+                key=lambda hit: (-hit["shared_kmers"], hit["id"])
+            )
+            query_result["indexed_hits"] = query_result["indexed_hits"][:top_n_hits]
+
+
+        return hits
+    
+    else:
+        results = []
+        for query in query_records:
+            results.append(kmer_search(query["sequence"],
+                                        database, 
+                                        k, 
+                                        threshold, 
+                                        top_n_hits, 
+                                        refinement))
+
+        return results
+
+
+
+
+        
+
 
