@@ -215,3 +215,22 @@ def fetch_uniprot_sequences(accession_file, strict=False):
         "records": parsed_sequences, 
         "failed": failed_accessions
     }
+
+def write_fasta_records(records, output_path, full_header):
+
+    if full_header:
+        word = "header"
+        first_char = ""
+    else:
+        first_char = ">"
+
+        if "accession" in records:
+            word = "accession"
+        else:
+            word = "id"
+        
+    with open(output_path, "w", newline="") as file:
+
+        for record in records:
+            file.write(first_char + record[word] + "\n")
+            file.write(record["sequence"] + "\n")

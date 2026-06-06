@@ -4,7 +4,7 @@ import json
 from bioseq.pipelines.search_pipeline import search
 from bioseq.alignment.smith_waterman import local_alignment
 from bioseq.alignment.needleman_wunsch import global_alignment
-
+from bioseq.fasta_io import fetch_uniprot_sequences, write_fasta_records
 
 def main():
     
@@ -15,6 +15,7 @@ def main():
     search_parser = subparsers.add_parser("search", help = "Run kmer search")
     local_alignment_parser = subparsers.add_parser("align-local", help = "Run local alignment on two sequences")
     global_alignment_parser = subparsers.add_parser("align-global", help = "Run global alignment on two sequences")
+    fetch_uniprot_parser = subparsers.add_parser("fetch-uniprot", help = "Fetch UniProt sequences through their accessions.", description="Takes the path for a FASAT file containing valid ids, returns a list of FASTA sequences with their header's details.")
 
     search_parser.add_argument('-q', '--query', type=str, required=True)
     search_parser.add_argument('-d', '--database', type=str, required=True)
@@ -38,6 +39,11 @@ def main():
     global_alignment_parser.add_argument('-g', '--gap-penalty', type=int, default=-2)
     global_alignment_parser.add_argument('-x', '--matrix', type=str, default=None)
     global_alignment_parser.add_argument('-ra', '--return-all', action='store_true')
+
+    fetch_uniprot_parser.add_argument("-f", "--file-path", type=str, required=True)
+    fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True)
+    fetch_uniprot_parser.add_argument("--full-header", action="store_false")
+    fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true")
 
     args = parser.parse_args()
 
@@ -77,6 +83,11 @@ def main():
         )
 
         print(json.dumps(results, indent=2))
+
+    elif args.command == "fetch-uniprot":
+        result = fetch_uniprot_sequences(args.file_path, args.strict)
+        records = result["records"]
+        write_fasta_records(records, args.result_path ,args.full_header)
 
 if __name__ == "__main__":
     main()
