@@ -1,10 +1,28 @@
 import argparse
 import json
-
+import textwrap
+from benchmarks.benchmark_utils import get_total_dataset_residues
 from bioseq.pipelines.search_pipeline import search
 from bioseq.alignment.smith_waterman import local_alignment
 from bioseq.alignment.needleman_wunsch import global_alignment
 from bioseq.fasta_io import fetch_uniprot_sequences, write_fasta_records
+
+def format_failed_accessions(failed_accessions):
+    final_text = ""
+
+    for num, failed_record in enumerate(failed_accessions, start=1):
+        reason_string = textwrap.fill(
+    failed_record["reason"],
+    width=88,
+    initial_indent="   Reason: ",
+    subsequent_indent="           ",
+)
+        final_text += (f'{num}. {failed_record["accession"]}\n'
+                       f'   Status code: {failed_record["status_code"]}\n'
+                       f'{reason_string}\n\n'
+        )
+    
+    return final_text
 
 def main():
     
@@ -44,6 +62,7 @@ def main():
     fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True)
     fetch_uniprot_parser.add_argument("--full-header", action="store_false")
     fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true")
+    fetch_uniprot_parser.add_argument("--show-failed", action="store_true")
 
     args = parser.parse_args()
 
@@ -85,9 +104,20 @@ def main():
         print(json.dumps(results, indent=2))
 
     elif args.command == "fetch-uniprot":
+
         result = fetch_uniprot_sequences(args.file_path, args.strict)
         records = result["records"]
         write_fasta_records(records, args.result_path ,args.full_header)
+  
+        print("Fetch Summary:")
+        print("--------------\n")
+        print(f"Successfully fetched accessions: {len(result["records"])}")
+        print(f"Failed accessions: {len(result["failed"])}")
+        print(f'Output written to: {args.result_path}\n')
+        if args.show_failed:
+            print("Detailed breakdown of failed accessions:")
+            print("----------------------------------------\n")
+            print(format_failed_accessions(result["failed"]))
 
 if __name__ == "__main__":
     main()

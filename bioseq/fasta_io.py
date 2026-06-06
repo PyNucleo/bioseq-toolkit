@@ -184,9 +184,24 @@ def fetch_uniprot_sequences(accession_file, strict=False):
             temp_url = f"https://www.uniprot.org/uniprotkb/{accession}.fasta"
 
             response = requests.get(temp_url)
+            
 
             if response.status_code == 200:
                 fasta_data = response.text
+
+                if not fasta_data:
+                    failed_accessions.append(
+                        {"accession": accession,
+                         "status_code": 200,
+                         "reason": (
+                            "Empty or invalid FASTA response. The accession may be secondary, "
+                            "merged, demerged, obsolete, ambiguous, or otherwise not directly "
+                            "resolvable to a current UniProt FASTA record. Tip: search this accession "
+                            "manually on UniProt to check its entry history and possible current "
+                            "primary accession(s)."
+                         )
+                        })
+                    continue
                 header_and_sequence = parse_header_sequence_from_string(fasta_data)
 
                 header = header_and_sequence["header"]
@@ -205,10 +220,11 @@ def fetch_uniprot_sequences(accession_file, strict=False):
                         f"Failed to fetch sequence for accession {accession}. "
                         f"Status code: {response.status_code}"
                     )
-                
+
                 failed_accessions.append({
                     "accession": accession,
-                    "status_code": response.status_code
+                    "status_code": response.status_code,
+                    "reason": "Reason: UniProt did not return a FASTA record for this accession. The accession may be invalid, retired, merged, obsolete, or incorrectly typed."
                 })
 
     return {
