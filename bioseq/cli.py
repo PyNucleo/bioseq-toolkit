@@ -2,7 +2,7 @@ import argparse
 import json
 import time
 import textwrap
-from bioseq.pipelines.search_pipeline import search, search_many
+from bioseq.pipelines.search_pipeline import search, multi_search
 from bioseq.alignment.smith_waterman import local_alignment
 from bioseq.alignment.needleman_wunsch import global_alignment
 from bioseq.fasta_io import fetch_uniprot_sequences, write_fasta_records
@@ -69,8 +69,8 @@ def main():
     multi_query_search_parser.add_argument("-d", "--database", type=str, required=True)
     multi_query_search_parser.add_argument("-k", "--kmer-size", type=int, default=3)
     multi_query_search_parser.add_argument("-t", "--threshold", type=int, default=1)
-    multi_query_search_parser.add_argument("-n", "--top-n-hits", type=int, default=10)
-    multi_query_search_parser.add_argument("-r", "--regular-kmer-search", action="store_false")
+    multi_query_search_parser.add_argument("--regular", dest="indexed", action="store_false")
+    multi_query_search_parser.set_defaults(indexed=True)
 
     args = parser.parse_args()
 
@@ -119,7 +119,7 @@ def main():
   
         print("Fetch Summary:")
         print("--------------\n")
-        print(f"Successfully fetched accessions: {len(result["records"])}")
+        print(f"Successfully fetched accessions: {len(result['records'])}")
         print(f"Failed accessions: {len(result["failed"])}")
         print(f'Output written to: {args.result_path}\n')
         if args.show_failed:
@@ -130,11 +130,19 @@ def main():
     elif args.command == "multi-search":
         start = time.perf_counter()
 
-        result = search_many(args.query_sequences, args.database, args.kmer_size, args.threshold, args.top_n_hits, args.regular_kmer_search)
+        result = multi_search(
+                query_fasta=args.query_sequences,
+                database=args.database,
+                k=args.kmer_size,
+                threshold=args.threshold,
+                top_n_hits=args.top_n_hits,
+                indexed=args.regular_kmer_search,
+                refinement=False,
+            )
         end = time.perf_counter()
         print(json.dumps(result, indent=2)) 
 
-        print(end - start)
+        print(f'\nFinished in: {end - start}')
 
 if __name__ == "__main__":
     main()
