@@ -1,5 +1,6 @@
+from pathlib import Path
 from database.database_utils import normalize_database
-from bioseq.search.kmer_search import kmer_search
+from bioseq.search.kmer_search import kmer_search, filter_by_relative_score
 from bioseq.search.kmer_index import multi_query_indexed_search
 from bioseq.search.similarity_search import rank_by_shared_kmers
 from bioseq.search.refinement import refine_hits
@@ -56,50 +57,64 @@ def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=Fal
    if not refinement:
         return ranked_hits
 
-def search_many(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True):
-   
-    query_records = read_fasta_records(query_fasta)
+def run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results):
+    if refinement:
+        raise NotImplementedError("Indexed multi-search refinement is not implemented yet.")
+    
+    db = normalize_database(database)
+
+    results = multi_query_indexed_search(query_records, db, k, threshold)
+
+    for query_result in results:
+        hits = query_result["query_hits"]
+
+        if hits:
+            max_kmers = max(hit["shared_kmers"] for hit in hits)
+            hits = filter_by_relative_score(max_kmers, hits)
+
+        ranked_hits = rank_by_shared_kmers(
+            query_result["query_sequence"],
+            hits
+        )
+
+        query_result["query_hits"] = ranked_hits[:top_n_hits]
+
+    return results
+
+def run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results):
+    results = []
+    for query in query_records:
+        temp_result = search(query["sequence"],
+                                    database=database, 
+                                    k=k, 
+                                    threshold=threshold,
+                                    top_n_hits=top_n_hits,
+                                    refinement=refinement
+                                )
+
+        results.append({
+            "query_id": query["id"],
+            "query_sequence": query["sequence"],
+            "query_hits": temp_result
+            }
+        )
+
+    
+
+    return results
+
+def multi_search(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True):
+
+    if isinstance(query_fasta, (str, Path)):
+        query_records = read_fasta_records(query_fasta)
+    else:
+        query_records = query_fasta
     database = normalize_database(database)
 
     if indexed:
-        db = normalize_database(database)
+        return run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results)
 
-        hits = multi_query_indexed_search(query_records, db, k, threshold)
-
-        if sorted:
-            for query_result in hits:
-                query_result["indexed_hits"].sort(
-                    key=lambda hit: (-hit["shared_kmers"], hit["id"])
-                )
-                query_result["indexed_hits"] = query_result["indexed_hits"][:top_n_hits]
-
-
-        return hits
-    
-    else:
-        results = []
-        for query in query_records:
-            temp_result = kmer_search(query["sequence"],
-                                        database, 
-                                        k, 
-                                        threshold
-                                    )
-            if sorted:
-                temp_result = sorted(temp_result,
-                    key=lambda hit: (-hit["shared_kmers"], hit["id"])
-                )
-            temp_result = temp_result[:top_n_hits]
-
-            results.append({
-                "query_id": query["id"],
-                "query_sequence": query["sequence"],
-                "query_hits": temp_result
-                }
-            )
-    
-        
-
-        return results
+    return run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results)
 
 
 

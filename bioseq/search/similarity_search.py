@@ -40,6 +40,9 @@ def rank_by_shared_kmers(query, db):
             "shared_kmers": seq["shared_kmers"]
         })
     
-    ranked_hits = sorted(ranked_hits, key = lambda hit: hit["shared_kmers"], reverse=True)
+    ranked_hits = sorted(
+                ranked_hits,
+                key=lambda hit: (-hit["shared_kmers"], hit["id"])
+                )
 
     return ranked_hits

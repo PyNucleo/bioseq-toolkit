@@ -1,5 +1,6 @@
-from bioseq.pipelines.search_pipeline import search_many
+from bioseq.pipelines.search_pipeline import multi_search
 from database.sequence_database import SequenceDatabase
+
 
 def make_tiny_database():
     return SequenceDatabase([
@@ -37,6 +38,16 @@ def hits_to_counts(hits):
     }
 
 
+def simplify_hits(hits):
+    return [
+        {
+            "id": hit["id"],
+            "shared_kmers": hit["shared_kmers"],
+        }
+        for hit in hits
+    ]
+
+
 def result_by_query_id(results):
     return {
         result["query_id"]: result
@@ -44,11 +55,11 @@ def result_by_query_id(results):
     }
 
 
-def test_search_many_indexed_returns_one_result_per_query(tmp_path):
+def test_multi_search_indexed_returns_one_result_per_query(tmp_path):
     database = make_tiny_database()
     query_fasta = write_query_fasta(tmp_path)
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -58,7 +69,7 @@ def test_search_many_indexed_returns_one_result_per_query(tmp_path):
     )
 
     assert len(results) == 5
-    
+
     query_ids = [result["query_id"] for result in results]
 
     assert query_ids == [
@@ -70,11 +81,11 @@ def test_search_many_indexed_returns_one_result_per_query(tmp_path):
     ]
 
 
-def test_search_many_indexed_returns_expected_hits_and_counts(tmp_path):
+def test_multi_search_indexed_uses_query_hits_key(tmp_path):
     database = make_tiny_database()
     query_fasta = write_query_fasta(tmp_path)
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -82,42 +93,60 @@ def test_search_many_indexed_returns_expected_hits_and_counts(tmp_path):
         indexed=True,
         refinement=False,
     )
-    print(f'RESULTS: {results}')
+
+    for result in results:
+        assert "query_hits" in result
+        assert "indexed_hits" not in result
+
+
+def test_multi_search_indexed_returns_expected_hits_and_counts(tmp_path):
+    database = make_tiny_database()
+    query_fasta = write_query_fasta(tmp_path)
+
+    results = multi_search(
+        query_fasta=query_fasta,
+        database=database,
+        k=3,
+        threshold=1,
+        indexed=True,
+        refinement=False,
+    )
+
     results_by_query = result_by_query_id(results)
 
     assert hits_to_counts(
-        results_by_query["query_exact_seq1_seq2"]["indexed_hits"]
+        results_by_query["query_exact_seq1_seq2"]["query_hits"]
     ) == {
         "seq1": 3,
         "seq2": 3,
     }
 
     assert hits_to_counts(
-        results_by_query["query_g_rich"]["indexed_hits"]
+        results_by_query["query_g_rich"]["query_hits"]
     ) == {
         "seq3": 1,
     }
 
     assert hits_to_counts(
-        results_by_query["query_ta_region"]["indexed_hits"]
+        results_by_query["query_ta_region"]["query_hits"]
     ) == {
         "seq4": 3,
     }
 
     assert hits_to_counts(
-        results_by_query["query_protein_like"]["indexed_hits"]
+        results_by_query["query_protein_like"]["query_hits"]
     ) == {
         "seq5": 2,
     }
 
-    assert results_by_query["query_no_hit"]["indexed_hits"] == []
+    assert results_by_query["query_no_hit"]["query_hits"] == []
 
 
-def test_search_many_indexed_sorts_hits_by_shared_kmers_then_id(tmp_path):
+def test_multi_search_indexed_sorts_hits_by_shared_kmers_then_id(tmp_path):
     database = make_tiny_database()
     query_fasta = write_query_fasta(tmp_path)
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -128,19 +157,19 @@ def test_search_many_indexed_sorts_hits_by_shared_kmers_then_id(tmp_path):
 
     results_by_query = result_by_query_id(results)
 
-    hits = results_by_query["query_exact_seq1_seq2"]["indexed_hits"]
+    hits = results_by_query["query_exact_seq1_seq2"]["query_hits"]
 
-    assert hits == [
+    assert simplify_hits(hits) == [
         {"id": "seq1", "shared_kmers": 3},
         {"id": "seq2", "shared_kmers": 3},
     ]
 
 
-def test_search_many_indexed_applies_threshold_per_query(tmp_path):
+def test_multi_search_indexed_applies_threshold_per_query(tmp_path):
     database = make_tiny_database()
     query_fasta = write_query_fasta(tmp_path)
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -152,26 +181,26 @@ def test_search_many_indexed_applies_threshold_per_query(tmp_path):
     results_by_query = result_by_query_id(results)
 
     assert hits_to_counts(
-        results_by_query["query_exact_seq1_seq2"]["indexed_hits"]
+        results_by_query["query_exact_seq1_seq2"]["query_hits"]
     ) == {
         "seq1": 3,
         "seq2": 3,
     }
 
-    assert results_by_query["query_g_rich"]["indexed_hits"] == []
+    assert results_by_query["query_g_rich"]["query_hits"] == []
 
     assert hits_to_counts(
-        results_by_query["query_ta_region"]["indexed_hits"]
+        results_by_query["query_ta_region"]["query_hits"]
     ) == {
         "seq4": 3,
     }
 
-    assert results_by_query["query_protein_like"]["indexed_hits"] == []
+    assert results_by_query["query_protein_like"]["query_hits"] == []
 
-    assert results_by_query["query_no_hit"]["indexed_hits"] == []
+    assert results_by_query["query_no_hit"]["query_hits"] == []
 
 
-def test_search_many_indexed_uses_database_wide_index_not_first_query_hits(tmp_path):
+def test_multi_search_indexed_uses_database_wide_index_not_first_query_hits(tmp_path):
     database = make_tiny_database()
 
     query_fasta = tmp_path / "unrelated_queries.fasta"
@@ -182,7 +211,7 @@ def test_search_many_indexed_uses_database_wide_index_not_first_query_hits(tmp_p
         "MKWV\n"
     )
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -194,24 +223,24 @@ def test_search_many_indexed_uses_database_wide_index_not_first_query_hits(tmp_p
     results_by_query = result_by_query_id(results)
 
     assert hits_to_counts(
-        results_by_query["dna_query"]["indexed_hits"]
+        results_by_query["dna_query"]["query_hits"]
     ) == {
         "seq1": 3,
         "seq2": 3,
     }
 
     assert hits_to_counts(
-        results_by_query["protein_query"]["indexed_hits"]
+        results_by_query["protein_query"]["query_hits"]
     ) == {
         "seq5": 2,
     }
 
 
-def test_search_many_indexed_respects_top_n_hits_per_query(tmp_path):
+def test_multi_search_indexed_respects_top_n_hits_per_query(tmp_path):
     database = make_tiny_database()
     query_fasta = write_query_fasta(tmp_path)
 
-    results = search_many(
+    results = multi_search(
         query_fasta=query_fasta,
         database=database,
         k=3,
@@ -222,13 +251,17 @@ def test_search_many_indexed_respects_top_n_hits_per_query(tmp_path):
     )
 
     results_by_query = result_by_query_id(results)
-    print(results_by_query)
-    assert results_by_query["query_exact_seq1_seq2"]["indexed_hits"] == [
+
+    assert simplify_hits(
+        results_by_query["query_exact_seq1_seq2"]["query_hits"]
+    ) == [
         {"id": "seq1", "shared_kmers": 3}
     ]
 
-    assert results_by_query["query_g_rich"]["indexed_hits"] == [
+    assert simplify_hits(
+        results_by_query["query_g_rich"]["query_hits"]
+    ) == [
         {"id": "seq3", "shared_kmers": 1}
     ]
 
-    assert results_by_query["query_no_hit"]["indexed_hits"] == []
+    assert results_by_query["query_no_hit"]["query_hits"] == []

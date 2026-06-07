@@ -1,4 +1,4 @@
-from bioseq.search.kmer_search import generate_kmers, kmer_search
+from bioseq.search.kmer_search import generate_kmers
 
 
 def multi_query_indexed_search(queries, db, k, threshold):
@@ -77,21 +77,22 @@ def multi_query_indexed_search(queries, db, k, threshold):
         query_words = generate_kmers(query["sequence"], k)
 
         db_sequences_shared_kmer_counts = get_word_occurenes(
-            query_words,
-            indexed_kmers_structure,
-            threshold
+        query_words,
+        indexed_kmers_structure["kmer_index"],
+        indexed_kmers_structure["sequence_lookup"],
+        threshold
         )
 
         query_indexed_search_results.append({
             "query_id": query["id"],
             "query_sequence": query["sequence"],
-            "indexed_hits": db_sequences_shared_kmer_counts
+            "query_hits": db_sequences_shared_kmer_counts
         })
 
     return query_indexed_search_results
 
 
-def get_word_occurenes(words, indexed_kmers, threshold):
+def get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold):
     """
     Count how many query k-mers are shared with each indexed database sequence.
 
@@ -149,15 +150,16 @@ def get_word_occurenes(words, indexed_kmers, threshold):
             if db_id not in hit_records:
                 hit_records[db_id] = {
                     "id": db_id,
+                    "sequence": sequence_lookup[db_id],
                     "shared_kmers": 0
                 }
 
             hit_records[db_id]["shared_kmers"] += 1
 
     indexed_hits = [
-    hit
-    for hit in hit_records.values()
-    if hit["shared_kmers"] >= threshold
+        hit
+        for hit in hit_records.values()
+        if hit["shared_kmers"] >= threshold
     ]
 
     return indexed_hits
@@ -215,16 +217,22 @@ def index_database_words(db_records, k):
     be added later for seed-extension algorithms.
     """
     db_records = db_records.get_sequences()
-    temp_structure = {}
+
+    kmer_index = {}
+    sequence_lookup = {}
 
     for record in db_records:
+        sequence_lookup[record["id"]] = record["sequence"]
+
         kmers = generate_kmers(record["sequence"], k)
 
         for word in kmers:
-
-            if word not in temp_structure:
-                temp_structure[word] = {record["id"]}
+            if word not in kmer_index:
+                kmer_index[word] = {record["id"]}
             else:
-                temp_structure[word].add(record["id"])
+                kmer_index[word].add(record["id"])
 
-    return temp_structure
+    return {
+        "kmer_index": kmer_index,
+        "sequence_lookup": sequence_lookup,
+    }
