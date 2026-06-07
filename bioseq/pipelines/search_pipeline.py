@@ -56,21 +56,22 @@ def search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=Fal
    if not refinement:
         return ranked_hits
 
-def search_many(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False):
+def search_many(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True):
    
     query_records = read_fasta_records(query_fasta)
-    
+    database = normalize_database(database)
+
     if indexed:
         db = normalize_database(database)
 
         hits = multi_query_indexed_search(query_records, db, k, threshold)
 
-        #Sort the hits per each query
-        for query_result in hits:
-            query_result["indexed_hits"].sort(
-                key=lambda hit: (-hit["shared_kmers"], hit["id"])
-            )
-            query_result["indexed_hits"] = query_result["indexed_hits"][:top_n_hits]
+        if sorted:
+            for query_result in hits:
+                query_result["indexed_hits"].sort(
+                    key=lambda hit: (-hit["shared_kmers"], hit["id"])
+                )
+                query_result["indexed_hits"] = query_result["indexed_hits"][:top_n_hits]
 
 
         return hits
@@ -78,12 +79,25 @@ def search_many(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, ind
     else:
         results = []
         for query in query_records:
-            results.append(kmer_search(query["sequence"],
+            temp_result = kmer_search(query["sequence"],
                                         database, 
                                         k, 
-                                        threshold, 
-                                        top_n_hits, 
-                                        refinement))
+                                        threshold
+                                    )
+            if sorted:
+                temp_result = sorted(temp_result,
+                    key=lambda hit: (-hit["shared_kmers"], hit["id"])
+                )
+            temp_result = temp_result[:top_n_hits]
+
+            results.append({
+                "query_id": query["id"],
+                "query_sequence": query["sequence"],
+                "query_hits": temp_result
+                }
+            )
+    
+        
 
         return results
 
