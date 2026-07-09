@@ -1,0 +1,25 @@
+views {
+  view smithWatermanDetail of bioseqToolkit.sw {
+    title 'Smith-Waterman Detail'
+
+    include bioseqToolkit.sw.localAlignmentFn
+    include bioseqToolkit.sw.getBestScoresFn
+    include bioseqToolkit.sw.swInitializeGridFn
+    include bioseqToolkit.sw.swFillLocalFn
+    include bioseqToolkit.sw.swLocalTraceFn
+    include bioseqToolkit.scoring.scorePairFn
+    include bioseqToolkit.scoring.normalizeGapFn
+    include bioseqToolkit.scoring.scoringMetadataFn
+    include bioseqToolkit.alignmentStats.getAlignmentStatsFn
+    include bioseqToolkit.refinement.refineHitsFn
+    include bioseqToolkit.benchmarks.benchmarkSwScoresRuntimeFn
+    include bioseqToolkit.dataStructures.queryString
+    include bioseqToolkit.dataStructures.alignmentScoreMatrix
+    include bioseqToolkit.dataStructures.tracebackInfo
+    include bioseqToolkit.dataStructures.structuredAlignmentResult
+    include bioseqToolkit.dataStructures.alignmentStatsDict
+    include bioseqToolkit.dataStructures.refinedHitList
+
+    autoLayout LeftRight
+  }
+}

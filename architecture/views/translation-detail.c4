@@ -1,0 +1,17 @@
+views {
+  view translationDetail of bioseqToolkit.translationPipeline {
+    title 'Translation Detail'
+
+    include bioseqToolkit.translationPipeline.processFastaSequencesFn
+    include bioseqToolkit.fastaIo.readFastaRecordsFn
+    include bioseqToolkit.validators.validDnaFn
+    include bioseqToolkit.sequenceUtils.gcContentFn
+    include bioseqToolkit.sequenceUtils.mrnaTemplateFn
+    include bioseqToolkit.translation.translateSequenceFn
+    include bioseqToolkit.dataStructures.fastaRecordList
+    include bioseqToolkit.dataStructures.translationResultDict
+    include biopython
+
+    autoLayout LeftRight
+  }
+}

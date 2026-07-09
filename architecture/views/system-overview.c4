@@ -1,0 +1,33 @@
+views {
+  view systemOverview of bioseqToolkit {
+    title 'System Overview'
+
+    include owner
+    include bioseqToolkit
+    include bioseqToolkit.cli
+    include bioseqToolkit.demoMain
+    include bioseqToolkit.searchPipeline
+    include bioseqToolkit.kmerSearch
+    include bioseqToolkit.kmerIndex
+    include bioseqToolkit.refinement
+    include bioseqToolkit.similarityRank
+    include bioseqToolkit.nw
+    include bioseqToolkit.sw
+    include bioseqToolkit.scoring
+    include bioseqToolkit.fastaIo
+    include bioseqToolkit.databaseUtils
+    include bioseqToolkit.sequenceDatabase
+    include bioseqToolkit.translationPipeline
+    include bioseqToolkit.translation
+    include bioseqToolkit.tests
+    include bioseqToolkit.benchmarks
+    include bioseqToolkit.benchmarkData
+    include bioseqToolkit.benchmarkReports
+    include bioseqToolkit.caseStudyDocs
+    include biopython
+    include requestsLib
+    include uniprot
+
+    autoLayout TopBottom
+  }
+}

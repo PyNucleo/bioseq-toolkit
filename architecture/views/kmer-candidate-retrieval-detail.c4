@@ -1,0 +1,24 @@
+views {
+  view kmerCandidateRetrievalDetail of bioseqToolkit.kmerSearch {
+    title 'K-mer Candidate Retrieval Detail'
+
+    include bioseqToolkit.kmerSearch.kmerSearchFn
+    include bioseqToolkit.kmerSearch.generateKmersFn
+    include bioseqToolkit.kmerSearch.sharedKmersFn
+    include bioseqToolkit.kmerSearch.filterRelativeFn
+    include bioseqToolkit.kmerIndex.multiQueryIndexedFn
+    include bioseqToolkit.kmerIndex.indexDatabaseWordsFn
+    include bioseqToolkit.kmerIndex.getWordOccurrencesFn
+    include bioseqToolkit.sequenceDatabase.getSequencesFn
+    include bioseqToolkit.similarityRank.rankBySharedKmersFn
+    include bioseqToolkit.dataStructures.queryString
+    include bioseqToolkit.dataStructures.normalizedDatabase
+    include bioseqToolkit.dataStructures.kmerSet
+    include bioseqToolkit.dataStructures.kmerIndexMapping
+    include bioseqToolkit.dataStructures.candidateHitList
+    include bioseqToolkit.dataStructures.queryRecordList
+    include bioseqToolkit.dataStructures.multiSearchResultList
+
+    autoLayout LeftRight
+  }
+}

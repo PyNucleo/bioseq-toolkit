@@ -1,0 +1,22 @@
+views {
+  view translationAndBenchmarks of bioseqToolkit {
+    title 'Translation and Benchmarks'
+
+    include owner
+    include bioseqToolkit.translationPipeline
+    include bioseqToolkit.translation
+    include bioseqToolkit.validators
+    include bioseqToolkit.sequenceUtils
+    include bioseqToolkit.fastaIo
+    include bioseqToolkit.benchmarks
+    include bioseqToolkit.benchmarkData
+    include bioseqToolkit.benchmarkReports
+    include bioseqToolkit.searchPipeline
+    include bioseqToolkit.kmerSearch
+    include bioseqToolkit.sw
+    include bioseqToolkit.tests
+    include biopython
+
+    autoLayout TopBottom
+  }
+}

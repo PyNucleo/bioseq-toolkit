@@ -1,0 +1,24 @@
+views {
+  view fastaDatabaseNormalizationDetail of bioseqToolkit.fastaIo {
+    title 'FASTA and Database Normalization Detail'
+
+    include bioseqToolkit.fastaIo.readFastaRecordsFn
+    include bioseqToolkit.fastaIo.parseFastaHeaderFn
+    include bioseqToolkit.fastaIo.readFastaSequencesOnlyFn
+    include bioseqToolkit.fastaIo.fetchUniprotFn
+    include bioseqToolkit.fastaIo.writeFastaRecordsFn
+    include bioseqToolkit.databaseUtils.normalizeDatabaseFn
+    include bioseqToolkit.loadDatabase.createDatabaseFn
+    include bioseqToolkit.sequenceDatabase.getSequencesFn
+    include bioseqToolkit.searchPipeline.searchFn
+    include bioseqToolkit.searchPipeline.multiSearchFn
+    include bioseqToolkit.translationPipeline.processFastaSequencesFn
+    include bioseqToolkit.dataStructures.fastaRecordList
+    include bioseqToolkit.dataStructures.normalizedDatabase
+    include bioseqToolkit.dataStructures.queryRecordList
+    include requestsLib
+    include uniprot
+
+    autoLayout LeftRight
+  }
+}

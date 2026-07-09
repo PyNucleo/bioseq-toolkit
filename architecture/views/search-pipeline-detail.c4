@@ -1,0 +1,27 @@
+views {
+  view searchPipelineDetail of bioseqToolkit.searchPipeline {
+    title 'Search Pipeline Detail'
+
+    include bioseqToolkit.searchPipeline.searchFn
+    include bioseqToolkit.searchPipeline.multiSearchFn
+    include bioseqToolkit.searchPipeline.runIndexedMultiSearchFn
+    include bioseqToolkit.searchPipeline.runRegularMultiSearchFn
+    include bioseqToolkit.databaseUtils.normalizeDatabaseFn
+    include bioseqToolkit.fastaIo.readFastaRecordsFn
+    include bioseqToolkit.kmerSearch.kmerSearchFn
+    include bioseqToolkit.kmerSearch.filterRelativeFn
+    include bioseqToolkit.similarityRank.rankBySharedKmersFn
+    include bioseqToolkit.refinement.refineHitsFn
+    include bioseqToolkit.sw.getBestScoresFn
+    include bioseqToolkit.kmerIndex.multiQueryIndexedFn
+    include bioseqToolkit.dataStructures.queryString
+    include bioseqToolkit.dataStructures.queryRecordList
+    include bioseqToolkit.dataStructures.normalizedDatabase
+    include bioseqToolkit.dataStructures.candidateHitList
+    include bioseqToolkit.dataStructures.refinedHitList
+    include bioseqToolkit.dataStructures.multiSearchResultList
+    include bioseqToolkit.dataStructures.fastaRecordList
+
+    autoLayout LeftRight
+  }
+}

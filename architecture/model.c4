@@ -1,0 +1,545 @@
+specification {
+  element actor
+  element system
+  element container
+  element component
+  element external
+  element artifact
+}
+
+model {
+  owner = actor 'Repository owner / learner' {
+    description 'First-year bioinformatics student using the toolkit for education, audit, and experiments.'
+  }
+
+  bioseqToolkit = system 'bioseq-toolkit repository' {
+    description 'Educational Python bioinformatics toolkit for sequence utilities, FASTA handling, pairwise alignment, k-mer search, translation, and benchmarks.'
+
+    cli = component 'bioseq.cli' {
+      description 'Argparse CLI entry point for search, local alignment, global alignment, UniProt fetching, and multi-search commands.'
+    }
+
+    demoMain = component 'bioseq.main' {
+      description 'Small demo function that runs a hard-coded search example.'
+    }
+
+    searchPipeline = component 'bioseq.pipelines.search_pipeline' {
+      description 'Audit: public functions search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=False) and multi_search(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True). Accepts query string or query FASTA records; database is SequenceDatabase, list[str], or str FASTA path through normalize_database. Returns list[dict] search hits or list[dict] per-query multi-search results. Calls database normalization, FASTA query reading, k-mer scan, indexed k-mer search, ranking, and optional refinement. Tests: tests/pipelines/test_search_pipeline.py, test_search_many.py, test_indexed_multi_search_equivalence.py, tests/test_cli.py. Uncertainty: sort_results is accepted but not observed to change behavior; CLI multi-search argument wiring is unresolved.'
+
+      searchFn = component 'search(...)' {
+        description 'Signature: search(query, database=None, k=3, threshold=1, top_n_hits=10, refinement=False). Input query is str; database categories are SequenceDatabase, list[str], or str FASTA path. Normalizes database, runs kmer_search, ranks by shared_kmers and id, slices top_n_hits, optionally calls refine_hits. Returns list[dict] hits with id, sequence, shared_kmers, and when refined sw_score plus best_positions. Side effects: reads FASTA only when database is str path.'
+      }
+
+      multiSearchFn = component 'multi_search(...)' {
+        description 'Signature: multi_search(query_fasta, database=None, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True). query_fasta is str or pathlib.Path FASTA path, otherwise list of query record dicts. Returns list[dict] with query_id, query_sequence, query_hits. Calls indexed or regular multi-search path. Uncertainty: sort_results parameter is unused in observed code.'
+      }
+
+      runIndexedMultiSearchFn = component 'run_indexed_multi_search(...)' {
+        description 'Signature: run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results). Raises NotImplementedError if refinement is True. Builds indexed hits, applies relative-score filtering, ranks hits, and slices top_n_hits.'
+      }
+
+      runRegularMultiSearchFn = component 'run_regular_multi_search(...)' {
+        description 'Signature: run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results). Iterates query records and calls search for each query sequence. Returns per-query dictionaries.'
+      }
+    }
+
+    kmerSearch = component 'bioseq.search.kmer_search' {
+      description 'Audit: public functions kmer_search(query, db, k, threshold), validate_kmer_params(seq, k, threshold=None), generate_kmers(seq, k), get_shared_kmers(query_words, seq, k), filter_by_relative_score(max_kmers, candidates_dict, ratio=0.3). Uses unique uppercase k-mers. k and threshold validation is explicit; sequence alphabet validation is absent. Returns candidate hit dictionaries with id, sequence, shared_kmers. Tests: tests/search/test_kmer_search.py.'
+
+      kmerSearchFn = component 'kmer_search(...)' {
+        description 'Signature: kmer_search(query, db, k, threshold). db is expected SequenceDatabase. Validates k and threshold; returns [] when k is larger than query. Scans db.get_sequences(), counts unique shared k-mers, applies threshold, then filter_by_relative_score. Returns list[dict] candidate hits.'
+      }
+
+      generateKmersFn = component 'generate_kmers(...)' {
+        description 'Signature: generate_kmers(seq, k). Validates k, uppercases seq, returns set[str] of unique k-mers. Returns empty set when k is larger than seq.'
+      }
+
+      filterRelativeFn = component 'filter_by_relative_score(...)' {
+        description 'Signature: filter_by_relative_score(max_kmers, candidates_dict, ratio=0.3). Keeps hit dictionaries where shared_kmers >= max_kmers * ratio. Input and output are list[dict] candidate hits.'
+      }
+
+      sharedKmersFn = component 'get_shared_kmers(...)' {
+        description 'Signature: get_shared_kmers(query_words, seq, k). query_words is set[str]; seq is database sequence string. Generates db sequence k-mers and returns int count of query words present.'
+      }
+    }
+
+    kmerIndex = component 'bioseq.search.kmer_index' {
+      description 'Audit: public functions multi_query_indexed_search(queries, db, k, threshold), get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold), index_database_words(db_records, k). Builds presence-based inverted index mapping k-mer to set of sequence IDs plus sequence lookup. Does not store positions. Tests: tests/pipelines/test_search_many.py and test_indexed_multi_search_equivalence.py.'
+
+      multiQueryIndexedFn = component 'multi_query_indexed_search(...)' {
+        description 'Signature: multi_query_indexed_search(queries, db, k, threshold). queries is list[dict] with id and sequence. db is SequenceDatabase. Returns list[dict] with query_id, query_sequence, query_hits.'
+      }
+
+      getWordOccurrencesFn = component 'get_word_occurenes(...)' {
+        description 'Signature: get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold). words is set[str]. indexed_kmers is dict[str, set[str]]. sequence_lookup is dict[str, str]. Returns list[dict] hits with id, sequence, shared_kmers after threshold filtering.'
+      }
+
+      indexDatabaseWordsFn = component 'index_database_words(...)' {
+        description 'Signature: index_database_words(db_records, k). Despite parameter name, expects SequenceDatabase and calls get_sequences(). Returns dict with kmer_index and sequence_lookup.'
+      }
+    }
+
+    similarityRank = component 'bioseq.search.similarity_search' {
+      description 'Audit: public function rank_by_shared_kmers(query, db). query is currently unused. db is list[dict] candidate hits with id, sequence, shared_kmers. Returns new list[dict] sorted by descending shared_kmers then id. Tests cover deterministic ID tie-breaking through pipeline behavior.'
+
+      rankBySharedKmersFn = component 'rank_by_shared_kmers(...)' {
+        description 'Signature: rank_by_shared_kmers(query, db). Converts candidate hit dictionaries to ranked hit dictionaries. Returns list[dict] with id, sequence, shared_kmers.'
+      }
+    }
+
+    refinement = component 'bioseq.search.refinement' {
+      description 'Audit: public function refine_hits(query, top_hits, gap_penalty=-2). Input top_hits is list[dict] containing at least sequence. Copies each hit, calls get_best_scores, adds sw_score and best_positions, and sorts by descending sw_score. Tests: tests/search/test_refinement.py.'
+
+      refineHitsFn = component 'refine_hits(...)' {
+        description 'Signature: refine_hits(query, top_hits, gap_penalty=-2). Returns list[dict] refined hits with original keys plus sw_score and best_positions. No file or network side effects.'
+      }
+    }
+
+    fastaIo = component 'bioseq.fasta_io' {
+      description 'Audit: public functions read_fasta_records, read_fasta_sequences_only, parse_fasta_header, parse_uniprot_fasta, parse_generic_fasta, parse_header_sequence_from_string, fetch_uniprot_sequences, write_fasta_records. Reads and writes FASTA files; fetch_uniprot_sequences performs HTTP requests. Tests: tests/test_fasta_io.py, tests/test_fasta_writer.py. Uncertainty: fetch validates non-empty HTTP 200 text but not a leading FASTA header.'
+
+      readFastaRecordsFn = component 'read_fasta_records(...)' {
+        description 'Signature: read_fasta_records(file). Opens local file, parses headers and concatenates multiline sequence lines. Returns list[dict] FASTA records with metadata and sequence.'
+      }
+
+      parseFastaHeaderFn = component 'parse_fasta_header(...)' {
+        description 'Signature: parse_fasta_header(header). Routes headers beginning sp| or tr| to UniProt parser after stripping >; otherwise uses generic parser. Returns metadata dict.'
+      }
+
+      fetchUniprotFn = component 'fetch_uniprot_sequences(...)' {
+        description 'Signature: fetch_uniprot_sequences(accession_file, strict=False). Reads accession file, calls requests.get for each non-empty accession, returns dict with records and failed lists. Side effects: local file read and network access.'
+      }
+
+      writeFastaRecordsFn = component 'write_fasta_records(...)' {
+        description 'Signature: write_fasta_records(records, output_path, full_header). Writes FASTA records to local output path. full_header=True writes record header exactly. full_header=False prepends > and writes selected id-like key. Uncertainty: accession-key selection checks the records collection, not each record.'
+      }
+
+      readFastaSequencesOnlyFn = component 'read_fasta_sequences_only(...)' {
+        description 'Signature: read_fasta_sequences_only(FILE). Calls read_fasta_records and returns list[str] sequences only.'
+      }
+    }
+
+    databaseUtils = component 'database.database_utils' {
+      description 'Audit: public function normalize_database(db). Accepts SequenceDatabase, list, or str FASTA path. list is treated as list[str] and converted to records with generated ids id1, id2, etc. str is treated as FASTA path. Unsupported types raise TypeError. Tests: tests/database/test_database_utils.py. Uncertainty: pathlib.Path database paths are not accepted here.'
+
+      normalizeDatabaseFn = component 'normalize_database(...)' {
+        description 'Signature: normalize_database(db). Returns SequenceDatabase. Side effects: reads FASTA when db is str path.'
+      }
+    }
+
+    sequenceDatabase = component 'database.sequence_database.SequenceDatabase' {
+      description 'Audit: class SequenceDatabase(sequences=None). Stores self.sequences as [] or provided object. get_sequences() returns the stored object directly. Expected search records contain id and sequence, but constructor does not enforce shape. Tests: tests/database/test_database_utils.py.'
+
+      getSequencesFn = component 'get_sequences(...)' {
+        description 'Signature: get_sequences(self). Returns self.sequences directly; callers can mutate the returned object.'
+      }
+    }
+
+    loadDatabase = component 'database.load_database' {
+      description 'Audit: public function create_database(db). Calls read_fasta_records on FASTA path and wraps returned records in SequenceDatabase.'
+
+      createDatabaseFn = component 'create_database(...)' {
+        description 'Signature: create_database(db). db is FASTA path. Returns SequenceDatabase of FASTA record dictionaries. Side effect: local file read through read_fasta_records.'
+      }
+    }
+
+    nw = component 'bioseq.alignment.needleman_wunsch' {
+      description 'Audit: public function global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, matrix=None, return_all=False, structured=True). Builds global score grid, movement matrix, traceback alignments, and structured result dictionary. Gap model is linear through normalize_gap. Tests: tests/alignment/test_needleman_wunsch_structured.py and CLI global alignment tests. Uncertainty: empty sequence behavior is not tested.'
+
+      globalAlignmentFn = component 'global_alignment(...)' {
+        description 'Signature: global_alignment(s1, s2, match=1, mismatch=-1, gap_penalty=-2, matrix=None, return_all=False, structured=True). Returns structured dict by default or list[tuple[str,str]] when structured=False.'
+      }
+
+      nwInitializeGridFn = component 'initialize_grid(...)' {
+        description 'Algorithm stage: creates global DP score matrix with cumulative gap penalties in first row and column. Returns list[list[number]].'
+      }
+
+      nwFillMatrixFn = component 'fill_matrix(...)' {
+        description 'Algorithm stage: fills global DP score matrix using diagonal, left, and up scores from score_pair and linear gap penalty.'
+      }
+
+      nwMovementFn = component 'compute_movement_matrix(...)' {
+        description 'Algorithm stage: records tied best moves as list entries containing diag, left, and/or up.'
+      }
+
+      nwTraceFn = component 'trace(...)' {
+        description 'Algorithm stage: reconstructs alignment tuple list from movement matrix. return_all controls whether all branches are explored or first move is followed.'
+      }
+    }
+
+    sw = component 'bioseq.alignment.smith_waterman' {
+      description 'Audit: public functions local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, matrix=None, return_all=False, structured=True) and get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1). Builds local score grid with zero floor, tracks best positions, and optionally reconstructs alignments. Tests: tests/alignment/test_smith_waterman.py. Rejects empty input for local_alignment.'
+
+      localAlignmentFn = component 'local_alignment(...)' {
+        description 'Signature: local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, matrix=None, return_all=False, structured=True). Returns structured local alignment result dict by default or list[tuple[str,str]] when structured=False. Raises ValueError for empty input.'
+      }
+
+      getBestScoresFn = component 'get_best_scores(...)' {
+        description 'Signature: get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1). Score-only Smith-Waterman. Returns tuple(best_score, best_positions). Used by refinement and benchmarks.'
+      }
+
+      swInitializeGridFn = component 'initialize_grid(...)' {
+        description 'Algorithm stage: creates zero-filled local DP score matrix. Returns list[list[number]].'
+      }
+
+      swFillLocalFn = component 'fill_local(...)' {
+        description 'Algorithm stage: fills local DP score and movement matrices using max(diagonal, horizontal, vertical, 0). Returns best_score and best_positions.'
+      }
+
+      swLocalTraceFn = component 'local_trace(...)' {
+        description 'Algorithm stage: reconstructs local alignments from movement matrix until score grid reaches zero.'
+      }
+    }
+
+    scoring = component 'bioseq.alignment.scoring' {
+      description 'Audit: public functions get_scoring_matrix(matrix=None), score_pair(a, b, loaded_matrix=None, match_score=2, mismatch_score=-1), normalize_gap(gap), build_scoring_metadata(match, mismatch, gap_penalty, matrix=None). Provides linear gap metadata. Tests: tests/alignment/test_scoring.py and alignment tests.'
+
+      scorePairFn = component 'score_pair(...)' {
+        description 'Signature: score_pair(a, b, loaded_matrix=None, match_score=2, mismatch_score=-1). Uppercases residues. Without matrix returns match_score or mismatch_score. With matrix, indexes loaded matrix.'
+      }
+
+      scoringMetadataFn = component 'build_scoring_metadata(...)' {
+        description 'Signature: build_scoring_metadata(match, mismatch, gap_penalty, matrix=None). Returns dict including gap_model linear. Matrix mode omits match and mismatch keys.'
+      }
+
+      normalizeGapFn = component 'normalize_gap(...)' {
+        description 'Signature: normalize_gap(gap). Returns -abs(gap).'
+      }
+    }
+
+    matrices = component 'bioseq.alignment.substitution_matrices' {
+      description 'Cached Biopython substitution-matrix loader.'
+    }
+
+    alignmentStats = component 'bioseq.alignment.alignment_stats' {
+      description 'Audit: public stats helpers get_identity, get_matches, get_mismatches, get_gaps, get_gap_columns, get_matches_mismatches_gaps, get_alignment_stats. Inputs are aligned strings of equal length; unequal lengths raise ValueError. get_alignment_stats returns dict with alignment_length, matches, mismatches, gaps, gap_columns, identity, identity_excluding_gaps, similarity=None. Tests: tests/alignment/test_alignment_stats.py.'
+
+      getAlignmentStatsFn = component 'get_alignment_stats(...)' {
+        description 'Signature: get_alignment_stats(algn_1, algn_2). Consumes equal-length aligned strings. Returns alignment stats dictionary. similarity is currently None.'
+      }
+    }
+
+    translationPipeline = component 'bioseq.pipelines.translation_pipeline' {
+      description 'Audit: public function process_fasta_sequences(file_path). Reads FASTA records, uppercases sequence strings, silently skips empty and invalid DNA records, computes length and GC percentage, transcribes with mrna_template, translates with translate_sequence. Tests: tests/pipelines/test_translation_pipeline.py. Uncertainty: base_counts key stores GC percentages, not counters.'
+
+      processFastaSequencesFn = component 'process_fasta_sequences(...)' {
+        description 'Signature: process_fasta_sequences(file_path). Returns dict with sequence, length, base_counts, transcribed_strand, amino_acid_chain. Side effect: reads local FASTA file.'
+      }
+    }
+
+    translation = component 'bioseq.translation' {
+      description 'Audit: public function translate_sequence(seq, stop_at_stop=True, trim_partial=True). If trim_partial, trims input length to multiple of 3. Calls Bio.Seq.Seq(seq).translate(to_stop=stop_at_stop). Return is Biopython Seq-like object. Uncertainty: downstream callers may expect strings because tests compare with string literals.'
+
+      translateSequenceFn = component 'translate_sequence(...)' {
+        description 'Signature: translate_sequence(seq, stop_at_stop=True, trim_partial=True). Returns Bio.Seq.Seq translation result.'
+      }
+    }
+
+    validators = component 'bioseq.validators' {
+      description 'Audit: public function valid_dna(seq). Uppercases input and returns bool indicating every character is A, T, G, or C.'
+
+      validDnaFn = component 'valid_dna(...)' {
+        description 'Signature: valid_dna(seq). Returns bool.'
+      }
+    }
+
+    sequenceUtils = component 'bioseq.sequence_utils' {
+      description 'Audit: public functions total_length, base_number, gc_content, reverse_complement, mrna_template, mrna_coding. Uppercase inputs before dictionary-based transformations. Unsupported bases can raise KeyError in mapping functions. Tests: tests/test_sequence_utils.py.'
+
+      gcContentFn = component 'gc_content(...)' {
+        description 'Signature: gc_content(sequence). Returns rounded GC percentage float; empty sequence returns 0.0.'
+      }
+
+      mrnaTemplateFn = component 'mrna_template(...)' {
+        description 'Signature: mrna_template(sequence). Uppercases DNA and maps A->U, G->C, T->A, C->G. Returns mRNA string.'
+      }
+    }
+
+    benchmarks = component 'benchmarks package' {
+      description 'Audit: benchmark entry points consume public APIs for Smith-Waterman, k-mer search, search pipeline refinement, FASTA reading, and database normalization. Runtime values are measurement artifacts for current query, data, parameters, and environment. Tests: tests/benchmarks/test_benchmark_alignment.py. Uncertainty: reports may predate indexed multi-search source/tests.'
+
+      benchmarkSwAlignmentRuntimeFn = component 'benchmark_smith_waterman_alignment_run_time(...)' {
+        description 'Consumes FASTA path, read_fasta_sequences_only, normalize_database, and local_alignment. Returns float seconds. Uses hard-coded protein query.'
+      }
+
+      benchmarkSwScoresRuntimeFn = component 'benchmark_smith_waterman_scores_run_time(...)' {
+        description 'Consumes FASTA path, read_fasta_sequences_only, normalize_database, and get_best_scores. Returns float seconds. Uses hard-coded protein query.'
+      }
+
+      benchmarkKmerRuntimeFn = component 'benchmark_kmer_search_run_time(...)' {
+        description 'Consumes FASTA path through normalize_database and calls kmer_search. Returns float seconds. Uses hard-coded protein query.'
+      }
+
+      benchmarkKmerRefinementRuntimeFn = component 'benchmark_kmer_refinement_run_time(...)' {
+        description 'Consumes FASTA path and calls search with refinement option. Returns float seconds. Uses hard-coded protein query.'
+      }
+
+      sensitivityBenchmarkFn = component 'benchmark_search_sensitivity.run_benchmark(...)' {
+        description 'Reads benchmark FASTA or cached exhaustive SW CSV, runs k-mer-only and refined search helpers, computes recall and runtime rows, and writes CSV output.'
+      }
+    }
+
+    dataStructures = component 'Observed data structures' {
+      description 'Repository-grounded data shapes passed between public modules. These are not all guaranteed public APIs.'
+
+      queryString = artifact 'query string' {
+        description 'str biological sequence passed to search, k-mer functions, alignment, refinement, and benchmarks. Search does not validate alphabet.'
+      }
+
+      queryRecordList = artifact 'query record list' {
+        description 'list[dict] consumed by multi_search and indexed search. Each query record must have id and sequence in tests.'
+      }
+
+      fastaRecordList = artifact 'FASTA record list' {
+        description 'list[dict] produced by read_fasta_records. Keys include id, db, accession, entry_name, description, header, and sequence depending on header parser.'
+      }
+
+      normalizedDatabase = artifact 'normalized SequenceDatabase' {
+        description 'SequenceDatabase containing sequence records. Search/index consumers expect get_sequences() records with id and sequence.'
+      }
+
+      kmerSet = artifact 'unique k-mer set' {
+        description 'set[str] produced by generate_kmers after uppercasing sequence.'
+      }
+
+      candidateHitList = artifact 'candidate hit list' {
+        description 'list[dict] with id, sequence, shared_kmers. Produced by kmer_search and indexed lookup; consumed by ranking and refinement.'
+      }
+
+      kmerIndexMapping = artifact 'k-mer index mapping' {
+        description 'dict with kmer_index: dict[str,set[str]] and sequence_lookup: dict[str,str]. Produced by index_database_words.'
+      }
+
+      multiSearchResultList = artifact 'multi-search result list' {
+        description 'list[dict] with query_id, query_sequence, query_hits.'
+      }
+
+      refinedHitList = artifact 'refined hit list' {
+        description 'list[dict] candidate hits copied and extended with sw_score and best_positions.'
+      }
+
+      alignmentScoreMatrix = artifact 'alignment score matrix' {
+        description 'list[list[int|float]] dynamic-programming grid for Needleman-Wunsch or Smith-Waterman.'
+      }
+
+      tracebackInfo = artifact 'traceback information' {
+        description 'movement matrix storing tied traceback moves; global labels include diag,left,up; local labels include diagonal,left,vertical.'
+      }
+
+      structuredAlignmentResult = artifact 'structured alignment result dictionary' {
+        description 'dict with algorithm, mode, sequence_1, sequence_2, score, scoring, num_alignments, alignments; local results also include best_positions.'
+      }
+
+      alignmentStatsDict = artifact 'alignment stats dictionary' {
+        description 'dict with alignment_length, matches, mismatches, gaps, gap_columns, identity, identity_excluding_gaps, similarity.'
+      }
+
+      translationResultDict = artifact 'translation pipeline result dictionary' {
+        description 'dict with sequence, length, base_counts, transcribed_strand, amino_acid_chain.'
+      }
+
+      benchmarkMeasurement = artifact 'benchmark measurement artifact' {
+        description 'float runtimes, CSV rows, Markdown reports, cached CSV, and figure outputs. They measure current scripts and inputs, not general biological accuracy.'
+      }
+    }
+
+    benchmarkReports = artifact 'benchmark reports' {
+      description 'Markdown reports and cached CSV/image artifacts under benchmarks.'
+    }
+
+    benchmarkData = artifact 'data/benchmark_sequences' {
+      description 'ASTRAL/SCOPe FASTA subsets used by benchmark scripts and tests.'
+    }
+
+    tests = component 'tests package' {
+      description 'Pytest coverage for sequence utilities, FASTA, database normalization, alignment, search, CLI, and benchmark smoke checks.'
+    }
+
+    datasetTools = component 'dataset_tools.chunk_dataset' {
+      description 'Utility that chunks FASTA datasets into benchmark subset FASTA files.'
+    }
+
+    caseStudyDocs = artifact 'case_studies/uniprot_fetch_demo' {
+      description 'Notes and accession input file for UniProt fetching behavior.'
+    }
+  }
+
+  biopython = external 'Biopython' {
+    description 'Runtime dependency used for sequence translation and substitution matrices.'
+  }
+
+  requestsLib = external 'requests' {
+    description 'Imported by FASTA I/O for HTTP requests to UniProt.'
+  }
+
+  uniprot = external 'UniProt FASTA endpoint' {
+    description 'Remote HTTP endpoint used by fetch_uniprot_sequences.'
+  }
+
+  owner -> cli 'Runs console commands'
+  owner -> demoMain 'May run demo module'
+  owner -> searchPipeline 'Imports public search functions'
+  owner -> nw 'Imports global_alignment'
+  owner -> sw 'Imports local_alignment'
+  owner -> translationPipeline 'Imports process_fasta_sequences'
+
+  cli -> searchPipeline 'Calls search and multi_search'
+  cli -> sw 'Calls local_alignment'
+  cli -> nw 'Calls global_alignment'
+  cli -> fastaIo 'Calls fetch_uniprot_sequences and write_fasta_records'
+
+  demoMain -> searchPipeline 'Calls search'
+
+  searchPipeline -> databaseUtils 'Normalizes database input'
+  searchPipeline -> fastaIo 'Reads query FASTA for multi_search'
+  searchPipeline -> kmerSearch 'Runs regular k-mer candidate scan'
+  searchPipeline -> kmerIndex 'Runs indexed multi-query search'
+  searchPipeline -> similarityRank 'Ranks hit dictionaries'
+  searchPipeline -> refinement 'Optionally refines single-query hits'
+
+  databaseUtils -> sequenceDatabase 'Returns existing or newly wrapped database'
+  databaseUtils -> loadDatabase 'Creates database from FASTA path'
+  loadDatabase -> fastaIo 'Reads FASTA records'
+  loadDatabase -> sequenceDatabase 'Wraps parsed records'
+
+  kmerSearch -> sequenceDatabase 'Reads records via get_sequences'
+  kmerIndex -> sequenceDatabase 'Reads records via get_sequences'
+  kmerIndex -> kmerSearch 'Reuses generate_kmers'
+  refinement -> sw 'Calls get_best_scores'
+  similarityRank -> kmerSearch 'Consumes candidate hit dictionaries'
+
+  nw -> scoring 'Scores pairs and normalizes gap penalty'
+  nw -> alignmentStats 'Adds alignment statistics'
+  sw -> scoring 'Scores pairs and normalizes gap penalty'
+  sw -> alignmentStats 'Adds alignment statistics'
+  scoring -> matrices 'Loads named matrices'
+  matrices -> biopython 'Uses Bio.Align.substitution_matrices'
+
+  fastaIo -> requestsLib 'Uses requests.get'
+  fastaIo -> uniprot 'Fetches accession FASTA'
+
+  translationPipeline -> fastaIo 'Reads records'
+  translationPipeline -> validators 'Filters non-DNA sequences'
+  translationPipeline -> sequenceUtils 'Computes sequence metrics and mRNA'
+  translationPipeline -> translation 'Translates mRNA'
+  translation -> biopython 'Uses Bio.Seq.Seq.translate'
+
+  benchmarks -> fastaIo 'Reads benchmark FASTA'
+  benchmarks -> databaseUtils 'Normalizes benchmark inputs'
+  benchmarks -> kmerSearch 'Measures k-mer search'
+  benchmarks -> searchPipeline 'Measures k-mer plus refinement'
+  benchmarks -> sw 'Measures Smith-Waterman scoring/alignment'
+  benchmarks -> benchmarkData 'Reads datasets'
+  benchmarks -> benchmarkReports 'Writes or corresponds to reports and cached artifacts'
+
+  tests -> cli 'Exercises help and selected CLI commands'
+  tests -> searchPipeline 'Covers search behavior'
+  tests -> kmerSearch 'Covers validation and candidate filtering'
+  tests -> kmerIndex 'Covers indexed multi-search behavior'
+  tests -> refinement 'Covers SW refinement sorting'
+  tests -> fastaIo 'Covers local FASTA parse/write behavior'
+  tests -> databaseUtils 'Covers database normalization'
+  tests -> nw 'Covers global alignment structured output'
+  tests -> sw 'Covers local alignment structured output'
+  tests -> alignmentStats 'Covers stats and unequal-length errors'
+  tests -> translationPipeline 'Covers DNA filtering/transcription/translation pipeline'
+  tests -> benchmarks 'Covers benchmark smoke behavior'
+
+  datasetTools -> fastaIo 'Reads source FASTA records'
+  datasetTools -> benchmarkData 'Writes chunked FASTA files'
+
+  searchPipeline.searchFn -> dataStructures.queryString 'accepts query string'
+  searchPipeline.searchFn -> databaseUtils.normalizeDatabaseFn 'database input categories'
+  databaseUtils.normalizeDatabaseFn -> dataStructures.normalizedDatabase 'returns normalized SequenceDatabase'
+  searchPipeline.searchFn -> kmerSearch.kmerSearchFn 'query string + normalized SequenceDatabase'
+  kmerSearch.kmerSearchFn -> kmerSearch.generateKmersFn 'query string'
+  kmerSearch.generateKmersFn -> dataStructures.kmerSet 'returns unique k-mer set'
+  kmerSearch.kmerSearchFn -> kmerSearch.sharedKmersFn 'query k-mer set + database sequence'
+  kmerSearch.kmerSearchFn -> kmerSearch.filterRelativeFn 'thresholded candidate hit list'
+  kmerSearch.filterRelativeFn -> dataStructures.candidateHitList 'returns filtered candidate hit list'
+  searchPipeline.searchFn -> similarityRank.rankBySharedKmersFn 'candidate hit list'
+  similarityRank.rankBySharedKmersFn -> dataStructures.candidateHitList 'returns ranked hit list'
+  searchPipeline.searchFn -> refinement.refineHitsFn 'top candidate hit list when refinement=True'
+  refinement.refineHitsFn -> sw.getBestScoresFn 'query string + hit sequence'
+  refinement.refineHitsFn -> dataStructures.refinedHitList 'returns refined hit list'
+
+  searchPipeline.multiSearchFn -> fastaIo.readFastaRecordsFn 'query FASTA path when str or Path'
+  fastaIo.readFastaRecordsFn -> dataStructures.fastaRecordList 'returns FASTA record list'
+  searchPipeline.multiSearchFn -> dataStructures.queryRecordList 'uses provided or parsed query records'
+  searchPipeline.multiSearchFn -> searchPipeline.runIndexedMultiSearchFn 'query record list + database when indexed=True'
+  searchPipeline.multiSearchFn -> searchPipeline.runRegularMultiSearchFn 'query record list + database when indexed=False'
+  searchPipeline.runRegularMultiSearchFn -> searchPipeline.searchFn 'per-query sequence string'
+  searchPipeline.runRegularMultiSearchFn -> dataStructures.multiSearchResultList 'returns per-query result list'
+  searchPipeline.runIndexedMultiSearchFn -> kmerIndex.multiQueryIndexedFn 'query record list + normalized SequenceDatabase'
+  kmerIndex.multiQueryIndexedFn -> kmerIndex.indexDatabaseWordsFn 'normalized SequenceDatabase'
+  kmerIndex.indexDatabaseWordsFn -> dataStructures.kmerIndexMapping 'returns k-mer index mapping'
+  kmerIndex.multiQueryIndexedFn -> kmerIndex.getWordOccurrencesFn 'query k-mer set + k-mer index mapping'
+  kmerIndex.getWordOccurrencesFn -> dataStructures.candidateHitList 'returns indexed candidate hit list'
+  kmerIndex.multiQueryIndexedFn -> dataStructures.multiSearchResultList 'returns query_id/query_sequence/query_hits'
+
+  fastaIo.readFastaRecordsFn -> fastaIo.parseFastaHeaderFn 'header string'
+  fastaIo.parseFastaHeaderFn -> dataStructures.fastaRecordList 'metadata dictionaries with sequence added by reader'
+  fastaIo.readFastaSequencesOnlyFn -> fastaIo.readFastaRecordsFn 'FASTA path'
+  fastaIo.writeFastaRecordsFn -> dataStructures.fastaRecordList 'writes FASTA record list'
+  fastaIo.fetchUniprotFn -> uniprot 'accession HTTP request'
+  fastaIo.fetchUniprotFn -> dataStructures.fastaRecordList 'returns records list inside result dict'
+  loadDatabase.createDatabaseFn -> fastaIo.readFastaRecordsFn 'FASTA path'
+  loadDatabase.createDatabaseFn -> dataStructures.normalizedDatabase 'returns SequenceDatabase'
+  databaseUtils.normalizeDatabaseFn -> loadDatabase.createDatabaseFn 'str FASTA path'
+  sequenceDatabase.getSequencesFn -> dataStructures.normalizedDatabase 'exposes stored sequence records'
+
+  nw.globalAlignmentFn -> scoring.normalizeGapFn 'gap_penalty'
+  nw.globalAlignmentFn -> nw.nwInitializeGridFn 'sequence strings + normalized gap penalty'
+  nw.nwInitializeGridFn -> dataStructures.alignmentScoreMatrix 'initial global score matrix'
+  nw.globalAlignmentFn -> nw.nwFillMatrixFn 'score matrix + scoring config'
+  nw.nwFillMatrixFn -> scoring.scorePairFn 'residue pair + scoring matrix or match/mismatch'
+  nw.nwFillMatrixFn -> dataStructures.alignmentScoreMatrix 'filled global score matrix'
+  nw.globalAlignmentFn -> nw.nwMovementFn 'filled score matrix'
+  nw.nwMovementFn -> dataStructures.tracebackInfo 'global movement matrix'
+  nw.globalAlignmentFn -> nw.nwTraceFn 'traceback information'
+  nw.nwTraceFn -> dataStructures.structuredAlignmentResult 'alignment tuple list consumed by structured result'
+  nw.globalAlignmentFn -> alignmentStats.getAlignmentStatsFn 'aligned sequence pair'
+  alignmentStats.getAlignmentStatsFn -> dataStructures.alignmentStatsDict 'returns stats dictionary'
+  nw.globalAlignmentFn -> dataStructures.structuredAlignmentResult 'returns structured alignment result dictionary'
+
+  sw.localAlignmentFn -> scoring.normalizeGapFn 'gap_penalty'
+  sw.localAlignmentFn -> sw.swInitializeGridFn 'sequence strings'
+  sw.swInitializeGridFn -> dataStructures.alignmentScoreMatrix 'initial local score matrix'
+  sw.localAlignmentFn -> sw.swFillLocalFn 'score matrix + movement matrix + scoring config'
+  sw.swFillLocalFn -> scoring.scorePairFn 'residue pair + scoring matrix or match/mismatch'
+  sw.swFillLocalFn -> dataStructures.alignmentScoreMatrix 'filled local score matrix'
+  sw.swFillLocalFn -> dataStructures.tracebackInfo 'local movement matrix'
+  sw.localAlignmentFn -> sw.swLocalTraceFn 'traceback information + score matrix'
+  sw.localAlignmentFn -> alignmentStats.getAlignmentStatsFn 'aligned sequence pair'
+  sw.localAlignmentFn -> dataStructures.structuredAlignmentResult 'returns structured local alignment result dictionary'
+  sw.getBestScoresFn -> scoring.normalizeGapFn 'gap_penalty'
+  sw.getBestScoresFn -> scoring.scorePairFn 'residue pair + scoring config'
+  sw.getBestScoresFn -> dataStructures.alignmentScoreMatrix 'score-only local DP matrix'
+
+  scoring.scorePairFn -> matrices 'named matrix or loaded matrix'
+  scoring.scoringMetadataFn -> dataStructures.structuredAlignmentResult 'scoring metadata nested in result'
+
+  translationPipeline.processFastaSequencesFn -> fastaIo.readFastaRecordsFn 'FASTA path'
+  translationPipeline.processFastaSequencesFn -> validators.validDnaFn 'uppercase sequence string'
+  translationPipeline.processFastaSequencesFn -> sequenceUtils.gcContentFn 'DNA sequence string'
+  translationPipeline.processFastaSequencesFn -> sequenceUtils.mrnaTemplateFn 'DNA sequence string'
+  translationPipeline.processFastaSequencesFn -> translation.translateSequenceFn 'mRNA string'
+  translationPipeline.processFastaSequencesFn -> dataStructures.translationResultDict 'returns parallel-list result dictionary'
+  translation.translateSequenceFn -> biopython 'Bio.Seq.Seq.translate'
+
+  benchmarks.benchmarkSwAlignmentRuntimeFn -> fastaIo.readFastaSequencesOnlyFn 'benchmark FASTA path'
+  benchmarks.benchmarkSwAlignmentRuntimeFn -> databaseUtils.normalizeDatabaseFn 'sequence list'
+  benchmarks.benchmarkSwAlignmentRuntimeFn -> sw.localAlignmentFn 'query string + database sequence'
+  benchmarks.benchmarkSwAlignmentRuntimeFn -> dataStructures.benchmarkMeasurement 'returns runtime float'
+  benchmarks.benchmarkSwScoresRuntimeFn -> sw.getBestScoresFn 'query string + database sequence'
+  benchmarks.benchmarkSwScoresRuntimeFn -> dataStructures.benchmarkMeasurement 'returns runtime float'
+  benchmarks.benchmarkKmerRuntimeFn -> databaseUtils.normalizeDatabaseFn 'benchmark FASTA path'
+  benchmarks.benchmarkKmerRuntimeFn -> kmerSearch.kmerSearchFn 'query string + normalized SequenceDatabase'
+  benchmarks.benchmarkKmerRuntimeFn -> dataStructures.benchmarkMeasurement 'returns runtime float'
+  benchmarks.benchmarkKmerRefinementRuntimeFn -> searchPipeline.searchFn 'query string + FASTA path + refinement flag'
+  benchmarks.benchmarkKmerRefinementRuntimeFn -> dataStructures.benchmarkMeasurement 'returns runtime float'
+  benchmarks.sensitivityBenchmarkFn -> fastaIo.readFastaRecordsFn 'benchmark FASTA path'
+  benchmarks.sensitivityBenchmarkFn -> sw.getBestScoresFn 'optional exhaustive SW reference'
+  benchmarks.sensitivityBenchmarkFn -> kmerSearch.kmerSearchFn 'k-mer-only search'
+  benchmarks.sensitivityBenchmarkFn -> dataStructures.benchmarkMeasurement 'writes CSV measurement rows'
+}

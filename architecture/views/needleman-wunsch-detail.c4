@@ -1,0 +1,22 @@
+views {
+  view needlemanWunschDetail of bioseqToolkit.nw {
+    title 'Needleman-Wunsch Detail'
+
+    include bioseqToolkit.nw.globalAlignmentFn
+    include bioseqToolkit.nw.nwInitializeGridFn
+    include bioseqToolkit.nw.nwFillMatrixFn
+    include bioseqToolkit.nw.nwMovementFn
+    include bioseqToolkit.nw.nwTraceFn
+    include bioseqToolkit.scoring.scorePairFn
+    include bioseqToolkit.scoring.normalizeGapFn
+    include bioseqToolkit.scoring.scoringMetadataFn
+    include bioseqToolkit.alignmentStats.getAlignmentStatsFn
+    include bioseqToolkit.dataStructures.queryString
+    include bioseqToolkit.dataStructures.alignmentScoreMatrix
+    include bioseqToolkit.dataStructures.tracebackInfo
+    include bioseqToolkit.dataStructures.structuredAlignmentResult
+    include bioseqToolkit.dataStructures.alignmentStatsDict
+
+    autoLayout LeftRight
+  }
+}

@@ -1,0 +1,21 @@
+views {
+  view fastaAndDatabaseFlow of bioseqToolkit {
+    title 'FASTA and Database Flow'
+
+    include owner
+    include bioseqToolkit.cli
+    include bioseqToolkit.fastaIo
+    include bioseqToolkit.loadDatabase
+    include bioseqToolkit.databaseUtils
+    include bioseqToolkit.sequenceDatabase
+    include bioseqToolkit.searchPipeline
+    include bioseqToolkit.translationPipeline
+    include bioseqToolkit.datasetTools
+    include bioseqToolkit.caseStudyDocs
+    include bioseqToolkit.tests
+    include requestsLib
+    include uniprot
+
+    autoLayout LeftRight
+  }
+}
