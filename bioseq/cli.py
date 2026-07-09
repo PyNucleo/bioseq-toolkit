@@ -33,7 +33,7 @@ def main():
     search_parser = subparsers.add_parser("search", help = "Run kmer search")
     local_alignment_parser = subparsers.add_parser("align-local", help = "Run local alignment on two sequences")
     global_alignment_parser = subparsers.add_parser("align-global", help = "Run global alignment on two sequences")
-    fetch_uniprot_parser = subparsers.add_parser("fetch-uniprot", help = "Fetch UniProt sequences through their accessions.", description="Takes the path for a FASAT file containing valid ids, returns a list of FASTA sequences with their header's details.")
+    fetch_uniprot_parser = subparsers.add_parser("fetch-uniprot", help = "Fetch UniProt sequences through their accessions.", description="Takes the path for a FASTA file containing valid ids, returns a list of FASTA sequences with their header's details.")
     multi_query_search_parser = subparsers.add_parser("multi-search", help = "Perform a search of top hits for query sequences inside a FASTA file.")
 
     search_parser.add_argument('-q', '--query', type=str, required=True)
@@ -63,14 +63,15 @@ def main():
     fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True)
     fetch_uniprot_parser.add_argument("--full-header", action="store_false")
     fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true")
-    fetch_uniprot_parser.add_argument("--show-failed", action="store_true")
+    fetch_uniprot_parser.add_argument("--show-failed", action="store_true", default=False)
 
     multi_query_search_parser.add_argument("-q", "--query-sequences", type=str, required=True)
     multi_query_search_parser.add_argument("-d", "--database", type=str, required=True)
     multi_query_search_parser.add_argument("-k", "--kmer-size", type=int, default=3)
     multi_query_search_parser.add_argument("-t", "--threshold", type=int, default=1)
-    multi_query_search_parser.add_argument("--regular", dest="indexed", action="store_false")
-    multi_query_search_parser.set_defaults(indexed=True)
+    multi_query_search_parser.add_argument("-n", "--top-n-hits", type=int, default=10)
+    multi_query_search_parser.add_argument("--regular", dest="indexed", action="store_false", default=True)
+    multi_query_search_parser.add_argument("-r", "--refine", dest="refine_result", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -120,8 +121,8 @@ def main():
         print("Fetch Summary:")
         print("--------------\n")
         print(f"Successfully fetched accessions: {len(result['records'])}")
-        print(f"Failed accessions: {len(result["failed"])}")
-        print(f'Output written to: {args.result_path}\n')
+        print(f"Failed accessions: {len(result['failed'])}")
+        print(f"Output written to: {args.result_path}\n")
         if args.show_failed:
             print("Detailed breakdown of failed accessions:")
             print("----------------------------------------\n")
@@ -136,13 +137,13 @@ def main():
                 k=args.kmer_size,
                 threshold=args.threshold,
                 top_n_hits=args.top_n_hits,
-                indexed=args.regular_kmer_search,
-                refinement=False,
+                indexed=args.indexed,
+                refinement=args.refine_result,
             )
         end = time.perf_counter()
         print(json.dumps(result, indent=2)) 
 
-        print(f'\nFinished in: {end - start}')
+        print(f"\nFinished in: {end - start}")
 
 if __name__ == "__main__":
     main()
