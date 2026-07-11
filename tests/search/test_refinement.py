@@ -20,7 +20,7 @@ def test_refinement_adds_sw_score_and_best_positions():
 
     assert len(results) == 1
     assert results[0]["sequence"] == "ATGCGT"
-    assert results[0]["sw_score"] == 10
+    assert results[0]["sw_score"] == 5
     assert results[0]["best_positions"] == [(5, 5)]
 
 

@@ -7,7 +7,17 @@ from bioseq.search.refinement import refine_hits
 from bioseq.fasta_io import read_fasta_records
 from database.database_utils import normalize_database
 
-def search(query, database, k=3, threshold=1, top_n_hits=10, refinement=False):
+def search(query, 
+           database=None, 
+           k=3, 
+           threshold=1, 
+           top_n_hits=10, 
+           refinement=False, 
+           match_score = 1, 
+           mismatch_score = -1,
+           gap_penalty = -2, 
+           matrix = None
+           ):
     
    """
     Run a BLAST-like sequence search pipeline.
@@ -52,7 +62,7 @@ def search(query, database, k=3, threshold=1, top_n_hits=10, refinement=False):
    ranked_hits = ranked_hits[:top_n_hits]
 
    if refinement:
-     return refine_hits(query, ranked_hits)
+     return refine_hits(query, ranked_hits, gap_penalty, matrix, match_score, mismatch_score)
    
    if not refinement:
         return ranked_hits

@@ -1,7 +1,7 @@
 from bioseq.alignment.smith_waterman import get_best_scores
 
 
-def refine_hits(query, top_hits, gap_penalty=-2):
+def refine_hits(query, top_hits, gap_penalty=-2, matrix=None, match_score=1, mismatch_score=-1):
     """
     Refine k-mer search hits using Smith-Waterman local alignment.
 
@@ -21,6 +21,13 @@ def refine_hits(query, top_hits, gap_penalty=-2):
     gap_penalty : int, optional
         Gap penalty used by Smith-Waterman. Positive values are converted to
         negative values by the scoring utility. Default is -2.
+    matrix : str, optional
+        The matrix to be used for scoring. If not passed, linear match/mismatch
+        scoring will be used. If an invalid matrix is passed, raises "KeyError".
+    match_score : int, optional
+        The score used for matching residues if no matrix is passed.
+    mismatch_score : int, optional
+        The score used for mismatching residues if no matrix is passed.
 
     Returns
     -------
@@ -38,7 +45,10 @@ def refine_hits(query, top_hits, gap_penalty=-2):
         score, positions = get_best_scores(
             query,
             refined_hit["sequence"],
-            gap_penalty
+            gap_penalty,
+            matrix=matrix,
+            match=match_score,
+            mismatch=mismatch_score
         )
 
         refined_hit["sw_score"] = score
