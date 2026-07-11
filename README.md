@@ -51,7 +51,6 @@ Current important limitations include:
 
 - No affine gap penalties yet
 - No E-values or bit scores yet
-- No indexed k-mer search yet
 - No seed-extension step yet
 - Command-line interface is still minimal and early-stage
 - No completed biological case study yet
@@ -115,9 +114,10 @@ Using `python -m pytest` is recommended because it runs tests through the active
 
 ## Dependencies
 
-Runtime dependency:
+Runtime dependencies:
 
 - Biopython
+- requests
 
 Development dependency:
 
@@ -278,6 +278,24 @@ Substitution-matrix support currently uses Biopython matrix loading with cached 
 
 ```text
 bioseq-toolkit/
+├── architecture/
+│   ├── README.md
+│   ├── model.c4
+│   ├── open_questions.md
+│   ├── audit-notes/
+│   └── views/
+│       ├── system-overview.c4
+│       ├── search-workflow.c4
+│       ├── alignment-workflow.c4
+│       ├── fasta-and-database-flow.c4
+│       ├── translation-and-benchmarks.c4
+│       ├── search-pipeline-detail.c4
+│       ├── kmer-candidate-retrieval-detail.c4
+│       ├── smith-waterman-detail.c4
+│       ├── needleman-wunsch-detail.c4
+│       ├── fasta-database-normalization-detail.c4
+│       └── translation-detail.c4
+│
 ├── bioseq/
 │   ├── alignment/
 │   │   ├── alignment_stats.py
@@ -291,10 +309,12 @@ bioseq-toolkit/
 │   │   └── translation_pipeline.py
 │   │
 │   ├── search/
+│   │   ├── kmer_index.py
 │   │   ├── kmer_search.py
 │   │   ├── refinement.py
 │   │   └── similarity_search.py
 │   │
+│   ├── __init__.py
 │   ├── cli.py
 │   ├── fasta_io.py
 │   ├── main.py
@@ -308,6 +328,7 @@ bioseq-toolkit/
 │   └── sequence_database.py
 │
 ├── benchmarks/
+│   ├── figures/
 │   ├── BENCHMARKS.md
 │   ├── benchmark_alignment.py
 │   ├── benchmark_search.py
@@ -323,6 +344,7 @@ bioseq-toolkit/
 │       ├── astral_1000.fasta
 │       └── astral_10000.fasta
 │
+├── InputFilesForTesting/
 ├── dataset_tools/
 │   └── chunk_dataset.py
 │
@@ -335,15 +357,13 @@ bioseq-toolkit/
 │   ├── database/
 │   ├── pipelines/
 │   ├── search/
-│   ├── test_cli.py
-│   ├── test_fasta_io.py
-│   ├── test_main.py
 │   └── test_sequence_utils.py
 │
+├── .gitignore
+├── README.md
 ├── pyproject.toml
 ├── pytest.ini
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
 ---
@@ -568,8 +588,10 @@ This is the first step toward BLAST-like search behavior: use a fast word-based 
 
 Current limitation:
 
-- The current implementation scans the database directly.
-- It does not yet build an inverted k-mer index.
+- Experimental indexed multi-query k-mer search exists, but it is not yet treated as a stable public feature.
+- Regular k-mer search scans database sequences directly.
+- Indexed multi-query search is currently exposed as an internal/experimental optimization through `multi_search(..., indexed=True)` and the `bioseq multi-search` CLI default.
+- Indexed search still needs focused tests, documentation, and benchmark comparison against regular k-mer scanning.
 - It does not yet track seed positions.
 - It does not yet perform seed extension.
 - It does not currently validate whether the query and database are the same biological sequence type, such as DNA-vs-protein.
@@ -842,7 +864,6 @@ Important limitations include:
 
 - No affine gap penalties yet
 - No statistical significance estimates such as E-values or bit scores
-- No indexed k-mer search yet
 - Current k-mer search scans database sequences directly
 - No seed-extension step yet
 - Command-line interface is still minimal and early-stage
@@ -852,7 +873,7 @@ Important limitations include:
 - Matrix scoring exists initially, but needs cleaner optimization and broader validation
 - Not intended for production biological analysis
 
-These limitations are intentional development targets, not hidden assumptions.
+These limitations are intentional development targets.
 
 ---
 
@@ -923,24 +944,7 @@ Possible measurements:
 
 ---
 
-### 6. Add Indexed Search
-
-Build an inverted k-mer index so database k-mers do not need to be regenerated for every query.
-
-Example idea:
-
-```python
-{
-    "ATG": ["seq1", "seq5", "seq9"],
-    "TGC": ["seq1", "seq2"]
-}
-```
-
-This would make repeated searches more scalable.
-
----
-
-### 7. Add Affine Gap Penalties
+### 6. Add Affine Gap Penalties
 
 Current alignments use a linear gap model.
 
@@ -963,7 +967,7 @@ This would make alignments more biologically realistic.
 
 ---
 
-### 8. Add a Biological Case Study
+### 7. Add a Biological Case Study
 
 Use the toolkit on a real protein-family dataset.
 
@@ -986,14 +990,16 @@ A biological case study is important because it would turn the project from a so
 
 ---
 
-### 9. Improve CLI and Packaging
+### 8. Improve CLI and Packaging
 
 A minimal command-line interface now exists for:
 
 ```bash
 bioseq search --help
+bioseq multi-search --help
 bioseq align-local --help
 bioseq align-global --help
+bioseq fetch-uniprot --help
 ```
 
 The module-style form also remains supported:
@@ -1002,6 +1008,8 @@ The module-style form also remains supported:
 python -m bioseq.cli search --help
 python -m bioseq.cli align-local --help
 python -m bioseq.cli align-global --help
+python -m bioseq.cli fetch-uniprot --help
+python -m bioseq.cli multi-search --help
 ```
 
 Current CLI output is structured JSON.
