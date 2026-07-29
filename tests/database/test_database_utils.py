@@ -35,3 +35,45 @@ def test_normalize_database():
         normalize_database(123)
     with pytest.raises(TypeError):
         normalize_database({"seq1": "ATGC"})
+
+
+def test_normalize_database_rejects_duplicate_ids_with_all_positions():
+    database = SequenceDatabase([
+        {"id": "alpha", "sequence": "AAAA"},
+        {"id": "beta", "sequence": "CCCC"},
+        {"id": "alpha", "sequence": "GGGG"},
+        {"id": "beta", "sequence": "TTTT"},
+        {"id": "beta", "sequence": "ACGT"},
+    ])
+
+    with pytest.raises(ValueError) as error:
+        normalize_database(database)
+
+    message = str(error.value)
+    assert "Duplicate database IDs detected:" in message
+    assert "'alpha' appears in records [1, 3]" in message
+    assert "'beta' appears in records [2, 4, 5]" in message
+
+
+def test_normalize_database_rejects_duplicate_ids_from_fasta(tmp_path):
+    fasta = tmp_path / "duplicate_ids.fasta"
+    fasta.write_text(
+        ">duplicate first record\n"
+        "AAAA\n"
+        ">unique\n"
+        "CCCC\n"
+        ">duplicate second record\n"
+        "GGGG\n"
+    )
+
+    with pytest.raises(ValueError, match="'duplicate' appears in records \\[1, 3\\]"):
+        normalize_database(str(fasta))
+
+
+def test_normalize_database_accepts_unique_ids_with_repeated_sequences():
+    database = SequenceDatabase([
+        {"id": "first", "sequence": "AAAA"},
+        {"id": "second", "sequence": "AAAA"},
+    ])
+
+    assert normalize_database(database) is database
