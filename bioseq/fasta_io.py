@@ -234,19 +234,29 @@ def fetch_uniprot_sequences(accession_file, strict=False):
 
 def write_fasta_records(records, output_path, full_header):
 
-    if full_header:
-        word = "header"
-        first_char = ""
-    else:
-        first_char = ">"
-
-        if "accession" in records:
-            word = "accession"
-        else:
-            word = "id"
-        
     with open(output_path, "w", newline="") as file:
+        for record_number, record in enumerate(records, start=1):
+            if "sequence" not in record:
+                raise ValueError(f"Record {record_number} is missing required sequence field.")
 
-        for record in records:
-            file.write(first_char + record[word] + "\n")
+            if full_header:
+                header = record.get("header")
+                if not isinstance(header, str) or not header:
+                    raise ValueError(
+                        f"Record {record_number} has a missing or unusable header."
+                    )
+            else:
+                accession = record.get("accession")
+                record_id = record.get("id")
+                identifier = accession if isinstance(accession, str) and accession else record_id
+
+                if not isinstance(identifier, str) or not identifier:
+                    raise ValueError(
+                        f"Record {record_number} has no usable accession or ID."
+                    )
+
+                clean_identifier = identifier.lstrip(">")
+                header = f">{clean_identifier}"
+
+            file.write(header + "\n")
             file.write(record["sequence"] + "\n")
