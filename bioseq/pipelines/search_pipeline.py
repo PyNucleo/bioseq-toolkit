@@ -113,7 +113,15 @@ def run_regular_multi_search(query_records, database, k, threshold, top_n_hits, 
 
     return results
 
-def multi_search(query_fasta, database, k=3, threshold=1, top_n_hits=10, indexed=True, refinement=False, sort_results=True):
+def multi_search(query_fasta,
+                 database, 
+                 k=3, 
+                 threshold=1, 
+                 top_n_hits=10, 
+                 indexed=True, 
+                 refinement=False, 
+                 sort_results=True
+                ):
 
     if isinstance(query_fasta, (str, Path)):
         query_records = read_fasta_records(query_fasta)

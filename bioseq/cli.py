@@ -42,10 +42,14 @@ def main():
     search_parser.add_argument('-t', '--threshold',type=int, default=3)
     search_parser.add_argument('-n', '--top-n-hits', type=int, default=10)
     search_parser.add_argument('-r', '--refine', action='store_true')
+    search_parser.add_argument('-m', '--match', type=int, default=1)
+    search_parser.add_argument('-u', '--mismatch', type=int, default=-1)
+    search_parser.add_argument('-g', '--gap-penalty', type=int, default=-2)
+    search_parser.add_argument('-x', '--matrix', type=str, default=None)
 
     local_alignment_parser.add_argument('-s1', '--sequence1', type=str, required=True)
     local_alignment_parser.add_argument('-s2', '--sequence2', type=str, required=True)
-    local_alignment_parser.add_argument('-m', '--match', type=int, default=2)
+    local_alignment_parser.add_argument('-m', '--match', type=int, default=1)
     local_alignment_parser.add_argument('-u', '--mismatch', type=int, default=-1)
     local_alignment_parser.add_argument('-g', '--gap-penalty', type=int, default=-2)
     local_alignment_parser.add_argument('-x', '--matrix', type=str, default=None)
@@ -53,7 +57,7 @@ def main():
 
     global_alignment_parser.add_argument('-s1', '--sequence1', type=str, required=True)
     global_alignment_parser.add_argument('-s2', '--sequence2', type=str, required=True)
-    global_alignment_parser.add_argument('-m', '--match', type=int, default=2)
+    global_alignment_parser.add_argument('-m', '--match', type=int, default=1)
     global_alignment_parser.add_argument('-u', '--mismatch', type=int, default=-1)
     global_alignment_parser.add_argument('-g', '--gap-penalty', type=int, default=-2)
     global_alignment_parser.add_argument('-x', '--matrix', type=str, default=None)
@@ -82,7 +86,11 @@ def main():
             args.kmer_size,
             args.threshold,
             args.top_n_hits,
-            args.refine
+            args.refine,
+            args.match,
+            args.mismatch,
+            args.gap_penalty,
+            args.matrix
         )
         print(json.dumps(results, indent=2))
 
