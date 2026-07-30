@@ -67,7 +67,7 @@ def search(query,
    if not refinement:
         return ranked_hits
 
-def run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results):
+def run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement):
     if refinement:
         raise NotImplementedError("Indexed multi-search refinement is not implemented yet.")
     
@@ -91,7 +91,7 @@ def run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, 
 
     return results
 
-def run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results):
+def run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement):
     results = []
     for query in query_records:
         temp_result = search(query["sequence"],
@@ -119,8 +119,7 @@ def multi_search(query_fasta,
                  threshold=1, 
                  top_n_hits=10, 
                  indexed=True, 
-                 refinement=False, 
-                 sort_results=True
+                 refinement=False
                 ):
 
     if isinstance(query_fasta, (str, Path)):
@@ -130,9 +129,9 @@ def multi_search(query_fasta,
     database = normalize_database(database)
 
     if indexed:
-        return run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results)
+        return run_indexed_multi_search(query_records, database, k, threshold, top_n_hits, refinement)
 
-    return run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement, sort_results)
+    return run_regular_multi_search(query_records, database, k, threshold, top_n_hits, refinement)
 
 
 
