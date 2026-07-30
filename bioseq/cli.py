@@ -65,7 +65,7 @@ def main():
 
     fetch_uniprot_parser.add_argument("-f", "--file-path", type=str, required=True)
     fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True)
-    fetch_uniprot_parser.add_argument("--full-header", action="store_false")
+    fetch_uniprot_parser.add_argument("--full-header", action="store_true", default=False)
     fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true")
     fetch_uniprot_parser.add_argument("--show-failed", action="store_true", default=False)
 

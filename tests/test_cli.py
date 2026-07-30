@@ -1,5 +1,7 @@
 import json
 import subprocess
+import pytest
+import bioseq.cli as cli
 import sys
 
 
@@ -235,3 +237,73 @@ def test_cli_rejects_unknown_command():
 
     assert result.returncode != 0
     assert "invalid choice" in result.stderr.lower()
+
+@pytest.mark.parametrize(
+    ("extra_args", "expected_full_header"),
+    [
+        ([], False),
+        (["--full-header"], True),
+    ],
+)
+def test_cli_fetch_uniprot_passes_full_header_flag(
+    monkeypatch,
+    tmp_path,
+    extra_args,
+    expected_full_header,
+):
+    input_path = tmp_path / "accessions.txt"
+    output_path = tmp_path / "output.fasta"
+
+    fetched_result = {
+        "records": [
+            {
+                "id": "P12345",
+                "accession": "P12345",
+                "header": ">sp|P12345|TEST_ENTRY Example protein",
+                "sequence": "ATGC",
+            }
+        ],
+        "failed": [],
+    }
+
+    captured = {}
+
+    def fake_fetch_uniprot_sequences(file_path, strict):
+        captured["fetch_args"] = (file_path, strict)
+        return fetched_result
+
+    def fake_write_fasta_records(records, result_path, full_header):
+        captured["write_args"] = (records, result_path, full_header)
+
+    monkeypatch.setattr(
+        cli,
+        "fetch_uniprot_sequences",
+        fake_fetch_uniprot_sequences,
+    )
+    monkeypatch.setattr(
+        cli,
+        "write_fasta_records",
+        fake_write_fasta_records,
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "bioseq",
+            "fetch-uniprot",
+            "-f",
+            str(input_path),
+            "-o",
+            str(output_path),
+            *extra_args,
+        ],
+    )
+
+    cli.main()
+
+    assert captured["fetch_args"] == (str(input_path), False)
+    assert captured["write_args"] == (
+        fetched_result["records"],
+        str(output_path),
+        expected_full_header,
+    )
