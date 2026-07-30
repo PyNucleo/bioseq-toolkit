@@ -1,37 +1,65 @@
 import requests
 
-def read_fasta_records(file):
-    FASTA = open(file, "r")
+def validate_fasta_header(record, line_number=None):
+    if not record.get("id"):
+        location = (
+            f" at line {line_number}"
+            if line_number is not None
+            else ""
+        )
+
+        raise ValueError(
+            f"Invalid FASTA header{location}: the record ID is empty."
+        )
+
+def read_fasta_records(file_path):
     records = []
     record = None
     current_seq = ""
+    record_starting_line = None
+    with open(file_path, "r") as fasta_file:
+        for line_number, line in enumerate(fasta_file, start=1):
 
-    for line in FASTA:
+            line = line.rstrip("\r\n")
 
-        line = line.rstrip()
+            if not line.strip():
+                continue
 
-        if line.startswith(">"):
+            if line.startswith(">"):
+                if record is not None:
+                    if not current_seq:
+                        raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
+                                         'sequence is empty.')
+                    record["sequence"] = current_seq
+                    records.append(record)
 
-            if record is not None:
-                record["sequence"] = current_seq
-                records.append(record)
+                record_starting_line = line_number
+                record = parse_fasta_header(line)
+                validate_fasta_header(record, line_number)
+                record["sequence"] = ""
+                
 
-            record = parse_fasta_header(line)
-            record["sequence"] = ""
-            
+                current_seq = ""
 
-            current_seq = ""
+            else:
+                if record is None: #Did not find a previous header
+                    raise ValueError(f'Invalid FASTA detected on line {line_number}: '
+                                     'Sequence data appeared before the first header.')
+                if any(character.isspace() for character in line):
+                    raise ValueError(
+                          f"Invalid FASTA sequence at line {line_number}: "
+                          "sequence data contains whitespace."
+                    )
+                current_seq += line
 
-        else:
+        if record is not None:
+            if not current_seq:
+                raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
+                                 'sequence is empty.')
+            record["sequence"] = current_seq
+            records.append(record)
 
-            current_seq += line
-
-    if record is not None:
-
-        record["sequence"] = current_seq
-        records.append(record)
-
-    return records
+        return records
 
 def parse_fasta_header(header):
     clean_header = header.lstrip(">")
@@ -40,6 +68,7 @@ def parse_fasta_header(header):
         return parse_uniprot_fasta(header)
 
     return parse_generic_fasta(header)
+
 
 
 
