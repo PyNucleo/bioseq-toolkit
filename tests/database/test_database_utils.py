@@ -1,5 +1,6 @@
 import pytest
 
+from bioseq.pipelines.search_pipeline import search
 from database.database_utils import normalize_database
 from database.sequence_database import SequenceDatabase
 
@@ -77,3 +78,29 @@ def test_normalize_database_accepts_unique_ids_with_repeated_sequences():
     ])
 
     assert normalize_database(database) is database
+def test_search_requires_database_argument():
+    with pytest.raises(TypeError) as error:
+        search("ATGC")
+
+    message = str(error.value).lower()
+    assert "database" in message
+    assert "required positional argument" in message
+
+@pytest.mark.parametrize(
+    ("database", "type_name"),
+    [
+        (123, "int"),
+        ({"seq1": "ATGC"}, "dict"),
+    ],
+)
+def test_normalize_database_rejects_unsupported_types(database, type_name):
+    with pytest.raises(TypeError) as error:
+        normalize_database(database)
+
+    message = str(error.value)
+
+    assert type_name in message
+    assert "SequenceDatabase" in message
+    assert "list[str]" in message
+    assert "FASTA" in message
+    assert "string" in message

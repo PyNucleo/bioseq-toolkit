@@ -8,7 +8,7 @@ from bioseq.fasta_io import read_fasta_records
 from database.database_utils import normalize_database
 
 def search(query, 
-           database=None, 
+           database, 
            k=3, 
            threshold=1, 
            top_n_hits=10, 
