@@ -43,7 +43,10 @@ def normalize_database(db):
         raw_db = create_database(db)
 
     else:
-        raise TypeError
+        received_type = type(db).__name__
+
+        raise TypeError(f"Unsupported database type: {received_type}. "
+        "Expected SequenceDatabase, list[str], or a FASTA file path string.")
 
     validate_unique_database_ids(raw_db)
 
