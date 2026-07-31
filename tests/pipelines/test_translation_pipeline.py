@@ -23,7 +23,7 @@ def test_lower_and_upper_case_dna(tmp_path):
     result =  {
         "sequence": ["ATGC","AC","GC","C","ACTCGCAGTAGCA", "ATGGCCATT"],
         "length": [4, 2, 2, 1, 13, 9],
-        "base_counts": [50, 50, 100, 100, 53.85, 44.44],
+        "gc_content": [50, 50, 100, 100, 53.85, 44.44],
         "transcribed_strand": ["UACG", "UG","CG","G","UGAGCGUCAUCGU", "UACCGGUAA"],
         "amino_acid_chain": ["Y", "", "", "", "", "YR"],
     }
