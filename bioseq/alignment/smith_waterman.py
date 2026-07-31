@@ -26,7 +26,7 @@ def dynamic_movement_filling(d, l, v):
     
     return tempArray
 
-def fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1):
+def fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=2, mismatch_s=-1, matrix_name=None):
    
     gap_penalty = normalize_gap(gap_penalty)
 
@@ -37,7 +37,7 @@ def fill_local(s1, s2, matrix, grid,movement_grid, gap_penalty, match_s=2, misma
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = score_pair(s1[i - 1], s2[j - 1], matrix, match_score=match_s, mismatch_score=mismatch_s)
+            match_score = score_pair(s1[i - 1], s2[j - 1], matrix, match_score=match_s, mismatch_score=mismatch_s, matrix_name=matrix_name)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -111,7 +111,7 @@ def get_best_scores(s1, s2, gap_penalty, matrix=None, match=2, mismatch=-1):
     for i in range(1, len(s1) + 1):
         
         for j in range(1, len(s2) + 1):
-            match_score = score_pair(s1[i - 1], s2[j - 1], scoring_matrix, match_score=match, mismatch_score=mismatch)
+            match_score = score_pair(s1[i - 1], s2[j - 1], scoring_matrix, match_score=match, mismatch_score=mismatch, matrix_name=matrix if isinstance(matrix, str) else None)
             
             diagonal = grid[i - 1][j - 1] + match_score
             horizontal = grid[i][j - 1] + gap_penalty
@@ -139,7 +139,17 @@ def local_alignment(s1, s2, match=2, mismatch=-1, gap_penalty=-2, matrix=None, r
     
     movement_grid = initialize_movementGrid(s1, s2)
     
-    best_score, start_at = fill_local(s1, s2, scoring_matrix, grid,movement_grid, gap_penalty, match_s=match,mismatch_s=mismatch)
+    best_score, start_at = fill_local(
+        s1,
+        s2,
+        scoring_matrix,
+        grid,
+        movement_grid,
+        gap_penalty,
+        match_s=match,
+        mismatch_s=mismatch,
+        matrix_name=matrix if isinstance(matrix, str) else None,
+    )
 
     all_alignments = []
     

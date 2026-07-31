@@ -1,7 +1,7 @@
 import pytest
+from Bio.Align import substitution_matrices
 
 from bioseq.alignment.scoring import score_pair
-from bioseq.alignment.substitution_matrices import load_matrix
 
 
 def test_blosum62_known_pair_scores():
@@ -34,10 +34,35 @@ def test_blosum62_rejects_unsupported_residues(a, b, normalized_a, normalized_b)
     assert repr(normalized_b) in str(error.value)
 
 
-def test_loaded_biopython_matrix_is_supported_and_validated():
-    matrix = load_matrix("BLOSUM62")
+def test_named_matrix_unsupported_residue_diagnostic_includes_context_and_alphabet():
+    with pytest.raises(ValueError) as error:
+        score_pair("a", "?", loaded_matrix="BLOSUM62")
 
-    assert score_pair("H", "P", loaded_matrix=matrix) == -2.0
+    message = str(error.value)
+    assert "('A', '?')" in message
+    assert "BLOSUM62" in message
+    assert "supported symbols" in message.lower()
+    for symbol in ("A", "X", "*"):
+        assert symbol in message
 
-    with pytest.raises(ValueError, match="not supported"):
-        score_pair("H", "?", loaded_matrix=matrix)
+
+def test_raw_biopython_matrix_unsupported_residue_uses_generic_diagnostic():
+    raw_matrix = substitution_matrices.load("BLOSUM62")
+
+    with pytest.raises(ValueError) as error:
+        score_pair("A", "?", loaded_matrix=raw_matrix)
+
+    message = str(error.value)
+    assert "('A', '?')" in message
+    assert "selected substitution matrix" in message.lower()
+    assert "supported symbols" in message.lower()
+    assert "X" in message
+    assert "*" in message
+    assert "BLOSUM62" not in message
+    assert "Array([" not in message
+
+
+def test_raw_biopython_matrix_valid_scoring_is_unchanged():
+    raw_matrix = substitution_matrices.load("BLOSUM62")
+
+    assert score_pair("H", "P", loaded_matrix=raw_matrix) == -2.0
