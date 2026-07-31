@@ -142,11 +142,17 @@ def test_kmer_search_rejects_invalid_threshold_values():
         {"id": "seq1", "sequence": "ATGCGT"},
     ])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="threshold.*positive"):
+        kmer_search("ATGC", db, k=3, threshold=0)
+
+    with pytest.raises(ValueError, match="threshold.*positive"):
         kmer_search("ATGC", db, k=3, threshold=-1)
 
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="threshold.*integer"):
         kmer_search("ATGC", db, k=3, threshold=1.5)
+
+    with pytest.raises(TypeError, match="threshold.*integer"):
+        kmer_search("ATGC", db, k=3, threshold=True)
 
 
 def test_kmer_search_returns_empty_when_k_larger_than_query():

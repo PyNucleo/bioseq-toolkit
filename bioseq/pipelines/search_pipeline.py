@@ -6,6 +6,7 @@ from bioseq.search.similarity_search import rank_by_shared_kmers
 from bioseq.search.refinement import refine_hits
 from bioseq.fasta_io import read_fasta_records
 from database.database_utils import normalize_database
+from bioseq.validators import validate_k_and_threshold
 
 def search(query, 
            database, 
@@ -52,7 +53,9 @@ def search(query,
         Search hits sorted by shared k-mers if refinement is False, or by
         Smith-Waterman score if refinement is True.
     """
-   
+
+   validate_k_and_threshold(k, threshold)
+
    db = normalize_database(database)
 
    potential_hits = kmer_search(query, db, k, threshold) #Dictionary of sequence : shared_kmer pairs 
@@ -121,6 +124,8 @@ def multi_search(query_fasta,
                  indexed=True, 
                  refinement=False
                 ):
+
+    validate_k_and_threshold(k, threshold)
 
     if isinstance(query_fasta, (str, Path)):
         query_records = read_fasta_records(query_fasta)

@@ -1,3 +1,5 @@
+from bioseq.validators import validate_k_and_threshold
+
 def kmer_search(query, db, k, threshold):
 
     """
@@ -31,7 +33,9 @@ def kmer_search(query, db, k, threshold):
         - "sequence": database sequence
         - "shared_kmers": number of shared k-mers with the query
     """
-    is_valid_query_length = validate_kmer_params(query, k, threshold)
+    validate_k_and_threshold(k, threshold)
+
+    is_valid_query_length = validate_kmer_params(query, k)
 
     if not is_valid_query_length:
         return []
@@ -60,21 +64,17 @@ def kmer_search(query, db, k, threshold):
     return filter_by_relative_score(max_shared_kmers, results)
 
 def validate_kmer_params(seq, k, threshold=None):
-    if not isinstance(k, int):
+    if not isinstance(k, int) or isinstance(k, bool):
         raise TypeError("k must be an integer.")
 
-    if k <= 0:
+    if k < 1:
         raise ValueError("k must be a positive integer.")
+
+    if threshold is not None:
+        validate_k_and_threshold(k, threshold)
 
     if k > len(seq):
         return False
-
-    if threshold is not None:
-        if not isinstance(threshold, int):
-            raise TypeError("threshold must be an integer.")
-
-        if threshold < 0:
-            raise ValueError("threshold must be greater than or equal to 0.")
 
     return True
 

@@ -64,14 +64,14 @@ model {
     }
 
     kmerIndex = component 'bioseq.search.kmer_index' {
-      description 'Audit: public functions multi_query_indexed_search(queries, db, k, threshold), get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold), index_database_words(db_records, k). Builds presence-based inverted index mapping k-mer to set of sequence IDs plus sequence lookup. Does not store positions. Tests: tests/pipelines/test_search_many.py and test_indexed_multi_search_equivalence.py.'
+      description 'Audit: public functions multi_query_indexed_search(queries, db, k, threshold), get_kmer_occurrences(words, indexed_kmers, sequence_lookup, threshold), index_database_words(db_records, k). Builds presence-based inverted index mapping k-mer to set of sequence IDs plus sequence lookup. Does not store positions. Tests: tests/pipelines/test_search_many.py and test_indexed_multi_search_equivalence.py.'
 
       multiQueryIndexedFn = component 'multi_query_indexed_search(...)' {
         description 'Signature: multi_query_indexed_search(queries, db, k, threshold). queries is list[dict] with id and sequence. db is SequenceDatabase. Returns list[dict] with query_id, query_sequence, query_hits.'
       }
 
-      getWordOccurrencesFn = component 'get_word_occurenes(...)' {
-        description 'Signature: get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold). words is set[str]. indexed_kmers is dict[str, set[str]]. sequence_lookup is dict[str, str]. Returns list[dict] hits with id, sequence, shared_kmers after threshold filtering.'
+      getKmerOccurrencesFn = component 'get_kmer_occurrences(...)' {
+        description 'Signature: get_kmer_occurrences(words, indexed_kmers, sequence_lookup, threshold). words is set[str]. indexed_kmers is dict[str, set[str]]. sequence_lookup is dict[str, str]. Returns list[dict] hits with id, sequence, shared_kmers after threshold filtering.'
       }
 
       indexDatabaseWordsFn = component 'index_database_words(...)' {
