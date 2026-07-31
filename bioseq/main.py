@@ -1,8 +1,8 @@
-from .pipelines.translation_pipeline import process_fasta_sequences
-from .pipelines.search_pipeline import search
-from .search.similarity_search import rank_by_shared_kmers
-from .translation import translate_sequence
-from .alignment.needleman_wunsch import global_alignment
+from bioseq.pipelines.translation_pipeline import process_fasta_sequences
+from bioseq.pipelines.search_pipeline import search
+from bioseq.search.similarity_search import rank_by_shared_kmers
+from bioseq.translation import translate_sequence
+from bioseq.alignment.needleman_wunsch import global_alignment
 
 
 def main():
