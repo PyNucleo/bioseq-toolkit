@@ -9,17 +9,27 @@ def get_scoring_matrix(matrix=None):
 
     return matrix
 
-def score_pair(a, b, loaded_matrix = None, match_score = 2, mismatch_score = -1):
+def score_pair(a, b, loaded_matrix = None, match_score = 2, mismatch_score = -1, matrix_name = None):
     a = a.upper()
     b = b.upper()
 
     if loaded_matrix is None:
         return match_score if a == b else mismatch_score
 
-    loaded_matrix = get_scoring_matrix(loaded_matrix)
+    if isinstance(loaded_matrix, str):
+        matrix_name = loaded_matrix
+        loaded_matrix = get_scoring_matrix(loaded_matrix)
 
     if a not in loaded_matrix.alphabet or b not in loaded_matrix.alphabet:
-        raise ValueError(f"Residue pair ({a!r}, {b!r}) is not supported by the selected substitution matrix.") 
+        if matrix_name is not None:
+            matrix_context = f" substitution matrix: {matrix_name}."
+        else:
+            matrix_context = " selected substitution matrix."
+
+        raise ValueError(
+            f"Residue pair ({a!r}, {b!r}) is not supported by the{matrix_context}\n"
+            f"Supported symbols: {' '.join(loaded_matrix.alphabet)}"
+        )
     return loaded_matrix[a, b]
 
 

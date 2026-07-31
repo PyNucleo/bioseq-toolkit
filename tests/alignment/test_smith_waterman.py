@@ -273,8 +273,10 @@ def test_local_alignment_reports_unsupported_matrix_residue():
     with pytest.raises(ValueError) as error:
         local_alignment("HE?RT", "HPEART", matrix="BLOSUM62")
 
-    assert "?" in str(error.value)
-    assert "substitution matrix" in str(error.value).lower()
+    message = str(error.value)
+    assert "('?', 'H')" in message
+    assert "BLOSUM62" in message
+    assert "supported symbols" in message.lower()
 
 
 def test_local_alignment_old_return_format_still_works():
