@@ -17,6 +17,9 @@ def score_pair(a, b, loaded_matrix = None, match_score = 2, mismatch_score = -1)
         return match_score if a == b else mismatch_score
 
     loaded_matrix = get_scoring_matrix(loaded_matrix)
+
+    if a not in loaded_matrix.alphabet or b not in loaded_matrix.alphabet:
+        raise ValueError(f"Residue pair ({a!r}, {b!r}) is not supported by the selected substitution matrix.") 
     return loaded_matrix[a, b]
 
 
