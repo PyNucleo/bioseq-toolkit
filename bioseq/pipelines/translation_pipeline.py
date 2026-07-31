@@ -30,7 +30,7 @@ def process_fasta_sequences(file_path):
     final = {
         "sequence": sequences,
         "length": [total_length(seq) for seq in sequences],
-        "base_counts": [gc_content(seq) for seq in sequences],
+        "gc_content": [gc_content(seq) for seq in sequences],
         "transcribed_strand": mrna_seqs,
         "amino_acid_chain": [translate_sequence(mrna) for mrna in mrna_seqs],
     }
