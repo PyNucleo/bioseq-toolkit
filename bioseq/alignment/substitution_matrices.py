@@ -5,5 +5,8 @@ from functools import lru_cache
 def load_matrix(matrix_name):
     if matrix_name is None:
         return None
-    
-    return substitution_matrices.load(matrix_name)
+
+    try:
+        return substitution_matrices.load(matrix_name)
+    except FileNotFoundError as error:
+        raise ValueError(f"Unknown substitution matrix: {matrix_name!r}") from error

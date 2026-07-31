@@ -261,6 +261,22 @@ def test_local_alignment_with_blosum62_matrix():
     }
 
 
+def test_local_alignment_reports_unknown_substitution_matrix():
+    with pytest.raises(ValueError) as error:
+        local_alignment("HEART", "HPEART", matrix="BLOSSUM62")
+
+    assert "unknown substitution matrix" in str(error.value).lower()
+    assert "BLOSSUM62" in str(error.value)
+
+
+def test_local_alignment_reports_unsupported_matrix_residue():
+    with pytest.raises(ValueError) as error:
+        local_alignment("HE?RT", "HPEART", matrix="BLOSUM62")
+
+    assert "?" in str(error.value)
+    assert "substitution matrix" in str(error.value).lower()
+
+
 def test_local_alignment_old_return_format_still_works():
     result = local_alignment(
         "ATGC",
