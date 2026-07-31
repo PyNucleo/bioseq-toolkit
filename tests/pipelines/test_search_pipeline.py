@@ -1,3 +1,5 @@
+import pytest
+
 from database.database_utils import normalize_database
 from bioseq.pipelines.search_pipeline import search
 
@@ -81,6 +83,20 @@ def test_empty_results():
     )
 
     assert results == []
+
+
+@pytest.mark.parametrize(
+    ("threshold", "exception", "message"),
+    [
+        (0, ValueError, "threshold.*positive"),
+        (-1, ValueError, "threshold.*positive"),
+        (1.5, TypeError, "threshold.*integer"),
+        (True, TypeError, "threshold.*integer"),
+    ],
+)
+def test_search_rejects_invalid_threshold_values(threshold, exception, message):
+    with pytest.raises(exception, match=message):
+        search("ATGC", make_search_db(), k=2, threshold=threshold)
 
 
 def test_search_pipeline_with_refinement_adds_sw_scores():

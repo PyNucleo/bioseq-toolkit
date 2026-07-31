@@ -13,32 +13,14 @@ def multi_query_indexed_search(queries, db, k, threshold):
 
     Parameters
     ----------
-    queries : list of dict
-        Query sequence records. Each query record must contain at least:
-
-        - "id": unique query identifier
-        - "sequence": biological sequence string
-
-        Example:
-        [
-            {"id": "query1", "sequence": "ATGCG"},
-            {"id": "query2", "sequence": "MKWV"}
-        ]
-
-    db : list of dict
-        Database sequence records. Each database record must contain at least:
-
-        - "id": unique database sequence identifier
-        - "sequence": biological sequence string
-
+    queries : list[dict]
+        Normalized query records containing "id" and "sequence".
+    db : SequenceDatabase
+        Normalized database object containing records with unique IDs.
     k : int
-        Size of the k-mers/words used for indexing and lookup.
-
+        Previously validated positive k-mer size.
     threshold : int
-        Minimum number of shared k-mers required for a database sequence to be
-        considered a hit. Note: this parameter is included in the function
-        signature, but filtering should be applied inside the indexed hit
-        generation logic.
+        Previously validated positive minimum shared-k-mer count.
 
     Returns
     -------
@@ -47,14 +29,14 @@ def multi_query_indexed_search(queries, db, k, threshold):
 
         - "query_id": ID of the query sequence
         - "query_sequence": original query sequence
-        - "indexed_hits": list of database hits with shared k-mer counts
+        - "query_hits": list of database hits with shared k-mer counts
 
         Example:
         [
             {
                 "query_id": "query1",
                 "query_sequence": "ATGCG",
-                "indexed_hits": [
+                "query_hits": [
                     {"id": "seq1", "shared_kmers": 3},
                     {"id": "seq2", "shared_kmers": 3}
                 ]
@@ -76,7 +58,7 @@ def multi_query_indexed_search(queries, db, k, threshold):
 
         query_words = generate_kmers(query["sequence"], k)
 
-        db_sequences_shared_kmer_counts = get_word_occurenes(
+        db_sequences_shared_kmer_counts = get_kmer_occurrences(
         query_words,
         indexed_kmers_structure["kmer_index"],
         indexed_kmers_structure["sequence_lookup"],
@@ -92,7 +74,7 @@ def multi_query_indexed_search(queries, db, k, threshold):
     return query_indexed_search_results
 
 
-def get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold):
+def get_kmer_occurrences(words, indexed_kmers, sequence_lookup, threshold):
     """
     Count how many query k-mers are shared with each indexed database sequence.
 
@@ -103,21 +85,14 @@ def get_word_occurenes(words, indexed_kmers, sequence_lookup, threshold):
 
     Parameters
     ----------
-    words : list of str
-        K-mers generated from one query sequence.
-
-        Example:
-        ["ATG", "TGC", "GCG"]
-
-    indexed_kmers : dict
-        Database-wide k-mer index produced by `index_database_words()`.
-
-        Expected structure:
-        {
-            "ATG": {"seq1", "seq2"},
-            "TGC": {"seq1"},
-            "GCG": {"seq1", "seq3"}
-        }
+    words : set[str]
+        Unique query k-mers.
+    indexed_kmers : dict[str, set[str]]
+        Inverted k-mer index.
+    sequence_lookup : dict[str, str]
+        Database ID-to-sequence mapping.
+    threshold : int
+        Previously validated positive minimum shared-k-mer count.
 
     Returns
     -------
@@ -176,20 +151,11 @@ def index_database_words(db_records, k):
 
     Parameters
     ----------
-    db_records : list of dict
-        Database sequence records. Each record must contain at least:
-
-        - "id": unique sequence identifier
-        - "sequence": biological sequence string
-
-        Example:
-        [
-            {"id": "seq1", "sequence": "ATGCGT"},
-            {"id": "seq2", "sequence": "ATGCGA"}
-        ]
-
+    db_records : SequenceDatabase
+        Normalized database object. Records must contain unique "id"
+        values and "sequence" strings.
     k : int
-        Size of the k-mers/words to generate from each database sequence.
+        Previously validated positive k-mer size.
 
     Returns
     -------

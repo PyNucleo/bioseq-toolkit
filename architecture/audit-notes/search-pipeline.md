@@ -73,7 +73,7 @@ Indexed `multi_search(indexed=True)`:
 - Query records consumed by `multi_search`: `list[dict[str, str]]` with:
   - `id`: query identifier.
   - `sequence`: query sequence string.
-- K-mer set: `set[str]` of uppercase unique k-mers, produced by `generate_kmers` and consumed by `get_shared_kmers` or `get_word_occurenes`.
+- K-mer set: `set[str]` of uppercase unique k-mers, produced by `generate_kmers` and consumed by `get_shared_kmers` or `get_kmer_occurrences`.
 - Candidate hit dictionaries returned by `kmer_search` and indexed search:
   - `id`: database record ID.
   - `sequence`: database sequence string.
