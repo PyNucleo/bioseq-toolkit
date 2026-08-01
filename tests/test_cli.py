@@ -39,6 +39,17 @@ def test_cli_search_help_runs():
     assert "--refine" in result.stdout
 
 
+def test_cli_multi_search_help_lists_refinement_scoring_options():
+    result = run_cli("multi-search", "--help")
+
+    assert result.returncode == 0
+    assert "--refine" in result.stdout
+    assert "--match" in result.stdout
+    assert "--mismatch" in result.stdout
+    assert "--gap-penalty" in result.stdout
+    assert "--matrix" in result.stdout
+
+
 def test_cli_align_local_help_runs():
     result = run_cli("align-local", "--help")
 
@@ -237,6 +248,75 @@ def test_cli_rejects_unknown_command():
 
     assert result.returncode != 0
     assert "invalid choice" in result.stderr.lower()
+
+
+@pytest.mark.parametrize(
+    ("extra_args", "expected"),
+    [
+        (
+            [
+                "--refine",
+                "--match", "7",
+                "--mismatch", "-5",
+                "--gap-penalty", "-3",
+                "--matrix", "BLOSUM62",
+            ],
+            {
+                "indexed": True,
+                "refinement": True,
+                "match_score": 7,
+                "mismatch_score": -5,
+                "gap_penalty": -3,
+                "matrix": "BLOSUM62",
+            },
+        ),
+        (
+            ["--regular", "--refine"],
+            {
+                "indexed": False,
+                "refinement": True,
+                "match_score": 1,
+                "mismatch_score": -1,
+                "gap_penalty": -2,
+                "matrix": None,
+            },
+        ),
+    ],
+)
+def test_cli_multi_search_refinement_dispatches_mode_and_scoring(
+    monkeypatch,
+    capsys,
+    extra_args,
+    expected,
+):
+    captured = {}
+
+    def fake_multi_search(**kwargs):
+        captured.update(kwargs)
+        return []
+
+    monkeypatch.setattr(cli, "multi_search", fake_multi_search)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "bioseq",
+            "multi-search",
+            "--query-sequences", "queries.fasta",
+            "--database", "database.fasta",
+            *extra_args,
+        ],
+    )
+
+    cli.main()
+    capsys.readouterr()
+
+    assert captured["query_fasta"] == "queries.fasta"
+    assert captured["database"] == "database.fasta"
+    assert captured["k"] == 3
+    assert captured["threshold"] == 1
+    assert captured["top_n_hits"] == 10
+    assert {key: captured[key] for key in expected} == expected
 
 @pytest.mark.parametrize(
     ("extra_args", "expected_full_header"),
