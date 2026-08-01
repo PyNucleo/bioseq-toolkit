@@ -1,3 +1,5 @@
+import pytest
+
 from bioseq.pipelines.search_pipeline import multi_search
 from database.sequence_database import SequenceDatabase
 
@@ -265,3 +267,249 @@ def test_multi_search_indexed_respects_top_n_hits_per_query(tmp_path):
     ]
 
     assert results_by_query["query_no_hit"]["query_hits"] == []
+
+
+def test_regular_multi_search_propagates_simple_refinement_scores():
+    results = multi_search(
+        [{"id": "query", "sequence": "AAAA"}],
+        SequenceDatabase([{"id": "exact", "sequence": "AAAA"}]),
+        k=1,
+        threshold=1,
+        indexed=False,
+        refinement=True,
+        match_score=3,
+        mismatch_score=-7,
+        gap_penalty=-2,
+        matrix=None,
+    )
+
+    assert results[0]["query_hits"][0]["sw_score"] == 12
+
+
+def test_indexed_refinement_keeps_queries_independent_and_reranks_selected_hits():
+    database = SequenceDatabase([
+        {"id": "a_alpha_weak", "sequence": "AATA"},
+        {"id": "z_alpha_exact", "sequence": "AAAA"},
+        {"id": "a_beta_weak", "sequence": "CGCC"},
+        {"id": "z_beta_exact", "sequence": "CCCC"},
+    ])
+    queries = [
+        {"id": "alpha", "sequence": "AAAA"},
+        {"id": "beta", "sequence": "CCCC"},
+    ]
+
+    unrefined = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        top_n_hits=2,
+        indexed=True,
+        refinement=False,
+    )
+    refined = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        top_n_hits=2,
+        indexed=True,
+        refinement=True,
+        match_score=2,
+        mismatch_score=-1,
+        gap_penalty=-2,
+    )
+
+    assert [result["query_id"] for result in refined] == ["alpha", "beta"]
+    assert [result["query_sequence"] for result in refined] == ["AAAA", "CCCC"]
+
+    assert [hit["id"] for hit in unrefined[0]["query_hits"]] == [
+        "a_alpha_weak",
+        "z_alpha_exact",
+    ]
+    assert [hit["id"] for hit in refined[0]["query_hits"]] == [
+        "z_alpha_exact",
+        "a_alpha_weak",
+    ]
+    assert [hit["sw_score"] for hit in refined[0]["query_hits"]] == [8, 5]
+
+    assert [hit["id"] for hit in unrefined[1]["query_hits"]] == [
+        "a_beta_weak",
+        "z_beta_exact",
+    ]
+    assert [hit["id"] for hit in refined[1]["query_hits"]] == [
+        "z_beta_exact",
+        "a_beta_weak",
+    ]
+    assert [hit["sw_score"] for hit in refined[1]["query_hits"]] == [8, 5]
+
+    for result in refined:
+        assert result["query_hits"] == sorted(
+            result["query_hits"],
+            key=lambda hit: hit["sw_score"],
+            reverse=True,
+        )
+        assert {hit["id"] for hit in result["query_hits"]} == {
+            hit["id"] for hit in unrefined[["alpha", "beta"].index(result["query_id"])]["query_hits"]
+        }
+
+
+def test_regular_and_indexed_refinement_propagate_matrix_scoring():
+    database = SequenceDatabase([{"id": "gapped", "sequence": "HPEART"}])
+    queries = [{"id": "query", "sequence": "HEART"}]
+
+    regular = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=False,
+        refinement=True,
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+    )
+    indexed = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+    )
+
+    assert regular[0]["query_hits"][0]["sw_score"] == 23.0
+    assert indexed[0]["query_hits"][0]["sw_score"] == 23.0
+
+
+def test_indexed_matrix_refinement_ignores_simple_scores():
+    database = SequenceDatabase([
+        {"id": "exact", "sequence": "HEART"},
+        {"id": "gapped", "sequence": "HPEART"},
+    ])
+    queries = [{"id": "query", "sequence": "HEART"}]
+
+    first = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+        match_score=99,
+        mismatch_score=-99,
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+    )
+    second = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+        match_score=-50,
+        mismatch_score=50,
+        gap_penalty=-4,
+        matrix="BLOSUM62",
+    )
+
+    assert [hit["id"] for hit in first[0]["query_hits"]] == ["exact", "gapped"]
+    assert [hit["sw_score"] for hit in first[0]["query_hits"]] == [27.0, 23.0]
+    assert second == first
+
+
+def test_indexed_refinement_propagates_gap_penalty_for_gapped_alignment():
+    database = SequenceDatabase([{"id": "gapped", "sequence": "ATTA"}])
+    queries = [{"id": "query", "sequence": "ATA"}]
+
+    stronger_penalty = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+        match_score=2,
+        mismatch_score=-1,
+        gap_penalty=-2,
+    )
+    weaker_penalty = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+        match_score=2,
+        mismatch_score=-1,
+        gap_penalty=-1,
+    )
+
+    assert stronger_penalty[0]["query_hits"][0]["sw_score"] == 4
+    assert weaker_penalty[0]["query_hits"][0]["sw_score"] == 5
+
+
+@pytest.mark.parametrize("indexed", [False, True])
+def test_multi_search_scoring_is_inactive_without_refinement(indexed):
+    database = SequenceDatabase([
+        {"id": "first", "sequence": "AAAA"},
+        {"id": "second", "sequence": "AATA"},
+    ])
+    queries = [{"id": "query", "sequence": "AAAA"}]
+
+    default = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=indexed,
+        refinement=False,
+    )
+    custom = multi_search(
+        queries,
+        database,
+        k=1,
+        threshold=1,
+        indexed=indexed,
+        refinement=False,
+        match_score=100,
+        mismatch_score=100,
+        gap_penalty=100,
+        matrix="NOT_LOADED_WHEN_REFINEMENT_IS_DISABLED",
+    )
+
+    assert custom == default
+    assert all(
+        "sw_score" not in hit and "best_positions" not in hit
+        for hit in custom[0]["query_hits"]
+    )
+
+
+def test_indexed_refinement_handles_empty_queries_and_empty_hit_lists():
+    database = SequenceDatabase([{"id": "hit", "sequence": "AAAA"}])
+
+    assert multi_search(
+        [],
+        database,
+        k=2,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+    ) == []
+
+    results = multi_search(
+        [{"id": "no_hit", "sequence": "CCCC"}],
+        database,
+        k=2,
+        threshold=1,
+        indexed=True,
+        refinement=True,
+    )
+
+    assert results == [{
+        "query_id": "no_hit",
+        "query_sequence": "CCCC",
+        "query_hits": [],
+    }]

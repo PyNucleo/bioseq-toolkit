@@ -365,30 +365,39 @@ def test_multi_search_accepts_query_fasta_path(tmp_path):
     assert results[0]["query_hits"][0]["id"] == "seq1"
 
 
-def test_indexed_multi_search_refinement_is_not_silently_ignored():
-    """
-    refinement=True with indexed=True should not be silently ignored.
-    Either implement indexed refinement or raise NotImplementedError.
-    """
-
+def test_indexed_multi_search_refinement_uses_real_simple_scoring_and_preserves_schema():
     db = make_db([
-        {"id": "seq1", "sequence": "MKTAAA"},
+        {"id": "seq1", "sequence": "AAAA"},
     ])
 
     queries = [
-        {"id": "query_seq", "sequence": "MKTAAA"},
+        {"id": "query_seq", "sequence": "AAAA"},
     ]
 
-    with pytest.raises(NotImplementedError):
-        multi_search(
-            queries,
-            database=db,
-            k=3,
-            threshold=1,
-            top_n_hits=1,
-            indexed=True,
-            refinement=True,
-        )
+    results = multi_search(
+        queries,
+        database=db,
+        k=1,
+        threshold=1,
+        top_n_hits=1,
+        indexed=True,
+        refinement=True,
+        match_score=3,
+        mismatch_score=-7,
+        gap_penalty=-2,
+        matrix=None,
+    )
+
+    assert set(results[0]) == {"query_id", "query_sequence", "query_hits"}
+    assert results[0]["query_id"] == "query_seq"
+    assert results[0]["query_sequence"] == "AAAA"
+
+    hit = results[0]["query_hits"][0]
+    assert hit["id"] == "seq1"
+    assert hit["sequence"] == "AAAA"
+    assert hit["shared_kmers"] == 1
+    assert hit["sw_score"] == 12
+    assert hit["best_positions"] == [(4, 4)]
 
 
 def test_indexed_multi_search_handles_empty_and_short_inputs():
