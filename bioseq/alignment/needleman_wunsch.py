@@ -85,6 +85,8 @@ def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
                 new_branch1 = algn1 + "-"
                 new_branch2 = algn2 + s2[col - 1]
                 branch_align = trace(movements, s1, s2, row, col - 1, new_branch1, new_branch2, return_all)
+
+            result.extend(branch_align)
     
     else:
             move = movements[row][col][0]
@@ -102,7 +104,7 @@ def trace(movements, s1, s2, row, col, algn1, algn2, return_all):
                 new_branch2 = algn2 + s2[col - 1]
                 branch_align = trace(movements, s1, s2, row, col - 1, new_branch1, new_branch2, return_all)
 
-    result.extend(branch_align)
+            result.extend(branch_align)
     
     return result
 
