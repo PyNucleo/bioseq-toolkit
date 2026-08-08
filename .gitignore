@@ -220,3 +220,4 @@ __marimo__/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+graphify-out/
