@@ -1,38 +1,46 @@
 from ..fasta_io import read_fasta_records
-from ..validators import valid_dna
+from ..sequence_utils import gc_content, mrna_template
 from ..translation import translate_sequence
-from ..sequence_utils import(
-   mrna_template,
-    total_length,
-    gc_content,
-    base_number,
-)
+from ..validators import report_invalid_symbols_and_positions
 
 
 def process_fasta_sequences(file_path):
     file_records = read_fasta_records(file_path)
+    accepted = []
+    rejected = []
 
-    sequences = []
-    mrna_seqs = []
+    for record_position, record in enumerate(file_records, start=1):
+        sequence = record["sequence"].upper()
+        invalid_report = report_invalid_symbols_and_positions(sequence)
 
-    for record in file_records:
-        seq = record["sequence"].upper()
-
-        if not seq:
+        if invalid_report["invalid_positions"]:
+            rejected.append({
+                "id": record["id"],
+                "record_position": record_position,
+                "sequence": sequence,
+                "reason_code": "unsupported_dna_symbols",
+                "reason": "Sequence contains unsupported DNA symbols.",
+                **invalid_report,
+            })
             continue
 
-        if not valid_dna(seq):
-            continue
+        mrna_sequence = mrna_template(sequence)
+        accepted.append({
+            "id": record["id"],
+            "record_position": record_position,
+            "sequence": sequence,
+            "length": len(sequence),
+            "gc_content": gc_content(sequence),
+            "transcribed_strand": mrna_sequence,
+            "amino_acid_chain": str(translate_sequence(mrna_sequence)),
+        })
 
-        sequences.append(seq)
-        mrna_seqs.append(mrna_template(seq))
-    
-    final = {
-        "sequence": sequences,
-        "length": [total_length(seq) for seq in sequences],
-        "gc_content": [gc_content(seq) for seq in sequences],
-        "transcribed_strand": mrna_seqs,
-        "amino_acid_chain": [translate_sequence(mrna) for mrna in mrna_seqs],
+    return {
+        "accepted": accepted,
+        "rejected": rejected,
+        "summary": {
+            "total_records": len(accepted) + len(rejected),
+            "accepted_records": len(accepted),
+            "rejected_records": len(rejected),
+        },
     }
-
-    return final
