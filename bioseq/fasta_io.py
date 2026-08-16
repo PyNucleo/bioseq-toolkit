@@ -1,5 +1,55 @@
 import requests
 
+def _parse_fasta_records(fasta_data):
+
+    records = []
+    record = None
+    current_seq = ""
+    record_starting_line = None
+
+    for line_number, line in enumerate(fasta_data, start=1):
+
+        line = line.rstrip("\r\n")
+
+        if not line.strip():
+            continue
+
+        if line.startswith(">"):
+            if record is not None:
+                if not current_seq:
+                    raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
+                                        'sequence is empty.')
+                record["sequence"] = current_seq
+                records.append(record)
+
+            record_starting_line = line_number
+            record = parse_fasta_header(line)
+            validate_fasta_header(record, line_number)
+            record["sequence"] = ""
+            
+
+            current_seq = ""
+
+        else:
+            if record is None: #Did not find a previous header
+                raise ValueError(f'Invalid FASTA detected on line {line_number}: '
+                                    'Sequence data appeared before the first header.')
+            if any(character.isspace() for character in line):
+                raise ValueError(
+                        f"Invalid FASTA sequence at line {line_number}: "
+                        "sequence data contains whitespace."
+                )
+            current_seq += line
+
+    if record is not None:
+        if not current_seq:
+            raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
+                                'sequence is empty.')
+        record["sequence"] = current_seq
+        records.append(record)
+
+    return records
+    
 def validate_fasta_header(record, line_number=None):
     if not record.get("id"):
         location = (
@@ -13,53 +63,9 @@ def validate_fasta_header(record, line_number=None):
         )
 
 def read_fasta_records(file_path):
-    records = []
-    record = None
-    current_seq = ""
-    record_starting_line = None
-    with open(file_path, "r") as fasta_file:
-        for line_number, line in enumerate(fasta_file, start=1):
 
-            line = line.rstrip("\r\n")
-
-            if not line.strip():
-                continue
-
-            if line.startswith(">"):
-                if record is not None:
-                    if not current_seq:
-                        raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
-                                         'sequence is empty.')
-                    record["sequence"] = current_seq
-                    records.append(record)
-
-                record_starting_line = line_number
-                record = parse_fasta_header(line)
-                validate_fasta_header(record, line_number)
-                record["sequence"] = ""
-                
-
-                current_seq = ""
-
-            else:
-                if record is None: #Did not find a previous header
-                    raise ValueError(f'Invalid FASTA detected on line {line_number}: '
-                                     'Sequence data appeared before the first header.')
-                if any(character.isspace() for character in line):
-                    raise ValueError(
-                          f"Invalid FASTA sequence at line {line_number}: "
-                          "sequence data contains whitespace."
-                    )
-                current_seq += line
-
-        if record is not None:
-            if not current_seq:
-                raise ValueError(f'Invalid FASTA detected on line {record_starting_line}: '
-                                 'sequence is empty.')
-            record["sequence"] = current_seq
-            records.append(record)
-
-        return records
+    with open(file_path) as fasta_file:
+        return _parse_fasta_records(fasta_file)
 
 def parse_fasta_header(header):
     clean_header = header.lstrip(">")
@@ -68,9 +74,6 @@ def parse_fasta_header(header):
         return parse_uniprot_fasta(header)
 
     return parse_generic_fasta(header)
-
-
-
 
 def read_fasta_sequences_only(FILE):
 
@@ -212,13 +215,33 @@ def fetch_uniprot_sequences(accession_file, strict=False):
 
             temp_url = f"https://www.uniprot.org/uniprotkb/{accession}.fasta"
 
-            response = requests.get(temp_url)
-            
+            try:
+                response = requests.get(temp_url)
+            except requests.RequestException as error:
+                if strict:
+                    raise ValueError(
+                        f"Failed to fetch sequence for accession {accession}: {error}"
+                    ) from error
+
+                failed_accessions.append({
+                    "accession": accession,
+                    "status_code": None,
+                    "reason": f"Network request failed: {error}"
+                })
+                continue
+
 
             if response.status_code == 200:
-                fasta_data = response.text
+                fasta_data = response.text.strip()
 
                 if not fasta_data:
+
+                    if strict:
+                        raise ValueError("Empty or invalid FASTA response. The accession may be secondary, "
+                                                    "merged, demerged, obsolete, ambiguous, or otherwise not directly "
+                                                    "resolvable to a current UniProt FASTA record. Tip: search this accession "
+                                                    "manually on UniProt to check its entry history and possible current "
+                                                    "primary accession(s).")
                     failed_accessions.append(
                         {"accession": accession,
                          "status_code": 200,
@@ -231,17 +254,9 @@ def fetch_uniprot_sequences(accession_file, strict=False):
                          )
                         })
                     continue
-                header_and_sequence = parse_header_sequence_from_string(fasta_data)
 
-                header = header_and_sequence["header"]
-                sequence = header_and_sequence["sequence"]
-
-                entry_data = {
-                    **parse_fasta_header(header),
-                    "sequence": sequence
-                }
-
-                parsed_sequences.append(entry_data)
+                entry_data = _parse_fasta_records(fasta_data.splitlines())
+                parsed_sequences.extend(entry_data)
 
             else:
                 if strict:
