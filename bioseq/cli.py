@@ -1,6 +1,5 @@
 import argparse
 import json
-import time
 import textwrap
 from bioseq.pipelines.search_pipeline import search, multi_search
 from bioseq.alignment.smith_waterman import local_alignment
@@ -180,7 +179,6 @@ def main():
             print(format_failed_accessions(result["failed"]))
 
     elif args.command == "multi-search":
-        start = time.perf_counter()
 
         result = multi_search(
                 query_fasta=args.query_sequences,
@@ -195,10 +193,8 @@ def main():
                  gap_penalty=args.gap_penalty,
                  matrix=args.matrix,
              )
-        end = time.perf_counter()
-        print(json.dumps(result, indent=2)) 
 
-        print(f"\nFinished in: {end - start}")
+        print(json.dumps(result, indent=2)) 
 
 if __name__ == "__main__":
     main()
