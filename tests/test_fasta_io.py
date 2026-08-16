@@ -261,3 +261,24 @@ def test_read_fasta_records_accepts_crlf_input(tmp_path):
 
     assert result[0]["header"] == ">seq1 description"
     assert result[0]["sequence"] == "ATGCGGTA"
+
+
+def test_read_fasta_records_accepts_path_and_string_equivalently(tmp_path):
+    fasta = tmp_path / "sample.fasta"
+    fasta.write_text(">seq1\nATGC\n")
+
+    path_result = read_fasta_records(fasta)
+    string_result = read_fasta_records(str(fasta))
+
+    assert path_result == string_result
+    assert path_result == [
+        {
+            "id": "seq1",
+            "db": None,
+            "accession": None,
+            "entry_name": None,
+            "description": "",
+            "header": ">seq1",
+            "sequence": "ATGC",
+        }
+    ]
