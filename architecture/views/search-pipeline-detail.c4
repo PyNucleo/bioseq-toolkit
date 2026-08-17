@@ -7,6 +7,7 @@ views {
     include bioseqToolkit.searchPipeline.runIndexedMultiSearchFn
     include bioseqToolkit.searchPipeline.runRegularMultiSearchFn
     include bioseqToolkit.databaseUtils.normalizeDatabaseFn
+    include bioseqToolkit.validators.validateKThresholdFn
     include bioseqToolkit.fastaIo.readFastaRecordsFn
     include bioseqToolkit.kmerSearch.kmerSearchFn
     include bioseqToolkit.kmerSearch.filterRelativeFn

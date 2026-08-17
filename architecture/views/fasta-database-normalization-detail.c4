@@ -3,11 +3,13 @@ views {
     title 'FASTA and Database Normalization Detail'
 
     include bioseqToolkit.fastaIo.readFastaRecordsFn
+    include bioseqToolkit.fastaIo.parseFastaRecordsFn
     include bioseqToolkit.fastaIo.parseFastaHeaderFn
     include bioseqToolkit.fastaIo.readFastaSequencesOnlyFn
     include bioseqToolkit.fastaIo.fetchUniprotFn
     include bioseqToolkit.fastaIo.writeFastaRecordsFn
     include bioseqToolkit.databaseUtils.normalizeDatabaseFn
+    include bioseqToolkit.databaseUtils.validateUniqueDatabaseIdsFn
     include bioseqToolkit.loadDatabase.createDatabaseFn
     include bioseqToolkit.sequenceDatabase.getSequencesFn
     include bioseqToolkit.searchPipeline.searchFn

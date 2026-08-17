@@ -33,15 +33,18 @@ It currently supports:
 - Linear gap penalties
 - Initial substitution-matrix support through Biopython, including BLOSUM62 usage in alignment tests
 - k-mer based sequence search
-- Optional Smith-Waterman refinement of k-mer search hits
+- Regular and database-wide indexed multi-query search (indexed by default)
+- Optional Smith-Waterman refinement in single-query and both multi-query modes
 - Basic sequence database normalization
+- Strict structural FASTA parsing shared by local reads and UniProt responses
+- Accountable FASTA translation results with accepted, rejected, and summary sections
 - Smith-Waterman runtime benchmarking on protein FASTA datasets
 - k-mer-only search benchmarking across multiple `k` and threshold settings
 - k-mer + Smith-Waterman refinement benchmarking
 - Case-insensitive k-mer generation
 - Benchmark driver scripts for alignment and search benchmarks
 - Unit tests for core utilities, alignment, search, refinement, database normalization, FASTA loading, and benchmark smoke checks
-- Minimal command-line interface for search, local alignment, and global alignment
+- Five-command interface for search, multi-search, local/global alignment, and UniProt fetching
 - Editable installation support through `pyproject.toml`
 
 
@@ -52,8 +55,7 @@ Current important limitations include:
 - No affine gap penalties yet
 - No E-values or bit scores yet
 - No seed-extension step yet
-- Command-line interface is still minimal and early-stage
-- No completed biological case study yet
+- No biologically validated protein-family case study yet
 - Not intended for clinical, diagnostic, or production biological analysis
 
 ---
@@ -157,7 +159,8 @@ Expected style of output:
 ]
 ```
 
-The exact ordering depends on the candidate scores and filtering behavior.
+Ties are deterministic: hits are ordered by descending `shared_kmers`, then
+ascending record `id`.
 
 ---
 
@@ -196,11 +199,21 @@ Expected style of refined output:
         "id": "id2",
         "sequence": "ATGCGT",
         "shared_kmers": 3,
-        "sw_score": 10,
+        "sw_score": 5,
         "best_positions": [(5, 5)]
+    },
+    {
+        "id": "id1",
+        "sequence": "ATGAAA",
+        "shared_kmers": 1,
+        "sw_score": 3,
+        "best_positions": [(3, 3)]
     }
 ]
 ```
+
+Refinement operates only on the already filtered and selected `top_n_hits`
+candidate set; it does not restore candidates removed by k-mer filtering.
 
 ---
 
@@ -270,7 +283,9 @@ result = local_alignment(
 print(result)
 ```
 
-Substitution-matrix support currently uses Biopython matrix loading with cached matrix reuse. This is an initial implementation and should not yet be treated as a fully complete scoring backend.
+Substitution-matrix support uses cached Biopython matrix loading. BLOSUM62 paths
+and repository error boundaries are tested, but this is not a broadly validated
+biological scoring backend.
 
 ---
 
@@ -330,8 +345,10 @@ bioseq-toolkit/
 ├── benchmarks/
 │   ├── figures/
 │   ├── BENCHMARKS.md
+│   ├── SEARCH_SENSITIVITY.md
 │   ├── benchmark_alignment.py
 │   ├── benchmark_search.py
+│   ├── benchmark_search_sensitivity.py
 │   ├── benchmark_utils.py
 │   ├── main.py
 │   ├── run_alignment_benchmarks.py
@@ -344,7 +361,8 @@ bioseq-toolkit/
 │       ├── astral_1000.fasta
 │       └── astral_10000.fasta
 │
-├── InputFilesForTesting/
+├── case_studies/
+│   └── uniprot_fetch_demo/
 ├── dataset_tools/
 │   └── chunk_dataset.py
 │
@@ -433,10 +451,79 @@ the parser returns:
 }
 ```
 
-Current limitation:
+Local reads and nonempty UniProt response bodies use the same structural
+parser. It ignores blank lines, strips only CR/LF line endings, concatenates
+multiline sequence data, and rejects sequence data before the first header,
+empty IDs, whitespace inside nonblank sequence lines, and empty record
+sequences. Empty or blank input returns an empty list. Errors include line
+context where applicable, and local files are opened with a context manager.
+Both strings and path-like objects accepted by `open()` work for local FASTA
+reads. These checks validate FASTA structure, not biological alphabets.
 
-- UniProt-style and generic FASTA headers are supported.
-- Other specialized formats such as RefSeq, PDB, and ASTRAL-specific headers may be added later when needed.
+`fetch_uniprot_sequences(accession_file, strict=False)` reads one accession per
+nonempty line and returns a flat result:
+
+```python
+{"records": [...], "failed": [...]}
+```
+
+In non-strict mode, expected HTTP/request failures and empty HTTP-200 bodies
+are recorded in `failed` and fetching continues. With `strict=True`, the first
+such operational failure raises. A nonempty malformed response is passed to
+the shared parser; its `ValueError` propagates even in non-strict mode.
+
+`write_fasta_records()` requires a usable sequence on every record. Full-header
+mode requires a usable stored `header`. Short-header mode chooses independently
+for each record, preferring a nonempty `accession` and otherwise using `id`; a
+leading `>` is removed before the writer constructs one short header marker.
+Missing required fields raise `ValueError` with the record number.
+
+UniProt-style and generic headers are supported. Other specialized formats may
+be added only when a real dataset requires them.
+
+### Translation pipeline
+
+`process_fasta_sequences(path)` returns accountable, JSON-safe results:
+
+```python
+{
+    "accepted": [
+        {
+            "id": "accepted",
+            "record_position": 1,
+            "sequence": "ATGGCC",
+            "length": 6,
+            "gc_content": 66.67,
+            "transcribed_strand": "UACCGG",
+            "amino_acid_chain": "YR"
+        }
+    ],
+    "rejected": [
+        {
+            "id": "rejected",
+            "record_position": 2,
+            "sequence": "ATGN",
+            "reason_code": "unsupported_dna_symbols",
+            "reason": "Sequence contains unsupported DNA symbols.",
+            "invalid_positions": [4],
+            "invalid_symbols": ["N"]
+        }
+    ],
+    "summary": {
+        "total_records": 2,
+        "accepted_records": 1,
+        "rejected_records": 1
+    }
+}
+```
+
+`record_position` and `invalid_positions` are one-based. Accepted DNA is
+uppercased; unsupported symbols are reported with deterministic unique symbol
+lists instead of being silently skipped. Duplicate FASTA IDs remain
+attributable through record positions, and malformed FASTA errors propagate.
+The pipeline uses the `A/T/G/C` alphabet; this is not general biological quality
+validation. The lower-level `translate_sequence()` may still return a Biopython
+`Seq`, while the pipeline converts translations to plain strings.
 
 ---
 
@@ -446,7 +533,7 @@ The search pipeline accepts:
 
 - an existing `SequenceDatabase`
 - a list of sequence strings
-- a FASTA file path
+- a FASTA file path supplied as `str`
 
 The input is normalized into a consistent sequence-record format before search.
 
@@ -461,9 +548,18 @@ Example list-input normalization:
 
 For FASTA input, parsed FASTA metadata is preserved where available.
 
+Public normalization rejects duplicate record IDs and reports all one-based
+positions for every duplicated ID. Identical sequence strings remain valid
+when their IDs differ, including generated records from `list[str]` input.
+`pathlib.Path` is accepted for a multi-search query FASTA but is not currently
+accepted as the database object; database `Path` support remains an open design
+question.
+
 Current limitation:
 
-- This is a lightweight wrapper, not a real database engine.
+- `SequenceDatabase` is a lightweight mutable wrapper, not a database engine.
+- Direct construction stores its input without enforcing record shape or the
+  public normalization invariants; `get_sequences()` exposes the stored object.
 - It is intended to support consistent input handling for the current educational pipeline.
 
 ---
@@ -476,6 +572,15 @@ The project currently includes two classic dynamic programming alignment algorit
 - **Smith-Waterman** for local alignment
 
 Both support structured output.
+
+Needleman-Wunsch uses a linear gap model. With `return_all=True`, it retains
+all tied optimal traceback leaves in deterministic recorded movement order;
+with `return_all=False`, it follows the deterministic first movement. Tied
+counts, ordering, legacy tuple output, and structured metadata are covered by
+regression tests. Rendered alignments are not promised to be deduplicated. The
+double-empty global-alignment case remains unresolved and is not documented as
+supported. Smith-Waterman also uses a linear gap model and does not provide
+calibrated biological significance.
 
 Example structured fields:
 
@@ -517,7 +622,8 @@ Current limitations:
 - Gap model is currently linear.
 - Affine gap penalties are not implemented yet.
 - Similarity is currently a placeholder field.
-- Matrix scoring exists initially, but scoring performance and broader validation still need improvement.
+- Matrix scoring is tested for supported BLOSUM62 paths, while broader
+  biological validation remains limited.
 
 ---
 
@@ -543,6 +649,12 @@ Matrix scoring example:
 matrix = "BLOSUM62"
 gap_penalty = -4
 ```
+
+Repository scoring paths raise `ValueError` for covered unknown matrix names
+and unsupported residues. Named and already-loaded matrix paths can provide
+different diagnostic context; callers should not depend on one identical error
+string for every path. Matrix residue-pair scores replace simple match/mismatch
+values, but the linear `gap_penalty` remains active.
 
 Current limitation:
 
@@ -571,27 +683,52 @@ This makes outputs easier to test, inspect, and compare.
 
 ### k-mer Search
 
-The k-mer search step splits the query sequence and database sequences into words of length `k`.
+The public APIs are:
 
-It then:
+```python
+search(query, database, k=3, threshold=1, top_n_hits=10,
+       refinement=False, match_score=1, mismatch_score=-1,
+       gap_penalty=-2, matrix=None)
 
-1. generates unique query k-mers,
-2. generates k-mers for each database sequence,
-3. counts shared k-mers,
-4. filters candidates by threshold,
-5. applies a relative score filter,
-6. returns candidate hits.
+multi_search(query_fasta, database, k=3, threshold=1, top_n_hits=10,
+             indexed=True, refinement=False, match_score=1,
+             mismatch_score=-1, gap_penalty=-2, matrix=None)
+```
+
+`database` is required. `multi_search` supports the regular path with
+`indexed=False` and the database-wide indexed path with `indexed=True`; indexed
+mode is the default. Both modes support the same optional refinement controls.
+
+Candidate processing is:
+
+1. generate unique uppercase k-mers;
+2. keep records meeting the absolute shared-k-mer `threshold`;
+3. apply the fixed relative cutoff `shared_kmers >= 0.3 * best_count`;
+4. sort by descending `shared_kmers`, then ascending `id`;
+5. select `top_n_hits`;
+6. optionally Smith-Waterman-refine that selected subset and re-rank it by
+   descending `sw_score`.
 
 K-mer generation normalizes sequences to uppercase, so matching is case-insensitive for lowercase or mixed-case FASTA inputs.
 
+`k` and `threshold` must be integers (Boolean values do not count), and both
+must be at least 1. There is no stable explicit public type/range-validation
+contract for `top_n_hits`, and search does not validate general biological
+alphabet compatibility. Candidate hits contain `id`, `sequence`, and
+`shared_kmers`. Each multi-query result uses this outer schema:
+
+```python
+{"query_id": "...", "query_sequence": "...", "query_hits": [...]}
+```
+
 This is the first step toward BLAST-like search behavior: use a fast word-based filter before doing more expensive alignment work.
 
-Current limitation:
+Current limitations:
 
-- Experimental indexed multi-query k-mer search exists, but it is not yet treated as a stable public feature.
-- Regular k-mer search scans database sequences directly.
-- Indexed multi-query search is currently exposed as an internal/experimental optimization through `multi_search(..., indexed=True)` and the `bioseq multi-search` CLI default.
-- Indexed search still needs focused tests, documentation, and benchmark comparison against regular k-mer scanning.
+- The regular path scans database sequences directly; the indexed multi-query
+  path builds a presence-based database-wide index without seed positions.
+- Current historical benchmarks measure the scan-based path and do not
+  establish that indexed mode is faster.
 - It does not yet track seed positions.
 - It does not yet perform seed extension.
 - It does not currently validate whether the query and database are the same biological sequence type, such as DNA-vs-protein.
@@ -605,17 +742,25 @@ The search pipeline can optionally refine k-mer hits using Smith-Waterman local 
 Pipeline:
 
 1. Normalize database input.
-2. Run k-mer search.
-3. Rank candidates by shared k-mers.
-4. Keep the top candidate hits.
-5. Optionally re-rank them using Smith-Waterman score.
+2. Filter and rank candidates as described above.
+3. Keep `top_n_hits` candidates.
+4. Refine only that selected set and re-rank by descending Smith-Waterman score.
+
+With `refinement=False`, all scoring options are inactive. With refinement and
+`matrix=None`, Smith-Waterman uses `match_score`, `mismatch_score`, and the
+linear `gap_penalty`. With a named matrix, residue-pair matrix scores replace
+simple match/mismatch scoring; simple values remain accepted but inactive, and
+the linear gap penalty remains active. Refined hits add `sw_score` and
+`best_positions`. Refinement does not run a second top-N truncation or
+reintroduce candidates removed earlier.
 
 This makes the project more than just a pairwise alignment implementation. It becomes a basic search pipeline demonstrating a seed-filter-refine idea.
 
 Current limitation:
 
 - Refinement currently scores top candidates, but does not yet return full local alignment objects inside each search hit.
-- Search accuracy/sensitivity has not yet been fully evaluated against exhaustive Smith-Waterman rankings.
+- The recorded sensitivity work is limited to one query, dataset family, and
+  parameter set; it is not broad biological validation.
 
 ---
 
@@ -625,7 +770,16 @@ Benchmarking results are documented in:
 
 ```text
 benchmarks/BENCHMARKS.md
+benchmarks/SEARCH_SENSITIVITY.md
 ```
+
+These are historical recorded measurements, not results regenerated for every
+revision. The hard-coded query is 151 residues. Alignment runtime measurements
+use simple scoring `match=2`, `mismatch=-1`, `gap=-2`; the historical refined
+public-search driver uses the API defaults `match=1`, `mismatch=-1`, `gap=-2`;
+and sensitivity measurements use BLOSUM62 with a linear gap penalty of `-4`.
+The runtime reports use scan-based k-mer functions. Current indexed
+multi-search support has no regular-versus-indexed performance benchmark.
 
 Current benchmarks evaluate runtime scaling on ASTRAL/SCOPe protein sequence datasets.
 
@@ -658,7 +812,8 @@ Current benchmark highlights:
 - K-mer + Smith-Waterman refinement took about 0.67 seconds with `k=3`, `threshold=3`, and `top_n_hits=10`.
 - K-mer + refinement showed a runtime speedup of about 203.73× over exact Smith-Waterman score-only search on the 10000-sequence dataset.
 
-These benchmarks demonstrate runtime improvement for the current query, datasets, implementation, and parameters.
+These historical measurements demonstrate runtime improvement for that query,
+those datasets, that implementation revision, and those parameters.
 
 They do **not** prove equal biological sensitivity or accuracy compared with exhaustive Smith-Waterman search.
 
@@ -696,8 +851,9 @@ Current benchmark limitations:
 - Initial substitution-matrix support exists, but matrix-based benchmark behavior is not yet fully evaluated
 - Protein lengths vary across datasets
 - Hardware and background processes were not strictly controlled
-- Current k-mer search scans database sequences directly rather than using an index
-- Sensitivity and false-negative behavior have not yet been fully evaluated
+- Historical runtime and sensitivity measurements use scan-based candidate
+  retrieval; indexed multi-search performance has not been compared.
+- Sensitivity evidence is limited to one query and score-derived internal tiers.
 - Current benchmarks emphasize speed more than biological accuracy
 
 Future benchmarks should evaluate both:
@@ -712,8 +868,12 @@ Future benchmarks should evaluate both:
 Run all tests:
 
 ```bash
-pytest
+python -m pytest -q
 ```
+
+At documentation synchronization base revision `3ce3f74`, the full suite passes:
+`199 passed`. This count is revision-scoped rather than a permanent project
+claim.
 
 Run only alignment tests:
 
@@ -792,9 +952,15 @@ Available commands:
 
 ```bash
 bioseq search --help
+bioseq multi-search --help
 bioseq align-local --help
 bioseq align-global --help
+bioseq fetch-uniprot --help
 ```
+
+`search`, `multi-search`, `align-local`, and `align-global` write JSON to
+stdout. `fetch-uniprot` writes a FASTA file and prints a human-readable summary;
+it is the exception to the JSON-output pattern.
 
 Run k-mer search with a tiny FASTA file:
 
@@ -821,13 +987,37 @@ Run Needleman-Wunsch global alignment:
 bioseq align-global -s1 ATGCG -s2 ATCGA -m 1 --mismatch -1 -g -2
 ```
 
-The CLI prints structured JSON output.
+Run indexed multi-search (the default) or regular multi-search:
+
+```bash
+bioseq multi-search -q queries.fasta -d tiny_search.fasta -k 3 -t 1
+bioseq multi-search -q queries.fasta -d tiny_search.fasta -k 3 -t 1 --regular
+```
+
+Both modes support `--refine`, `--match`, `--mismatch`, `--gap-penalty`, and
+`--matrix` and emit the same `query_hits` schema.
+
+Fetch accessions from a plain-text file:
+
+```bash
+bioseq fetch-uniprot -f accessions.txt -o sequences.fasta
+```
+
+`--strict` stops on the first expected operational fetch failure;
+`--full-header` preserves stored headers instead of short accession/ID headers;
+and `--show-failed` prints the failures collected in non-strict mode.
+
+Python and CLI defaults are not all identical: Python `search()` defaults to
+`threshold=1`, while CLI `search` defaults to `3`; Python `local_alignment()`
+defaults to `match=2`, while CLI `align-local` defaults to `1`; CLI
+`multi-search` defaults to `threshold=1`.
 
 The module-style form also remains supported:
 
 ```bash
 python -m bioseq.cli --help
 python -m bioseq.cli search -q ATGCG -d tiny_search.fasta -k 3 -t 2
+python -m bioseq.cli multi-search -q queries.fasta -d tiny_search.fasta
 ```
 
 ---
@@ -840,11 +1030,14 @@ The strongest parts of the project are:
 - Basic package organization
 - Structured output for both global and local alignment
 - Structured FASTA parsing for UniProt-style and generic headers
+- Shared strict FASTA structure parsing for local and downloaded text
+- Accountable translation outcomes with source-record positions
 - Case-insensitive k-mer generation for lowercase or mixed-case FASTA inputs
+- Tested regular/indexed multi-search equivalence and both-mode refinement
 - Tests for alignment, search, refinement, database normalization, FASTA parsing, CLI behavior, and benchmark behavior
 - Runtime comparison between exact dynamic programming and heuristic search
 - Benchmark driver scripts for repeatable benchmark runs
-- Minimal command-line interface for search, local alignment, and global alignment
+- Five-command interface with machine-readable JSON for search/alignment commands
 - Editable installation support through `pyproject.toml`
 - `bioseq` console command entry point
 - Benchmark documentation instead of only toy examples
@@ -864,13 +1057,13 @@ Important limitations include:
 
 - No affine gap penalties yet
 - No statistical significance estimates such as E-values or bit scores
-- Current k-mer search scans database sequences directly
+- Regular search scans database sequences; indexed multi-search is supported,
+  but no current benchmark establishes its performance advantage
 - No seed-extension step yet
-- Command-line interface is still minimal and early-stage
-- No biological case study has been completed yet
+- No biologically meaningful protein-family case study has been completed yet
 - FASTA parsing currently supports structured UniProt-style and generic header metadata, but broader FASTA format support is limited
 - K-mer search is case-insensitive, but it does not yet validate whether the query and database are the same biological sequence type, such as DNA-vs-protein
-- Matrix scoring exists initially, but needs cleaner optimization and broader validation
+- Matrix scoring has tested BLOSUM62 paths but still needs broader validation
 - Not intended for production biological analysis
 
 These limitations are intentional development targets.
@@ -895,7 +1088,7 @@ Planned development stages:
 
 - Keep BLOSUM62 support
 - Keep substitution matrix loading cached and covered by tests
-- Add direct tests for known BLOSUM62 pair scores
+- Preserve direct tests for known BLOSUM62 pair scores and `ValueError` boundaries
 - Benchmark simple scoring vs BLOSUM62 scoring
 - Clearly document which matrices are stable and tested
 
@@ -920,9 +1113,11 @@ Future work:
 
 ---
 
-### 4. Add Sensitivity / Recovery Evaluation
+### 4. Extend Sensitivity / Recovery Evaluation
 
-Future benchmarks should evaluate not only speed, but also whether heuristic search recovers the same important candidates as exhaustive Smith-Waterman.
+An initial one-query ASTRAL sensitivity report now compares heuristic results
+with an internal exhaustive Smith-Waterman ranking. Future benchmarks should
+extend this beyond the recorded query, data, parameters, and score-derived tiers.
 
 Possible measurements:
 
@@ -1012,7 +1207,8 @@ python -m bioseq.cli fetch-uniprot --help
 python -m bioseq.cli multi-search --help
 ```
 
-Current CLI output is structured JSON.
+Search and alignment commands emit JSON; `fetch-uniprot`
+writes FASTA and prints a human-readable summary.
 
 Current packaging support includes:
 
@@ -1085,7 +1281,7 @@ benchmarking
         ↓
 biologically realistic scoring
         ↓
-indexed search
+regular-vs-indexed benchmarking
         ↓
 real protein-family case study
 ```

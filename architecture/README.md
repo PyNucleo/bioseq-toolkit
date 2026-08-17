@@ -1,54 +1,43 @@
 # Architecture documentation
 
-This directory documents the current repository architecture for manual audit. It is intentionally private-first and public-ready: the goal is to make current behavior traceable, not to market the project or describe planned features.
-
-Scope rules used while writing these files:
-
-- Only repository files were used as evidence: source code, tests, configuration, benchmark scripts, data paths, and existing docs.
-- Production code, tests, dependency configuration, and the main `README.md` were not intentionally modified.
-- Unclear, inconsistent, or untested behavior is recorded in `open_questions.md`.
-- Diagrams use LikeC4 source files. No renderer dependency was added.
+This directory describes the current repository architecture. Source code and
+tests remain authoritative; the model, views, and narratives are synchronized
+descriptions rather than a separate specification.
 
 ## Contents
 
-- `model.c4` defines shared LikeC4 elements and relationships.
-- `views/system-overview.c4` shows entry points, main modules, external services, tests, and benchmarks.
-- `views/search-workflow.c4` traces single-query and multi-query k-mer search paths.
-- `views/alignment-workflow.c4` separates Needleman-Wunsch and Smith-Waterman workflows.
-- `views/fasta-and-database-flow.c4` traces FASTA parsing, writing, UniProt fetching, and `SequenceDatabase` normalization.
-- `views/translation-and-benchmarks.c4` shows translation and benchmark relationships.
-- `views/search-pipeline-detail.c4` drills into `search`, `multi_search`, regular multi-search, indexed multi-search, ranking, and refinement.
-- `views/kmer-candidate-retrieval-detail.c4` drills into scan-based k-mer retrieval and indexed candidate lookup.
-- `views/smith-waterman-detail.c4` drills into local alignment, score-only Smith-Waterman, refinement, score matrices, and traceback structures.
-- `views/needleman-wunsch-detail.c4` drills into global alignment, score matrix filling, movement matrix creation, traceback, and structured result assembly.
-- `views/fasta-database-normalization-detail.c4` drills into FASTA parsing/writing/fetching and database normalization.
-- `views/translation-detail.c4` drills into FASTA-driven DNA filtering, transcription, translation, and translation result dictionaries.
-- `audit-notes/*.md` contains module-by-module audit notes using a fixed evidence structure.
-- `open_questions.md` lists unresolved behavior and verification risks.
+- `model.c4` defines shared LikeC4 elements, contracts, and relationships.
+- `views/system-overview.c4` shows entry points, modules, externals, tests, and benchmarks.
+- `views/search-workflow.c4` and the search detail views show regular/indexed candidate retrieval and optional refinement.
+- `views/alignment-workflow.c4` and the alignment detail views show the linear-gap Needleman-Wunsch and Smith-Waterman workflows.
+- `views/fasta-and-database-flow.c4` and `views/fasta-database-normalization-detail.c4` show the shared parser, UniProt fetch, writer, and normalization boundaries.
+- `views/translation-and-benchmarks.c4` and `views/translation-detail.c4` show accountable translation outcomes and benchmark consumers.
+- `audit-notes/*.md` documents current module contracts and evidence.
+- `open_questions.md` contains only unresolved or partially resolved behavior.
 
-## Suggested preview
+## Preview and validation
 
-If LikeC4 is installed locally, preview from the repository root:
+From the repository root, the documented LikeC4 workflow is:
 
 ```bash
 npx likec4 start architecture
 ```
 
-If `npx likec4` is not available, the `.c4` files are still plain source files and can be reviewed directly.
-
-The LikeC4 source files were validated in this workspace with:
+The local validation command used by this repository is:
 
 ```bash
-cmd /c likec4 validate architecture
+likec4 validate architecture
 ```
 
-## Verification performed
+At this synchronization revision, that command reported `Valid (12 files)`,
+covering the model and every view.
 
-Repository structure, source modules, tests, benchmark scripts, benchmark reports, data paths, and package metadata were inspected. The full test command was attempted with:
+LikeC4 is documentation tooling, not a Bioseq runtime dependency. If the tool
+is unavailable, static element-reference checks are the minimum fallback and
+the missing render/parse validation must be reported.
 
-```bash
-python -m pytest
-python -m pytest --basetemp .pytest-tmp -p no:cacheprovider
-```
+## Verification baseline
 
-Both runs were blocked by Windows permission errors while pytest created or cleaned temporary directories. Before the temp-directory failure, 78 tests passed and the remaining 22 errors were setup errors tied to temp-path access, not project assertion failures. The second run left `.pytest-tmp` inaccessible to normal workspace commands.
+At documentation synchronization base revision `3ce3f74`, `python -m pytest -q`
+completed with `199 passed`. That count is revision-scoped. The architecture
+documents reflect current source signatures and tests at that revision.

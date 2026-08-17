@@ -4,7 +4,7 @@
 
 Evaluate how Smith-Waterman search scales with increasing database size and compare the computational cost of exhaustive alignment reconstruction, score-only computation, k-mer search, and k-mer search with Smith-Waterman refinement.
 
-## Experimental Setup
+## Recorded Setup
 
 Dataset:
 
@@ -12,7 +12,7 @@ Dataset:
 
 Query:
 
-* Single protein sequence (~142 residues)
+* Single hard-coded protein sequence (151 residues)
 
 Algorithm:
 
@@ -21,7 +21,9 @@ Algorithm:
 Scoring:
 
 * Linear gap penalties
-* Simple scoring system
+* Alignment reconstruction and score-only timing: match `2`, mismatch `-1`, gap `-2`
+* Refined public-search timing: `search()` defaults match `1`, mismatch `-1`, gap `-2`
+* The separate sensitivity report uses BLOSUM62 with gap `-4`
 
 Hardware:
 - Machine: Lenovo IdeaPad Slim 3i
@@ -52,6 +54,10 @@ Benchmark Modes:
 * K-mer search with Smith-Waterman refinement
 
 The numbers below are existing recorded benchmark results from the scripts and environment described above. They were not regenerated as part of this documentation update.
+
+`benchmark_alignment.py` and `benchmark_search.py` contain executable timing
+functions; the `run_*_benchmarks.py` modules execute them. `benchmarks/main.py`
+only prints static historical values and does not rerun a benchmark.
 
 ## Dataset Statistics
 
@@ -89,7 +95,7 @@ The numbers below are existing recorded benchmark results from the scripts and e
 | 1000    |        11.825 |         10.765 |    1.10× |
 | 10000   |       218.914 |        137.183 |    1.60× |
 
-## Observations
+## Alignment Runtime Observations
 
 * Runtime scaled approximately linearly from 10 → 1000 sequences for both benchmark modes.
 * Runtime increase between 1000 and 10000 sequences was larger than expected from sequence count alone.
@@ -133,13 +139,17 @@ The visualization suggests runtime scales approximately proportionally with resi
 
 ## Future Benchmarks
 
-* Indexed k-mer search
+* Regular-versus-indexed multi-search performance comparison
 * Affine gap penalties
 * Runtime per residue analysis
 * Sensitivity/speed tradeoff experiments
 * Seed-extension search variants
 
 ## Runtime Results - K-mer Search Only Using Varying k Sizes and Thresholds 
+
+These historical measurements call the scan-based `kmer_search()` function.
+Current source also supports indexed multi-search, but this report contains no
+regular-versus-indexed measurement and makes no indexed-speed claim.
 
 | Dataset      |  k | Threshold | Runtime (s) |
 | ------------ | -: | --------: | ----------: |
@@ -164,7 +174,7 @@ The visualization suggests runtime scales approximately proportionally with resi
 | astral_10000 |  4 |         2 |    0.495486 |
 | astral_10000 |  4 |         3 |    0.495018 |
 
-## Observations
+## K-mer Search Observations
 
 K-mer-only search was substantially faster than exact Smith-Waterman score-only search. On astral_10000, exact SW score-only took about 137.18 s, while k-mer-only search took about 0.50–0.52 s depending on k and threshold. 
 
@@ -176,6 +186,7 @@ Parameters:
 - k = 3
 - threshold = 3
 - top_n_hits = 10
+- simple refinement scoring = match 1, mismatch -1, linear gap -2
 
 | Dataset | Exact SW Score-Only (s) | K-mer + SW Refinement (s) |  Speedup  |
 |---------|-------------------------|---------------------------|-----------|

@@ -5,6 +5,13 @@ from ..validators import report_invalid_symbols_and_positions
 
 
 def process_fasta_sequences(file_path):
+    """Translate structurally valid FASTA records with accountable outcomes.
+
+    The returned dictionary contains ``accepted`` records, ``rejected`` records
+    with one-based source positions and invalid-symbol diagnostics, and a
+    derived ``summary``. Accepted DNA is uppercased and translation strings are
+    JSON-safe; malformed FASTA structure still raises from the shared parser.
+    """
     file_records = read_fasta_records(file_path)
     accepted = []
     rejected = []
