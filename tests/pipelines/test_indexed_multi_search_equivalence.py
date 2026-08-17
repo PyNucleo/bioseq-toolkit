@@ -220,8 +220,8 @@ def test_regular_multi_search_applies_search_pipeline_ratio_filter():
     """
     This documents the current behavior.
 
-    Regular multi-search calls search(), and search() uses rank_by_shared_kmers().
-    If rank_by_shared_kmers applies the 0.3 ratio filter, weak seq2 is removed.
+    Regular multi-search calls search(), whose k-mer candidate stage applies
+    the fixed 0.3 ratio filter before rank_by_shared_kmers().
 
     Query k-mers:
     MKT, KTA, TAA, AAA

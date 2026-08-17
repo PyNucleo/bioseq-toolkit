@@ -63,6 +63,12 @@ def validate_fasta_header(record, line_number=None):
         )
 
 def read_fasta_records(file_path):
+    """Read a local FASTA path with the shared strict structural parser.
+
+    Blank lines are ignored, multiline sequences are concatenated, and
+    malformed record structure raises line-aware ``ValueError`` diagnostics.
+    This validates FASTA structure, not biological sequence alphabets.
+    """
 
     with open(file_path) as fasta_file:
         return _parse_fasta_records(fasta_file)
@@ -200,6 +206,14 @@ def parse_header_sequence_from_string(text):
     return header_seq_dict
 
 def fetch_uniprot_sequences(accession_file, strict=False):
+    """Fetch one UniProt accession per nonempty input line.
+
+    Returns ``{"records": [...], "failed": [...]}``. In non-strict mode,
+    expected request/HTTP failures and empty HTTP-200 bodies are collected and
+    fetching continues; strict mode raises on the first such failure. Nonempty
+    response bodies use the same structural parser as local FASTA reads, so a
+    parser ``ValueError`` propagates in either mode.
+    """
 
     parsed_sequences = []
     failed_accessions = []
@@ -277,6 +291,12 @@ def fetch_uniprot_sequences(accession_file, strict=False):
     }
 
 def write_fasta_records(records, output_path, full_header):
+    """Write records using stored full headers or per-record short headers.
+
+    Short headers prefer a nonempty accession and otherwise use the record ID.
+    Each record must provide a usable sequence and the header/identifier needed
+    by the selected mode.
+    """
 
     with open(output_path, "w", newline="") as file:
         for record_number, record in enumerate(records, start=1):

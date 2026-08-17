@@ -8,7 +8,8 @@ views {
     include bioseqToolkit.kmerSearch.filterRelativeFn
     include bioseqToolkit.kmerIndex.multiQueryIndexedFn
     include bioseqToolkit.kmerIndex.indexDatabaseWordsFn
-    include bioseqToolkit.kmerIndex.getWordOccurrencesFn
+    include bioseqToolkit.kmerIndex.getKmerOccurrencesFn
+    include bioseqToolkit.validators.validateKThresholdFn
     include bioseqToolkit.sequenceDatabase.getSequencesFn
     include bioseqToolkit.similarityRank.rankBySharedKmersFn
     include bioseqToolkit.dataStructures.queryString

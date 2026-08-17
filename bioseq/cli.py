@@ -29,13 +29,21 @@ def main():
 
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    search_parser = subparsers.add_parser("search", help = "Run kmer search")
-    local_alignment_parser = subparsers.add_parser("align-local", help = "Run local alignment on two sequences")
-    global_alignment_parser = subparsers.add_parser("align-global", help = "Run global alignment on two sequences")
-    fetch_uniprot_parser = subparsers.add_parser("fetch-uniprot", help = "Fetch UniProt sequences through their accessions.", description="Takes the path for a FASTA file containing valid ids, returns a list of FASTA sequences with their header's details.")
+    search_parser = subparsers.add_parser("search", help = "Search one sequence against a FASTA database and print JSON")
+    local_alignment_parser = subparsers.add_parser("align-local", help = "Run Smith-Waterman local alignment and print JSON")
+    global_alignment_parser = subparsers.add_parser("align-global", help = "Run Needleman-Wunsch global alignment and print JSON")
+    fetch_uniprot_parser = subparsers.add_parser(
+        "fetch-uniprot",
+        help = "Fetch accessions, write FASTA, and print a summary.",
+        description=(
+            "Read one UniProt accession per nonempty line from a plain-text file, "
+            "fetch each FASTA record, write successful records, and print a "
+            "human-readable summary."
+        ),
+    )
     multi_query_search_parser = subparsers.add_parser(
         "multi-search",
-        help="Perform a search of top hits for query sequences inside a FASTA file.",
+        help="Search FASTA queries in indexed mode by default and print JSON.",
         description=(
             "Search multiple queries in indexed mode by default or regular mode with "
             "--regular. --refine is supported in both modes; refinement scoring "
@@ -70,18 +78,18 @@ def main():
     global_alignment_parser.add_argument('-x', '--matrix', type=str, default=None)
     global_alignment_parser.add_argument('-ra', '--return-all', action='store_true')
 
-    fetch_uniprot_parser.add_argument("-f", "--file-path", type=str, required=True)
-    fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True)
-    fetch_uniprot_parser.add_argument("--full-header", action="store_true", default=False)
-    fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true")
-    fetch_uniprot_parser.add_argument("--show-failed", action="store_true", default=False)
+    fetch_uniprot_parser.add_argument("-f", "--file-path", type=str, required=True, help="Plain-text input with one accession per nonempty line.")
+    fetch_uniprot_parser.add_argument("-o", "--result-path", type=str, required=True, help="Output FASTA path for successful records.")
+    fetch_uniprot_parser.add_argument("--full-header", action="store_true", default=False, help="Preserve stored FASTA headers instead of writing short accession/ID headers.")
+    fetch_uniprot_parser.add_argument("-s", "--strict", action = "store_true", help="Stop at the first expected HTTP, network, or empty-response failure.")
+    fetch_uniprot_parser.add_argument("--show-failed", action="store_true", default=False, help="Print details for failures collected in non-strict mode.")
 
     multi_query_search_parser.add_argument("-q", "--query-sequences", type=str, required=True)
     multi_query_search_parser.add_argument("-d", "--database", type=str, required=True)
     multi_query_search_parser.add_argument("-k", "--kmer-size", type=int, default=3)
     multi_query_search_parser.add_argument("-t", "--threshold", type=int, default=1)
     multi_query_search_parser.add_argument("-n", "--top-n-hits", type=int, default=10)
-    multi_query_search_parser.add_argument("--regular", dest="indexed", action="store_false", default=True)
+    multi_query_search_parser.add_argument("--regular", dest="indexed", action="store_false", default=True, help="Use per-query regular scanning instead of the default database-wide index.")
     multi_query_search_parser.add_argument(
         "-r",
         "--refine",

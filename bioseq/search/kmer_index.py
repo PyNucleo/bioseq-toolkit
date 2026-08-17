@@ -37,8 +37,8 @@ def multi_query_indexed_search(queries, db, k, threshold):
                 "query_id": "query1",
                 "query_sequence": "ATGCG",
                 "query_hits": [
-                    {"id": "seq1", "shared_kmers": 3},
-                    {"id": "seq2", "shared_kmers": 3}
+                    {"id": "seq1", "sequence": "ATGCGT", "shared_kmers": 3},
+                    {"id": "seq2", "sequence": "ATGCGA", "shared_kmers": 3}
                 ]
             }
         ]
@@ -101,8 +101,8 @@ def get_kmer_occurrences(words, indexed_kmers, sequence_lookup, threshold):
 
         Example:
         [
-            {"id": "seq1", "shared_kmers": 3},
-            {"id": "seq2", "shared_kmers": 1}
+            {"id": "seq1", "sequence": "ATGCGT", "shared_kmers": 3},
+            {"id": "seq2", "sequence": "ATGAAA", "shared_kmers": 1}
         ]
 
     Notes
@@ -160,16 +160,23 @@ def index_database_words(db_records, k):
     Returns
     -------
     dict
-        Inverted k-mer index mapping each k-mer to the set of database sequence
-        IDs that contain it.
+        A mapping with two entries: ``kmer_index`` maps each k-mer to the set
+        of database IDs that contain it, and ``sequence_lookup`` maps each ID
+        to its sequence.
 
         Example:
         {
-            "ATG": {"seq1", "seq2"},
-            "TGC": {"seq1", "seq2"},
-            "GCG": {"seq1", "seq2"},
-            "CGT": {"seq1"},
-            "CGA": {"seq2"}
+            "kmer_index": {
+                "ATG": {"seq1", "seq2"},
+                "TGC": {"seq1", "seq2"},
+                "GCG": {"seq1", "seq2"},
+                "CGT": {"seq1"},
+                "CGA": {"seq2"}
+            },
+            "sequence_lookup": {
+                "seq1": "ATGCGT",
+                "seq2": "ATGCGA"
+            }
         }
 
     Notes

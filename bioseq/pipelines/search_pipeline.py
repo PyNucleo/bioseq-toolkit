@@ -71,9 +71,10 @@ def search(query,
 
    db = normalize_database(database)
 
-   potential_hits = kmer_search(query, db, k, threshold) #Dictionary of sequence : shared_kmer pairs 
+   potential_hits = kmer_search(query, db, k, threshold) # Candidate hit dictionaries after k-mer filtering.
 
-   ranked_hits = rank_by_shared_kmers(query, potential_hits) #Ranks based on SW scores; List of dictionaries, each containing info about one sequence 
+   # Rank k-mer candidates by descending shared-k-mer count, then ascending ID.
+   ranked_hits = rank_by_shared_kmers(query, potential_hits)
 
    ranked_hits = ranked_hits[:top_n_hits]
 

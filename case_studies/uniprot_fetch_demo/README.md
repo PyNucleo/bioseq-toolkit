@@ -1,32 +1,40 @@
-````markdown
-## UniProt Fetching Notes
+# UniProt fetch demonstration
 
-The `fetch-uniprot` command can retrieve protein sequences from a text file of UniProt accessions and write the successfully fetched records to a FASTA file.
+This case study records the observed behavior of a dated fetch demonstration.
+UniProt service state and accession histories can change, so the recorded counts
+are not a promise about current remote results.
 
-Example workflow:
+The command reads a plain-text file containing one accession per nonempty line,
+writes successfully parsed records to FASTA, and prints a human-readable
+summary:
 
 ```bash
 bioseq fetch-uniprot -f accessions.txt -o sequences.fasta
-````
+```
 
-Each non-empty line in the input file is treated as one UniProt accession. Successfully fetched records are parsed into FASTA format and written to the output file. Accessions that do not return valid FASTA records are reported separately instead of being silently written or replaced.
+Useful flags are:
 
-### Accession validity
+- `--strict`: raise on the first expected HTTP, requests-layer/network, or empty
+  HTTP-200 response failure instead of collecting it and continuing;
+- `--full-header`: write each stored FASTA header; otherwise select a short
+  header independently per record, preferring accession then ID; and
+- `--show-failed`: print details for failures collected in non-strict mode.
 
-Not every valid-looking UniProt accession maps directly to a current, unique FASTA sequence. Some accessions may be secondary, merged, demerged, deleted, or otherwise affected by UniProt entry-history changes.
+Successful nonempty response bodies use the same strict structural FASTA parser
+as local files. A malformed nonempty body can therefore raise parser
+`ValueError` even in non-strict mode; non-strict mode does not convert every
+possible malformed body into a `failed` entry.
 
-For example, an accession may exist historically but no longer represent one unique current protein entry. In that case, UniProt may not return a normal FASTA record for the accession. The fetch command treats responses as valid only when they contain FASTA text beginning with a `>` header line. One such observed example is the accession Q9V3G5, which is an entry that has been demerged. Its accession has been set as a secondary accession in UniProt for P8262 and P8263, and such, was not included in the fetched results file and instead was added into failed accessions with a "reason" key.
+## Historical observation
 
-This behavior avoids silently choosing a replacement sequence when an accession is ambiguous.
+In one dated run over the included 39-line accession set, 33 records were
+written, 6 accessions were reported as operational failures, and the output
+contained 56,497 amino-acid residues. Repeated elapsed times were approximately
+40-64 seconds. These values are historical observations, not a reproducible
+algorithmic benchmark or a statement about current accession status.
 
-### Runtime note
-
-In one test accession file containing 39 UniProt accessions:
-
-* 33 accessions returned valid FASTA records
-* 6 accessions failed or returned invalid/non-FASTA responses
-* 56,497 total amino-acid residues were written
-* repeated runs took approximately 40–64 seconds
-
-This runtime should not be interpreted as a pure algorithmic benchmark. The command depends on remote UniProt requests, so elapsed time is affected by network latency, UniProt server response time, accession history behavior, and the number of requested accessions. For datasets of this size, local parsing and FASTA writing are expected to be minor contributors compared with remote fetching.
-
+The earlier version of this note asserted a specific demerge/secondary-
+accession history for `Q9V3G5`. That provenance was not reliably established,
+so the claim and the purported replacement accessions have been removed rather
+than replaced with another unverified history. The fetcher deliberately does
+not guess replacement records for unresolved accessions.

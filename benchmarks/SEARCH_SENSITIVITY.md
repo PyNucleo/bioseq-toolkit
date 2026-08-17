@@ -14,6 +14,10 @@ The goal is to test whether the heuristic k-mer stage can preserve the high-conf
 
 This is an internal algorithmic benchmark. Exhaustive Smith-Waterman is used as the reference ranking, not as biological ground truth.
 
+The values below are historical recorded results. They were not regenerated for
+this documentation synchronization and apply only to this query, these ASTRAL
+subsets, these parameters, and the recorded implementation/environment.
+
 ---
 
 ## Benchmark Setup
@@ -42,6 +46,8 @@ The same protein query was used across benchmark runs:
 ttltnpqkaairsswskfmdngvsngqgfymdlfkahpetltpfkslfggltlaqlqdnpkmkaqslvfcngmssfvdhlddndmlvvliqkmaklhnnrgirasdlrtaydilihymedhnhmvggakdawevfvgficktlgdymkels
 ```
 
+The query is 151 residues long.
+
 ### Scoring
 
 ```text
@@ -54,7 +60,9 @@ Gap model: linear
 
 Exhaustive Smith-Waterman scores were used to build reference tiers automatically.
 
-For this query, the high-confidence set is:
+For this query, the internally labelled "high-confidence" set is derived only
+from Smith-Waterman score thresholds; it is not a curated homology, family, or
+functional annotation. The score-derived set is:
 
 ```text
 Tier 1 exact/near-exact hits: 15 sequences
@@ -93,18 +101,14 @@ Matrix: BLOSUM62
 Gap penalty: -4
 ```
 
-### Recovery
+### `astral_100` Recovery
 
 |         Method        | Candidates | Recall@5 | Recall@10 | Recall@20 | Tier 1+2 Recall | Background Returned |
 |:---------------------:|:----------:|:--------:|:---------:|:---------:|:---------------:|:-------------------:|
 |       K-mer only      |  20 / 100  |   5 / 5  |  10 / 10  |  20 / 20  |     20 / 20     |           0         |
 | K-mer + SW refinement |  20 / 100  |   5 / 5  |  10 / 10  |  20 / 20  |     20 / 20     |           0         |
 
-### Runtime
-
-### Runtime
-
-### Runtime
+### `astral_100` Runtime
 
 |         Method        |   Runtime  | Speedup vs exhaustive SW |
 |:---------------------:|:----------:|:------------------------:|
@@ -112,7 +116,7 @@ Gap penalty: -4
 | K-mer only            | 0.003196 s |           1573.47x       |
 | K-mer + SW refinement | 1.060561 s |           4.74x          |
 
-### Interpretation
+### `astral_100` Interpretation
 
 For `astral_100`, k-mer-only search recovered the same top 20 high-confidence hits as exhaustive SW while reducing the database from 100 sequences to 20 candidates.
 
@@ -181,14 +185,14 @@ Matrix: BLOSUM62
 Gap penalty: -4
 ```
 
-### Recovery
+### `astral_10000` Recovery
 
 |         Method          |  Candidates  | Recall@5 | Recall@10 | Recall@20 | Tier 1+2 Recall | Background Returned |
 |:-----------------------:|:------------:|:--------:|:---------:|:---------:|:---------------:|:-------------------:|
 |       K-mer only        | 20 / 10000   |  5 / 5   |  10 / 10  |  20 / 20  |     20 / 20     |          0          |
 | K-mer + SW refinement   | 20 / 10000   |  5 / 5   |  10 / 10  |  20 / 20  |     20 / 20     |          0          |
 
-### Runtime
+### `astral_10000` Runtime
 
 |         Method          |    Runtime    | Speedup vs exhaustive SW |
 |:-----------------------:|:-------------:|:------------------------:|
@@ -196,7 +200,7 @@ Gap penalty: -4
 |       K-mer only        |  0.527722 s   |        1212.16x          |
 | K-mer + SW refinement   |  1.724182 s   |         371.01x          |
 
-### Interpretation
+### `astral_10000` Interpretation
 
 The `astral_10000` run is the strongest result so far. With `k = 3` and threshold `1`, the k-mer stage returned only 20 candidates out of 10000 sequences while preserving full recovery of the exhaustive SW top 20 and the full Tier 1+2 high-confidence set.
 
@@ -286,7 +290,8 @@ k-mer-only ranking differs from exhaustive SW ranking,
 k-mer-only performs badly on a harder dataset or query.
 ```
 
-The better next step is to preserve this benchmark as the baseline, then test harder biological cases or implement indexed search.
+The better next step is to preserve this historical baseline, then test harder
+biological cases and benchmark regular versus indexed multi-search.
 
 ---
 
@@ -316,7 +321,9 @@ Important limitations:
 1. The benchmark uses one query sequence.
 2. Exhaustive SW is used as an internal reference ranking, not biological ground truth.
 3. The high-confidence tiers are derived from SW score thresholds, not curated family labels.
-4. The current k-mer method is still scan-based rather than indexed.
+4. This benchmark calls the scan-based k-mer functions. Current toolkit source
+   also supports indexed multi-search, but no regular-versus-indexed performance
+   conclusion can be drawn from these results.
 5. The current implementation uses a linear gap penalty.
 6. The strong result may partly reflect redundancy or close homologs in the ASTRAL subset.
 
@@ -326,7 +333,7 @@ Important limitations:
 
 Recommended immediate next steps:
 
-1. Commit the sensitivity benchmark script and final report.
-2. Keep the cached exhaustive SW CSV for `astral_10000`.
-3. Do not implement seed extension yet.
-4. Next improvement should likely be indexed k-mer search or a real biological family case study.
+1. Record exact regeneration commands, revision, environment, and cache provenance.
+2. Benchmark regular versus indexed multi-search on controlled workloads.
+3. Test harder and biologically curated protein-family cases.
+4. Consider seed extension only after documenting a concrete failure case.
