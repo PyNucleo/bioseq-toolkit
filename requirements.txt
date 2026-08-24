@@ -1,3 +1,4 @@
 biopython
 requests>=2.31
+pyperf==2.10.0
 pytest
