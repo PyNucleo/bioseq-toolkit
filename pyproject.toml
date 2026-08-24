@@ -15,6 +15,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "pyperf==2.10.0",
     "pytest",
     "requests>=2.31"
 ]

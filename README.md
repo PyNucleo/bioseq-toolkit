@@ -121,11 +121,16 @@ Runtime dependencies:
 - Biopython
 - requests
 
-Development dependency:
+Development dependencies:
 
+- pyperf 2.10.0 (deliberate benchmark evidence)
 - pytest
 
 Dependencies are defined in `pyproject.toml`. The `requirements.txt` file is kept as a lightweight compatibility/development helper.
+
+Installation, evidence-regeneration, and bounded harness-execution commands for
+the completed pyperf study are documented in
+[`benchmarks/pyperf_spike/README.md`](benchmarks/pyperf_spike/README.md).
 
 ---
 

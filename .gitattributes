@@ -1,0 +1,3 @@
+benchmarks/pyperf_spike/workloads/non_refined_search/historical_manual_summaries/*.json -text
+benchmarks/pyperf_spike/workloads/non_refined_search/raw/pyperf/*.json -text
+benchmarks/pyperf_spike/workloads/non_refined_search/historical_summary_ms.csv -text
