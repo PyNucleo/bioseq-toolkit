@@ -123,6 +123,7 @@ Runtime dependencies:
 
 Development dependencies:
 
+- Hypothesis (selective property-based regression testing)
 - pyperf 2.10.0 (deliberate benchmark evidence)
 - pytest
 
@@ -913,6 +914,8 @@ The tests currently cover:
 - BLOSUM62 usage in alignment tests
 - k-mer search
 - case-insensitive k-mer behavior
+- property-based regular/indexed unrefined multi-search equivalence over a
+  bounded generated canonical-DNA domain
 - search refinement
 - full search pipeline behavior
 - CLI subprocess behavior
@@ -1038,7 +1041,8 @@ The strongest parts of the project are:
 - Shared strict FASTA structure parsing for local and downloaded text
 - Accountable translation outcomes with source-record positions
 - Case-insensitive k-mer generation for lowercase or mixed-case FASTA inputs
-- Tested regular/indexed multi-search equivalence and both-mode refinement
+- Deterministic and property-based regular/indexed unrefined multi-search
+  equivalence coverage, plus both-mode refinement coverage
 - Tests for alignment, search, refinement, database normalization, FASTA parsing, CLI behavior, and benchmark behavior
 - Runtime comparison between exact dynamic programming and heuristic search
 - Benchmark driver scripts for repeatable benchmark runs

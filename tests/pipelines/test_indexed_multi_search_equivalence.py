@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 import pytest
+from hypothesis import given, settings, strategies as st
 
 from database.sequence_database import SequenceDatabase
 from bioseq.pipelines.search_pipeline import multi_search
@@ -510,3 +511,56 @@ def test_regular_and_indexed_multi_search_are_equivalent_for_multiple_queries():
     assert simplify_hits(indexed_results[1]["query_hits"]) == [
         {"id": "beta", "shared_kmers": 4}
     ]
+
+
+def _query_record_strategy():
+    return st.fixed_dictionaries(
+        {
+            "id": st.text(min_size=3, max_size=10),
+            "sequence": st.text(
+                alphabet="ATGCatgc", min_size=4, max_size=10
+            ),
+        }
+    )
+
+
+@settings(max_examples=150, deadline=None)
+@given(
+    query=st.lists(
+        _query_record_strategy(),
+        min_size=1,
+        max_size=10,
+        unique_by=lambda record: record["id"],
+    ),
+    database=st.lists(
+        st.text(alphabet="ATGCatgc", min_size=4, max_size=10),
+        min_size=1,
+        max_size=10,
+    ),
+    k=st.integers(min_value=1, max_value=8),
+    threshold=st.integers(min_value=1, max_value=4),
+    top_n_hits=st.integers(min_value=1, max_value=4),
+)
+def test_regular_and_indexed_multi_search_are_equivalent_for_multiple_queries_with_hypothesis(
+    query, database, k, threshold, top_n_hits
+):
+    regular_multi_search = multi_search(
+        query,
+        database,
+        k,
+        threshold,
+        top_n_hits,
+        indexed=False,
+        refinement=False,
+    )
+    indexed_multi_search = multi_search(
+        query,
+        database,
+        k,
+        threshold,
+        top_n_hits,
+        indexed=True,
+        refinement=False,
+    )
+
+    assert regular_multi_search == indexed_multi_search
