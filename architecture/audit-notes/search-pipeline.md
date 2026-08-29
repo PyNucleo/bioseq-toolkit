@@ -55,6 +55,55 @@ Query order is preserved. Tests cover validation, ratio-filter equivalence,
 deterministic ties, default/indexed behavior, both-mode refinement/scoring,
 duplicate-ID rejection, and CLI JSON output.
 
+## Selective property-based equivalence coverage
+
+Hypothesis is a development/test dependency, used selectively for invariants
+that benefit from generated combinations and shrinking; it is not Bioseq's
+default testing mechanism. The first property lives in
+`tests/pipelines/test_indexed_multi_search_equivalence.py` and checks the
+candidate-search invariant that regular and indexed **unrefined** multi-search
+produce exactly the same observable result. Indexed mode is a faster candidate
+retrieval path for the same caller-visible operation, so a different answer is
+not a successful optimization.
+
+The property directly generates one to ten query records and one to ten raw
+database sequences. Query IDs are arbitrary generated text of length 3–10 and
+unique within each generated query list; query and database sequences use
+canonical DNA characters `ATGCatgc` with lengths 4–10. Duplicate query
+sequences and duplicate database sequence contents are allowed. It varies
+`k` from 1–8, `threshold` from 1–4, and `top_n_hits` from 1–4, then calls
+`multi_search(..., indexed=False, refinement=False)` and
+`multi_search(..., indexed=True, refinement=False)` and asserts full Python
+structure equality. Since the candidate stage has deterministic descending
+shared-k-mer ranking with ascending-ID tie-breaking, this equality includes
+observable query and hit ordering as well as returned values; it is not merely
+set or hit-ID equivalence. The settings are `max_examples=150` and
+`deadline=None`: the former bounds exploration rather than proving the
+contract exhaustively, while the latter prevents runtime variation from being
+reported as a correctness failure.
+
+This intentionally bounded property does not cover proteins, ambiguous DNA,
+malformed records or databases, duplicate query IDs, or refinement. Disabling
+refinement isolates regular/indexed candidate retrieval; adding
+Smith–Waterman scoring, refined ordering, and post-refinement behavior would
+make any divergence harder to attribute and could mask a candidate-stage
+error. Refined regular/indexed equivalence is a possible future invariant.
+
+Deterministic pytest coverage remains the source for known examples, exact
+boundaries, and named regressions, including ratio-filter parity,
+sort-before-`top_n_hits`, deterministic ID tie-breaking, and a concrete
+multi-query equality case. The Hypothesis property complements those tests
+with generated interaction coverage and shrinking; it does not replace them.
+
+This is software-correctness evidence over the configured generated domain,
+not biological validation, search sensitivity or homology evidence,
+Smith–Waterman/refinement validation, runtime evidence, an indexed speedup
+claim, production-readiness evidence, BLAST equivalence, or exhaustive proof.
+It is the correctness layer ahead of a separate future regular-versus-indexed
+performance benchmark, whose datasets, parameters, timing method, environment,
+repetitions, and limitations must be evaluated independently. Hypothesis test
+runtime is not benchmark evidence.
+
 ## Limits
 
 This is an educational filter/refine pipeline, not BLAST. It has no seed
